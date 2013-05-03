@@ -76,10 +76,10 @@ class verbose {
   public function open($verbose_file_name, $verbose_mask, $date_format='') {
     self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
     if (!self::$date_format = $date_format)
-      self::$date_format='H:i:s-d/m/y';
-    self::$verbose_file_name=$verbose_file_name;
+      self::$date_format = 'H:i:s-d/m/y';
+    self::$verbose_file_name = $verbose_file_name;
     if (!is_string($verbose_mask)) {
-      self::$verbose_mask=(empty($verbose_mask) ? 0 : $verbose_mask);
+      self::$verbose_mask = (empty($verbose_mask) ? 0 : $verbose_mask);
     }
     else {
       foreach (explode('+', $verbose_mask) as $vm) {
