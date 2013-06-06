@@ -545,9 +545,7 @@ __HEADER_WARNING__
 </script>
 </head><body>
   <form target="_blank" name="f" method="POST" accept-charset="utf-8">
-    <textarea name="xml" rows=20 cols=90>
-__XML__
-    </textarea>
+    <textarea name="xml" rows=20 cols=90>__XML__</textarea>
     <br /> <br />
     <select name="no" onChange="if (this.selectedIndex) document.f.xml.value = reqs[this.options[this.selectedIndex].value];">
       <option>Pick a test-request</option>
