@@ -38,12 +38,16 @@ class SolrQuery extends tokenizer {
   var $solr_escapes_to = array();
   var $phrase_index = array();
   var $best_match = FALSE;
+  var $operator_translate = array();
 
   public function __construct($xml, $config='', $language='') {
     $this->dom = new DomDocument();
     $this->dom->Load($xml);
 
     $this->best_match = ($language == 'bestMatch');
+    if ($language == 'cqldan') {
+      $this->operator_translate = array('OG' => 'AND', 'ELLER' => 'OR', 'IKKE' => 'NOT');
+    }
     $this->case_insensitive = TRUE;
     $this->split_expression = '/(<=|>=|[ <>=()[\]])/';
     $this->operators = $this->get_operators($language);
@@ -76,7 +80,7 @@ class SolrQuery extends tokenizer {
    */
   public function cql_2_edismax($query) {
     try {
-      $tokens = $this->tokenize($query);
+      $tokens = $this->tokenize($query, $this->operator_translate);
       if (DEVELOP) { echo 'Query: ' . $query . "\n" . print_r($tokens, TRUE) . "\n"; }
       $rpn = Cql2Rpn::parse_tokens($tokens);
       $edismax = $this->rpn_2_edismax($rpn);

@@ -52,15 +52,12 @@ class Cql2Rpn {
       if ($loops++ > MAX_DEFENSIVE_LOOP) {
         throw new Exception('CQL-1: CQL parse error');
       }
-      $token = new stdClass();
-      $token->value = trim($tokenlist[$token_no]['value']);
-      $token->type = $tokenlist[$token_no]['type'];
+      $token = self::set_token_from_list($tokenlist, $token_no);
       if ((count($rpn) > 1 && count($stack) == 1 && $token->value == END_VALUE) || 
           ($token->type == OPERAND && $token->value)) {
         if ($operand_no++) {
-          $token->type = OPERATOR;
-          $token->value = 'NO_OP';
-          $token_no--;
+          self::insert_token_in_list($tokenlist, array('type' => OPERATOR, 'value' => 'NO_OP'), $token_no);
+          $token = self::set_token_from_list($tokenlist, $token_no);
         }
       }
       if ($token->type == OPERAND || $token->type == INDEX) {
@@ -101,6 +98,20 @@ class Cql2Rpn {
     }
 
     return $rpn;
+  }
+
+  private function set_token_from_list($tokenlist, $pos) {
+    $token = new stdClass();
+    $token->value = trim($tokenlist[$pos]['value']);
+    $token->type = $tokenlist[$pos]['type'];
+    return $token;
+  }
+
+  private function insert_token_in_list(&$tokenlist, $token, $pos) {
+    $start_slice = array_slice($tokenlist, 0, $pos);
+    $start_slice[] = $token;
+    $end_slice = array_slice($tokenlist, $pos);
+    $tokenlist = array_merge($start_slice, $end_slice);
   }
 
   private function set_token_state_from_value($value) {

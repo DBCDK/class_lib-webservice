@@ -69,10 +69,10 @@ class tokenizer {
 
   function is_operator($token) {
     if ($this->case_insensitive) {
-      $token=strtolower($token);
+      $token = strtolower($token);
     }
 
-    if (in_array($token,$this->operators)) {
+    if (in_array($token, $this->operators)) {
       return TRUE;
     }
     return FALSE;
@@ -88,15 +88,15 @@ class tokenizer {
   function is_index($token) {
 
     if ($this->case_insensitive) {
-      $token=strtolower($token);
+      $token = strtolower($token);
     }
 
-    if (in_array($token,$this->indexes)) {
+    if (in_array($token, $this->indexes)) {
       return TRUE;
     }
 
     foreach($this->index_prefixes as $v) {
-      if (in_array(str_replace("$v".'.','',$token), $this->indexes)) {
+      if (in_array(str_replace("$v".'.', '', $token), $this->indexes)) {
         return TRUE;
       }
     }
@@ -125,21 +125,21 @@ class tokenizer {
    *
    */
 
-  function tokenize($string) {
+  function tokenize($string, $trans_table = array()) {
     $use_phrase = FALSE;
 
-    $tokens=preg_split($this->split_expression,$string, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $tokens = preg_split($this->split_expression,$string, -1, PREG_SPLIT_DELIM_CAPTURE);
 
     if ($this->case_insensitive) {
-      foreach($this->indexes as $k=>$v)	 {
-        $this->indexes[$k]=strtolower($v);
+      foreach($this->indexes as $k => $v)	 {
+        $this->indexes[$k] = strtolower($v);
       }
-      foreach($this->operators as $k=>$v)	 {
-        $this->operators[$k]=strtolower($v);
+      foreach($this->operators as $k => $v)	 {
+        $this->operators[$k] = strtolower($v);
       }
     }
 
-    foreach($tokens as $k=>$v) {
+    foreach($tokens as $k => $v) {
       if (empty($spos) && isset($v[0]) && $v[0] == '"' && substr_count($v, '"') == 1)
         $spos = $k;
       elseif (isset($spos)) {
@@ -147,50 +147,55 @@ class tokenizer {
         if (strpos(' '.$v, '"')) unset($spos);
         unset($tokens[$k]);
       }
-      $last_token_index=$k;
+      $last_token_index = $k;
     }
 
     //Read a token
-    foreach($tokens as $k=>$v) {
+    foreach ($tokens as $k => $v) {
       $token=array();
 
       //If the token is a index token
       if ($this->is_index($v)) {
-        $token['type']=INDEX;
+        $token['type'] = INDEX;
         if ($this->is_phrase_index($v)) {
           $use_phrase = TRUE;
         }
-        $token['value']=$v;
+        $token['value'] = $v;
 
       }
       else if ($this->is_operator($v)) {
-        $token['type']=OPERATOR;
-        $token['value']=$v;
+        $token['type'] = OPERATOR;
+        if (isset($trans_table[$v])) {
+          $token['value'] = $trans_table[$v];
+        }
+        else {
+          $token['value'] = $v;
+        }
 
       }
       else {
 
-        $ignore=FALSE;
+        $ignore = FALSE;
 
         foreach($this->ignore as $ign) {
           if (preg_match($ign, $v)) {
-            $ignore=TRUE;
+            $ignore = TRUE;
           }
         }
 
         if (!$ignore) {
-          $token['type']=OPERAND;
+          $token['type'] = OPERAND;
           if ($use_phrase) {
-            $token['value']=str_replace('"', '', $v);
-            $token['phrase_index']=TRUE;
+            $token['value'] = str_replace('"', '', $v);
+            $token['phrase_index'] = TRUE;
             $use_phrase = FALSE;
           }
           else
-            $token['value']=$v;
+            $token['value'] = $v;
         }
       }
 
-      if (!empty($token)) $tokenlist[]=$token;
+      if (!empty($token)) $tokenlist[] = $token;
 
     }
     return $tokenlist;
