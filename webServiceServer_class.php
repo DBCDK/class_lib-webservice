@@ -31,6 +31,7 @@ require_once('OLS_class_lib/inifile_class.php');
 require_once('OLS_class_lib/timer_class.php');
 require_once('OLS_class_lib/aaa_class.php');
 require_once('OLS_class_lib/restconvert_class.php');
+require_once('OLS_class_lib/jsonconvert_class.php');
 require_once('OLS_class_lib/xmlconvert_class.php');
 require_once('OLS_class_lib/objconvert_class.php');
 
@@ -120,7 +121,7 @@ abstract class webServiceServer {
     elseif (!empty($GLOBALS['HTTP_RAW_POST_DATA'])) {
       $this->soap_request($GLOBALS['HTTP_RAW_POST_DATA']);
     }
-    elseif (!empty($_SERVER['QUERY_STRING']) && $_REQUEST['action']) {
+    elseif (!empty($_SERVER['QUERY_STRING']) && ($_REQUEST['action'] || $_REQUEST['json'])) {
       $this->rest_request();
     }
     elseif (!empty($_POST)) {
@@ -232,8 +233,14 @@ abstract class webServiceServer {
   */
   private function rest_request() {
     // convert to soap
-    $rest = new restconvert($this->default_namespace);
-    $xml=$rest->rest2soap($this->config);
+    if ($_REQUEST['json']) {
+      $json = new jsonconvert($this->default_namespace);
+      $xml = $json->json2soap($this->config);
+    }
+    else {
+      $rest = new restconvert($this->default_namespace);
+      $xml = $rest->rest2soap($this->config);
+    }
     $this->soap_request($xml);
   }
 
