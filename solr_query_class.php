@@ -32,8 +32,7 @@ class SolrQuery extends tokenizer {
   // full set of escapes as seen in the solr-doc. We use those who so far has been verified
   //var $solr_escapes = array('+','-','&&','||','!','(',')','{','}','[',']','^','"','~','*','?',':','\\');
   var $solr_escapes = array('+', '-', ':', '!', '"');
-  var $solr_ignores = array('.');
-  //var $solr_ignores = array();
+  var $solr_ignores = array();         // this should be kept empty
   var $solr_escapes_from = array();
   var $solr_escapes_to = array();
   var $phrase_index = array();
