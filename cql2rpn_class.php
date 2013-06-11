@@ -35,10 +35,10 @@ class Cql2Rpn {
    *
    */
   public function parse_tokens($tokenlist) {
-// 0: advance, 1: stack  and advance, 2: unstack, 3: drop stack and advance, 9:error
+// 0: advance, 1: stack  and advance, 2: unstack, 3: drop stack and advance, 4: unstack, stack and advance, 9:error
 //                             OP  NO_OP END INDEX P_START
     $action[C_OP]      = array( 2,  2,    1,  2,    1);
-    $action[C_NO_OP]   = array( 2,  2,    1,  1,    1);
+    $action[C_NO_OP]   = array( 2,  4,    1,  1,    1);
     $action[C_END]     = array( 2,  2,    0,  2,    9);
     $action[C_INDEX]   = array( 1,  1,    1,  2,    1);
     $action[C_P_START] = array( 1,  1,    1,  1,    1);
@@ -56,8 +56,9 @@ class Cql2Rpn {
       if ((count($rpn) > 1 && count($stack) == 1 && $token->value == END_VALUE) || 
           ($token->type == OPERAND && $token->value)) {
         if ($operand_no++) {
-          self::insert_token_in_list($tokenlist, array('type' => OPERATOR, 'value' => 'NO_OP'), $token_no);
-          $token = self::set_token_from_list($tokenlist, $token_no);
+          $token->type = OPERATOR;
+          $token->value = 'NO_OP';
+          $token_no--;
         }
       }
       if ($token->type == OPERAND || $token->type == INDEX) {
@@ -88,6 +89,11 @@ class Cql2Rpn {
             unset($stack[count($stack) - 1]);
             $token_no++;
             break;
+          case 4: 
+            $rpn[] = $stack[count($stack) - 1];
+            $stack[count($stack) - 1] = $token;
+            $token_no++;
+            break;
           case 9: 
             throw new Exception('CQL-2: Unbalanced ()');
             break;
@@ -105,13 +111,6 @@ class Cql2Rpn {
     $token->value = trim($tokenlist[$pos]['value']);
     $token->type = $tokenlist[$pos]['type'];
     return $token;
-  }
-
-  private function insert_token_in_list(&$tokenlist, $token, $pos) {
-    $start_slice = array_slice($tokenlist, 0, $pos);
-    $start_slice[] = $token;
-    $end_slice = array_slice($tokenlist, $pos);
-    $tokenlist = array_merge($start_slice, $end_slice);
   }
 
   private function set_token_state_from_value($value) {
