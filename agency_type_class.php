@@ -33,15 +33,17 @@ require_once('OLS_class_lib/curl_class.php');
 
 class agency_type {
 
+  private $agency_status;         // service status (init, ready or fatal)
   private $agency_type_tab;
-  private $agency_cache;		    // cache object
-  private $agency_uri;	        // uri of openagency service
+  private $agency_cache;		  // cache object
+  private $agency_uri;	          // uri of openagency service
 
   public function __construct($open_agency, $cache_host, $cache_port='', $cache_seconds = 0) {
     if ($cache_host) {
       $this->agency_cache = new cache($cache_host, $cache_port, $cache_seconds);
     }
     $this->agency_uri = $open_agency;
+    $this->agency_status = 'init';
   }
 
   /**
@@ -52,7 +54,7 @@ class agency_type {
   * @returns bracnh_type if found, NULL otherwise
   **/
   public function get_branch_type($agency) {
-    if (empty($agency_type_tab)) {
+    if ($this->agency_status == 'init') {
       $this->fetch_agency_type_tab();
     }
     return $this->agency_type_tab[$agency]['branchType'];
@@ -66,7 +68,7 @@ class agency_type {
   * @returns agency_type if found, NULL otherwise
   **/
   public function get_agency_type($agency) {
-    if (empty($agency_type_tab)) {
+    if ($this->agency_status == 'init') {
       $this->fetch_agency_type_tab();
     }
     return $this->agency_type_tab[$agency]['agencyType'];
@@ -77,20 +79,20 @@ class agency_type {
   *
   **/
   private function fetch_agency_type_tab() {
+    $this->agency_status = 'ready';
     if ($this->agency_cache) {
       $cache_key = 'branch_types';
       $this->agency_type_tab = $this->agency_cache->get($cache_key);
     }
 
     if (!$this->agency_type_tab) {
+      $this->agency_type_tab = $this->agency_cache->get($cache_key);
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, 10);
       $res_json = $curl->get(sprintf($this->agency_uri));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
-        if (method_exists('verbose','log')) {
-          verbose::log(FATAL, __FUNCTION__ . '():: Cannot fetch agencies from ' . sprintf($this->agency_uri));
-        }
+        self::report_fatal_error(__FUNCTION__ . '():: Cannot fetch agencies from ' . sprintf($this->agency_uri));
       }
       else {
         $libs = json_decode($res_json);
@@ -101,12 +103,22 @@ class agency_type {
                     'branchType' => $agency->branchType->{'$'});
           }
         }
+        else {
+          self::report_fatal_error(__FUNCTION__ . '():: No agencies found ' . sprintf($this->agency_uri));
+        }
         $curl->close();
       }
-      if ($this->agency_cache && $this->agency_type_tab) {
+      if ($this->agency_cache) {
         $this->agency_cache->set($cache_key, $this->agency_type_tab);
       }
     }
+  }
+
+  private function report_fatal_error($msg) {
+    if (method_exists('verbose','log')) {
+      verbose::log(FATAL, $msg);
+    }
+    $this->agency_status = 'fatal';
   }
 
 }
