@@ -60,7 +60,7 @@ class tokenizer {
   // indexes which shold be searched as phrase
   var $phrase_index=array();
 
-  /** \brief Check if token is operator.
+  /** \brief Check if token is operator. Operators must be uppercase
    *
    * @param token (string)
    * @return (bool)
@@ -68,10 +68,6 @@ class tokenizer {
    */
 
   function is_operator($token) {
-    if ($this->case_insensitive) {
-      $token = strtolower($token);
-    }
-
     if (in_array($token, $this->operators)) {
       return TRUE;
     }
@@ -135,7 +131,7 @@ class tokenizer {
         $this->indexes[$k] = strtolower($v);
       }
       foreach($this->operators as $k => $v)	 {
-        $this->operators[$k] = strtolower($v);
+        $this->operators[$k] = strtoupper($v);
       }
     }
 
