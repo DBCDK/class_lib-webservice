@@ -113,6 +113,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
 
   function get_edismax($cql) {
     $help = $this->c2s->cql_2_edismax($cql);
+echo $cql . ' -> ' . $help['error'] . '/' . $help['edismax'] . "\n";
     if (isset($help['edismax'])) {
       return $help['edismax'];
     }
