@@ -223,7 +223,7 @@ class SolrQuery extends tokenizer {
               $curr_index = '';
               $index_stack = array();
               break;
-            case 'adj':
+            case 'ADJ':
               if (empty($curr_index)) {
                 throw new Exception('CQL-4: Unknown register');
               }

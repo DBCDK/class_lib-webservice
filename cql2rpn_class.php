@@ -120,7 +120,7 @@ class Cql2Rpn {
       case '>': return C_INDEX;
       case '<=': return C_INDEX;
       case '>=': return C_INDEX;
-      case 'adj': return C_INDEX;
+      case 'ADJ': return C_INDEX;
       case '(':   return C_P_START;
       case ')':   return C_P_END;
       case END_VALUE: return C_END;
