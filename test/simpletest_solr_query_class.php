@@ -81,10 +81,10 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_adjacency() {
-    $tests = array('dkcclphrase.cclphrase adj en to' => 'dkcclphrase.cclphrase:"en to"~10',
-                   'dkcclphrase.cclphrase adj en to tre' => 'dkcclphrase.cclphrase:"en to tre"~10',
-                   'term.term adj en to' => 'term.term:"en to"~10',
-                   'term.term adj en to tre' => 'term.term:"en to tre"~10');
+    $tests = array('dkcclphrase.cclphrase ADJ en to' => 'dkcclphrase.cclphrase:"en to"~10',
+                   'dkcclphrase.cclphrase ADJ en to tre' => 'dkcclphrase.cclphrase:"en to tre"~10',
+                   'term.term ADJ en to' => 'term.term:"en to"~10',
+                   'term.term ADJ en to tre' => 'term.term:"en to tre"~10');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
