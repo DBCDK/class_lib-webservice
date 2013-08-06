@@ -50,6 +50,7 @@ abstract class webServiceServer {
   protected $soap_action;
   protected $dump_timer;
   protected $output_type='';
+  protected $curl_recorder;
   protected $debug;
 
 
@@ -72,7 +73,7 @@ abstract class webServiceServer {
       die($http_error);
     }
 
-    if ($this->config->get_value('only_https', 'setup') && empty($_SYSTEM['HTTPS'])) {
+    if ($this->config->get_value('only_https', 'setup') && empty($_SERVER['HTTPS'])) {
       header('HTTP/1.0 403.4 SSL Required');
       die('HTTP/1.0 403.4 SSL Required');
     }
@@ -93,6 +94,12 @@ abstract class webServiceServer {
     $this->version = $this->config->get_value('version', 'setup');
     $this->output_type = $this->config->get_value('default_output_type', 'setup');
     $this->dump_timer = $this->config->get_value('dump_timer', 'setup');
+
+    $test_section = $this->config->get_section('test');
+    if (is_array($test_section['curl_record_urls'])) {
+      require_once('OLS_class_lib/curl_recorder.php');
+      $this->curl_recorder = new CurlRecorder($test_section);
+    }
 
     $this->aaa = new aaa($this->config->get_section('aaa'));
   }
