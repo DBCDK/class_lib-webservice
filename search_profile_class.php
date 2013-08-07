@@ -67,7 +67,7 @@ class search_profiles {
         $this->profiles[strtolower($p_name)] = FALSE;
         if (method_exists('verbose','log')) {
           verbose::log(FATAL, __FUNCTION__ . '():: Cannot fetch profile ' . $profile_name .
-                       ' from ' . sprintf($this->agency_uri, $agency));
+                       ' from ' . sprintf($this->agency_uri, $agency, 3));
         }
       }
       else {
