@@ -21,6 +21,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
     $this->c2s = new SolrQuery(cql_file);
     $this->c2s->phrase_index = array('dkcclphrase', 'phrase', 'facet');
+    //$this->c2s->best_match = TRUE;
   }
 
   function __destruct() { 
@@ -44,7 +45,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'et AND to OR tre AND fire' => '((et AND to) OR tre) AND fire',
                    'et to OR tre fire' => '((et AND to) OR tre) AND fire',
                    '(et AND to) OR tre' => '(et AND to) OR tre',
-                   'et AND (to OR tre)' => '(to OR tre) AND et',
+                   'et AND (to OR tre)' => 'et AND (to OR tre)',
                    '(et AND to' => 'CQL-2: Unbalanced ()',
                    'et AND to)' => 'CQL-2: Unbalanced ()');
     foreach ($tests as $send => $recieve) {
