@@ -80,9 +80,9 @@ class SolrQuery extends tokenizer {
   public function cql_2_edismax($query) {
     try {
       $tokens = $this->tokenize($query, $this->operator_translate);
-      if (DEVELOP) { echo 'Query: ' . $query . "\n" . print_r($tokens, TRUE) . "\n"; }
+      if (DEVELOP) { echo 'Query: ' . $query . PHP_EOL . print_r($tokens, TRUE) . PHP_EOL; }
       $rpn = Cql2Rpn::parse_tokens($tokens);
-      $edismax = $this->rpn_2_edismax($rpn);
+      $edismax = self::rpn_2_edismax($rpn);
     } catch (Exception $e) {
       $edismax = array('error' => $e->getMessage());
     }
@@ -139,17 +139,17 @@ class SolrQuery extends tokenizer {
    */
   private function rpn_2_edismax($rpn) {
     $ret = array();
-    $folded_rpn = $this->fold_operands($rpn);
+    $folded_rpn = self::fold_operands($rpn);
     $ret['operands'] = 0;
     foreach ($folded_rpn as $r) {
       if ($r->type == OPERAND) {
         $ret['operands']++;
       }
     }
-    $ret['edismax'] = $this->folded_2_edismax($folded_rpn);
+    $ret['edismax'] = self::folded_2_edismax($folded_rpn);
 
     if ($this->best_match) {
-      $ret['best_match'] = $this->remove_bool_and_expand_indexes($folded_rpn);
+      $ret['best_match'] = self::remove_bool_and_expand_indexes($folded_rpn);
     }
     return $ret;
   }
@@ -167,9 +167,9 @@ class SolrQuery extends tokenizer {
     $index_stack = array();
     $folded = array();
     $operand->type = OPERAND;
-    if (DEVELOP) { echo 'fold_op: ' . print_r($rpn, TRUE) . "\n"; }
+    if (DEVELOP) { echo 'fold_op: ' . print_r($rpn, TRUE) . PHP_EOL; }
     foreach ($rpn as $r) {
-      if (DEVELOP) { echo $r->type . ' ' . $r->value . ' ' . print_r($operand, TRUE) . "\n"; }
+      if (DEVELOP) { echo $r->type . ' ' . $r->value . ' ' . print_r($operand, TRUE) . PHP_EOL; }
       switch ($r->type) {
         case INDEX:
           $curr_index = $r->value;
@@ -194,7 +194,7 @@ class SolrQuery extends tokenizer {
               }
               $interval = $intervals[$r->value];
               $interval_adjust = $adjust_intervals[$r->value];
-              $imploded = $this->implode_stack($index_stack);
+              $imploded = self::implode_stack($index_stack);
               if (is_numeric($imploded)) {
                 $operand->value = $curr_index . ':' . 
                                   sprintf($interval, intval($imploded) + $interval_adjust);
@@ -215,8 +215,8 @@ class SolrQuery extends tokenizer {
               if (empty($curr_index)) {
                 throw new Exception('CQL-4: Unknown register');
               }
-              $operand->value = $this->implode_indexed_stack($index_stack, $curr_index);
-              if (DEVELOP) { echo 'Imploded: ' . $operand->value . "\n"; }
+              $operand->value = self::implode_indexed_stack($index_stack, $curr_index);
+              if (DEVELOP) { echo 'Imploded: ' . $operand->value . PHP_EOL; }
               if ($operand->value) {
                 $folded[] = $operand;
               }
@@ -227,7 +227,7 @@ class SolrQuery extends tokenizer {
               if (empty($curr_index)) {
                 throw new Exception('CQL-4: Unknown register');
               }
-              $imploded = $this->implode_stack($index_stack);
+              $imploded = self::implode_stack($index_stack);
               $operand->value = $curr_index . ':"' . $imploded . '"~10';
               if ($operand->value) {
                 $folded[] = $operand;
@@ -252,7 +252,7 @@ class SolrQuery extends tokenizer {
         default:
           throw new Exception('CQL-5: Internal error: Unknown rpn-element-type');
       }
-      if (DEVELOP && ($r->type == OPERATOR)) { echo 'folded: ' . print_r($folded, TRUE) . "\n"; }
+      if (DEVELOP && ($r->type == OPERATOR)) { echo 'folded: ' . print_r($folded, TRUE) . PHP_EOL; }
     }
     if (isset($operand->value) && $operand->value) {
       $folded[] = $operand;
@@ -268,7 +268,7 @@ class SolrQuery extends tokenizer {
     $ret = array();
     foreach ($folded as $f) {
       if ($f->type == OPERAND) {
-        foreach ($this->explode_indexes($f->value) as $t)
+        foreach (self::explode_indexes($f->value) as $t)
           $term[] = $t;
       }
     }
@@ -304,13 +304,13 @@ class SolrQuery extends tokenizer {
   private function implode_indexed_stack($stack, $index, $adjacency = '') {
     list($idx_type) = explode('.', $index);
     if (in_array($idx_type, $this->phrase_index)) {
-      return $index . ':"' . $this->implode_stack($stack) . '"' . $adjacency;
+      return $index . ':"' . self::implode_stack($stack) . '"' . $adjacency;
     }
     elseif ($this->best_match) {
-      return $index . ':(' . $this->implode_stack($stack) . ')' . $adjacency;
+      return $index . ':(' . self::implode_stack($stack) . ')' . $adjacency;
     }
     else {
-      return $index . ':(' . $this->implode_stack($stack, 'AND') . ')' . $adjacency;
+      return $index . ':(' . self::implode_stack($stack, 'AND') . ')' . $adjacency;
     }
   }
 
@@ -347,45 +347,42 @@ class SolrQuery extends tokenizer {
    *         If bestMatch remove operators (for functionality) and parenthesis (for speed)
    */
   private function folded_2_edismax($folded) {
-    if (!$this->best_match) {
-      $start_paren = '(';
-      $end_paren = ')';
-    }
-    $edismax = '';
-    $stack = array();
-    foreach ($folded as $f) {
-      if (DEVELOP) { echo $f->type . ' ' . $f->value . "\n"; }
-      if ($f->type == OPERAND) {
-        $stack[count($stack)] = $f->value;
-      }
-      if ($f->type == OPERATOR) {
-        if ($this->best_match) {
-          $f->value = '';
-        }
-        elseif ($f->value == 'NO_OP') {
-          $f->value = 'AND';
-        }
-        if (empty($edismax)) {
-          $edismax .= $start_paren . $stack[count($stack)-2] . ' ' . $f->value . ' ' . $stack[count($stack)-1] . $end_paren . ' ';
-          unset($stack[count($stack)-1]);
-        }
-        else {
-          $edismax = $start_paren . $edismax . $f->value . ' ' . $stack[count($stack)-1] . $end_paren . ' ';
-        }
-        unset($stack[count($stack)-1]);
+    if (DEVELOP) {
+      for ($i = count($folded) - 1; $i; $i--) {
+        echo $i . ' ' . $folded[$i]->value . PHP_EOL;
       }
     }
-    if (DEVELOP) { echo 'stack: ' . print_r($stack, TRUE) . "\n"; }
-    foreach ($stack as $s) {
-      $edismax .= $s . ' ';
-    }
-    $edismax = trim($edismax);
+    $stack = $folded;
+    $edismax = self::folded_unstack($stack);
     if (substr($edismax, 0, 1) == '(' && substr($edismax, -1) == ')') {
       $edismax = substr($edismax, 1, -1);
     }
-    if (DEVELOP) { echo 'ed: ' . $edismax . "\n"; }
+    if (DEVELOP) { echo 'ed 22: ' . $edismax . PHP_EOL; }
     return $edismax;
   }
+
+  private function folded_unstack(&$stack) {
+    if ($stack) {
+      $f = array_pop($stack);
+      if ($f->type == OPERATOR) {
+        $op = self::set_operator($f->value);
+        if (DEVELOP) { echo 'operator at: ' . $pos . PHP_EOL; }
+        $term1 = self::folded_unstack($stack);
+        $term2 = self::folded_unstack($stack);
+        return '(' . $term2 . ' ' . $op . ' ' . $term1 . ')';
+      }
+      else {
+        if (DEVELOP) { echo 'other at: ' . $pos . PHP_EOL; }
+        return $f->value;
+      }
+    }
+  }
+
+  private function set_operator($op) {
+    if ($this->best_match) { return ''; }
+    return ($op == 'NO_OP' ? 'AND' : $op);
+  }
+
 }
 
-?>
+
