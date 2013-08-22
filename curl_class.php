@@ -107,7 +107,7 @@ $curl_default_options = array(
 */
 
 
-class cURL {
+class Curl {
 
   ///////////////////////////////////////
   // PRIVATE VARIABLES DO NOT CHANGE!!!//
@@ -143,7 +143,6 @@ class cURL {
    * @var mixed
    */
   private $curl_options ;
-
 
 
   ////////////////////
@@ -243,7 +242,7 @@ class cURL {
   public function get($urls = FALSE) {
 
     if ($urls)
-      $this->set_url($urls);
+      self::set_url($urls);
 
     // remove previous curl_multi_handle, if any
     if (is_resource($this->curl_multi_handle)) {
@@ -300,6 +299,10 @@ class cURL {
 
     foreach ($this->curl_handle as $key => $handle) {
       $this->curl_content[$key] = curl_multi_getcontent($handle);
+      if (method_exists('curl_recorder', 'record')) {
+        $curl_recorder->record('status', $this->curl_status[$key], $key);
+        $curl_recorder->record('result', $this->curl_content[$key], $key);
+      }
     }
 
     if (sizeof($this->curl_handle) == 1)
@@ -364,7 +367,7 @@ class cURL {
       }
     }
     else {
-      $this->handle_check($handle_no);
+      self::handle_check($handle_no);
       $this->curl_options[$handle_no][$option] = $value;
       $res = curl_setopt($this->curl_handle[$handle_no], $option, $value);
     }
@@ -383,11 +386,17 @@ class cURL {
   public function set_url($value, $handle_no=0) {
     if (is_array($value)) {
       foreach ($value as $key => $url) {
-        $this->set_option(CURLOPT_URL, $url, $key);
+        self::set_option(CURLOPT_URL, $url, $key);
+        if (method_exists('curl_recorder', 'record_url')) {
+          $curl_recorder->record_url($url, $key);
+        }
       }
     }
     else {
-      $this->set_option(CURLOPT_URL, $value, $handle_no);
+      self::set_option(CURLOPT_URL, $value, $handle_no);
+      if (method_exists('curl_recorder', 'record_url')) {
+        $curl_recorder->record_url($value, $handle_no);
+      }
     }
   }
 
@@ -400,8 +409,8 @@ class cURL {
    */
 
   public function set_proxy($value, $handle_no=null) {
-    if ($ret = $this->set_option(CURLOPT_HTTPPROXYTUNNEL, TRUE, $handle_no))
-      $ret = $this->set_option(CURLOPT_PROXY, $value, $handle_no);
+    if ($ret = self::set_option(CURLOPT_HTTPPROXYTUNNEL, TRUE, $handle_no))
+      $ret = self::set_option(CURLOPT_PROXY, $value, $handle_no);
     return $ret;
   }
 
@@ -415,7 +424,7 @@ class cURL {
    */
 
   public function set_authentication($user, $passwd, $handle_no=null) {
-    return $this->set_option(CURLOPT_USERPWD, $user.':'.$passwd, $handle_no);
+    return self::set_option(CURLOPT_USERPWD, $user.':'.$passwd, $handle_no);
   }
 
 
@@ -428,7 +437,7 @@ class cURL {
    */
 
   public function set_proxy_authentication($user, $passwd, $handle_no=null) {
-    return $this->set_option(CURLOPT_PROXYUSERPWD, '['.$user.']:['.$passwd.']', $handle_no);
+    return self::set_option(CURLOPT_PROXYUSERPWD, '['.$user.']:['.$passwd.']', $handle_no);
   }
 
 
@@ -440,7 +449,7 @@ class cURL {
    */
 
   public function set_timeout($seconds, $handle_no=null) {
-    return $this->set_option(CURLOPT_TIMEOUT, $seconds, $handle_no);
+    return self::set_option(CURLOPT_TIMEOUT, $seconds, $handle_no);
   }
 
 
@@ -462,8 +471,11 @@ class cURL {
    */
 
   public function set_post($value, $handle_no=null) {
-    if ($ret = $this->set_option(CURLOPT_POST, 1, $handle_no))
-      $ret = $this->set_option(CURLOPT_POSTFIELDS, $value, $handle_no);
+    if ($ret = self::set_option(CURLOPT_POST, 1, $handle_no))
+      $ret = self::set_option(CURLOPT_POSTFIELDS, $value, $handle_no);
+    if (method_exists('curl_recorder', 'record_parameters')) {
+      $curl_recorder->record_parameters($value, $handle_no);
+    }
     return $ret;
   }
 
@@ -478,8 +490,8 @@ class cURL {
   public function set_post_xml($value, $handle_no=null) {
     $headers = $this->get_option(CURLOPT_HTTPHEADER, $handle_no);
     $headers[] = "Content-Type: text/xml";
-    if ($ret = $this->set_option(CURLOPT_HTTPHEADER, $headers, $handle_no))
-      $ret = $this->set_post($value, $handle_no);
+    if ($ret = self::set_option(CURLOPT_HTTPHEADER, $headers, $handle_no))
+      $ret = self::set_post($value, $handle_no);
     return $ret;
   }
 
@@ -494,7 +506,7 @@ class cURL {
   public function set_soap_action($action, $handle_no=null) {
     $headers = $this->get_option(CURLOPT_HTTPHEADER, $handle_no);
     $headers[] = "SOAPAction: " . $action;
-    return $this->set_option(CURLOPT_HTTPHEADER, $headers, $handle_no);
+    return self::set_option(CURLOPT_HTTPHEADER, $headers, $handle_no);
   }
 
 
@@ -614,15 +626,13 @@ class cURL {
    */
 
   private function handle_check($handle_no) {
-
     if (!isset($this->curl_handle[$handle_no])) {
       $this->curl_handle[$handle_no] = curl_init() ;
       foreach ($this->curl_default_options as $option => $option_value) {
-        $this->set_option($option, $option_value, $handle_no);
+        self::set_option($option, $option_value, $handle_no);
       }
     }
   }
-
 
 }
 
