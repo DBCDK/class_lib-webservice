@@ -281,7 +281,6 @@ class Curl {
       }
     }
     while ($this->wait_for_connections && ($status === CURLM_CALL_MULTI_PERFORM || $active));
-
     if ($info = curl_multi_info_read($this->curl_multi_handle)) {
       $multi_status[$info['handle']] = $info['result'];
     }
@@ -296,7 +295,6 @@ class Curl {
         $this->curl_status[$key]['http_code'] = 504;  // Gateway timeout
       }
     }
-
     foreach ($this->curl_handle as $key => $handle) {
       $this->curl_content[$key] = curl_multi_getcontent($handle);
       if (method_exists('curl_recorder', 'record')) {

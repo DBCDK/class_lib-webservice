@@ -4,7 +4,7 @@
  * \brief Class for handling Marc (iso and ln) records
  *
  * Example usage:
- * 
+ *
  */
 class marcException extends Exception {
 //  public function __toString() {
@@ -55,10 +55,10 @@ class marc implements Iterator {
   }
 
   /**
-   * 
+   *
    * @param type $fieldName
    * @return type array's of fields
-   * Returns all fields matching $fieldName 
+   * Returns all fields matching $fieldName
    */
   function findFields($fieldName) {
     $fields = array();
@@ -70,7 +70,7 @@ class marc implements Iterator {
   }
 
   /**
-   * 
+   *
    * @param type $fieldName
    * @return type array of strings
    * Returnin all fields $fieldName convertet into strings
@@ -90,7 +90,7 @@ class marc implements Iterator {
   }
 
   /**
-   * 
+   *
    * @param type $newField
    * @return boolean
    * If a field is already present nothing happens (return false)
@@ -118,7 +118,7 @@ class marc implements Iterator {
   }
 
   /**
-   * 
+   *
    * @param type $string
    * @return type Field
    */
@@ -172,7 +172,7 @@ class marc implements Iterator {
    *
    * @param type $fieldName the name of the field (marc field ex. '245')
    * @param type $subFields the subfield(s) code (marc 'a' or 'ea')
-   * @param type $maxres Maxresult, if you for instance only one the first subfield. If more 
+   * @param type $maxres Maxresult, if you for instance only one the first subfield. If more
    * an exception is thrown
    * @return array The subfields. The first character is the subfield code: 'aDet lille hus på...'
    * @throws marcException to many results
@@ -211,7 +211,7 @@ class marc implements Iterator {
   /**
    *
    * @param type $field
-   * @return boolean 
+   * @return boolean
    */
   function thisField($field) {
     if (!$field)
@@ -234,7 +234,7 @@ class marc implements Iterator {
 
   /**
    *
-   * @return type 
+   * @return type
    */
   function getMarc_arryIndex() {
     return $this->marc_arrayIndex;
@@ -243,8 +243,8 @@ class marc implements Iterator {
   /**
    *
    * @param type $subfield
-   * 
-   * @return boolean 
+   *
+   * @return boolean
    */
   function thisSubfield($subfield) {
     if (!$subfield)
@@ -269,7 +269,7 @@ class marc implements Iterator {
 
   /**
    * function update subfield
-   *  
+   *
    */
   function updateSubfield($txt) {
     if ($this->subfieldIndex < 0) {
@@ -284,7 +284,7 @@ class marc implements Iterator {
 
   /**
    *
-   * @return type 
+   * @return type
    */
   function subfield() {
     return $this->subfieldText;
@@ -292,7 +292,7 @@ class marc implements Iterator {
 
   /**
    *
-   * @return boolean 
+   * @return boolean
    */
   function remSubfield() {
     if (!$this->marc_arrayIndex)
@@ -313,7 +313,8 @@ class marc implements Iterator {
   }
 
   /**
-   * 
+   * @param type string  field
+   * @param type int index of field
    */
   function remField($field = '', $index = 0) {
     if ($field) {
@@ -330,7 +331,6 @@ class marc implements Iterator {
     }
     if (!$this->marc_arrayIndex)
       return false;
-
     $newMarcArray = array();
     for ($i = 0; $i < count($this->marc_array); $i++) {
       if ($i == $this->marc_arrayIndex)
@@ -343,10 +343,39 @@ class marc implements Iterator {
   /**
    *
    * @param type $field
+   * @param type $subfieldcode
+   * @param type $txt
+   */
+  function remFieldText($searchfield, $subfieldcode, $txt) {
+    $remove = true;
+    $ret = false;
+    $txt = $subfieldcode . $txt;
+    while ($remove) {
+      $remove = false;
+      $fields = $this->findFields($searchfield);
+      foreach ($fields as $key => $currenctfield) {
+        foreach ($currenctfield['subfield'] as $field) {
+          if (substr($field, 0, strlen($txt)) == $txt) {
+            $this->remField($searchfield, $key);
+            $remove = true;
+            $ret = true;
+            break;
+          }
+        }
+        if ($remove)
+          break;
+      }
+    }
+    return $ret;
+  }
+
+  /**
+   *
+   * @param type $field
    * @param type $subfieldArray
    * @param type $indexToSubfieldArray
-   * 
-   * @return boolean true: subfield removed, false: no such subfield 
+   *
+   * @return boolean true: subfield removed, false: no such subfield
    */
   function removeSubfield($fieldName, $subfieldArray, $indexToSubfieldArray) {
     $returnValue = false;
@@ -423,10 +452,10 @@ class marc implements Iterator {
 
   /**
    * \brief insert a subfield.
-   * If no field exist, make one. 
-   * If one exist add the subfield to the field. 
+   * If no field exist, make one.
+   * If one exist add the subfield to the field.
    * Default '00' to indicators.
-   * 
+   *
    * @param type $data (the data going into the marc-field)
    * @param type $field (the field. ex. '032')
    * @param type $subfield ( the subfield ex. 'a')
@@ -456,8 +485,8 @@ class marc implements Iterator {
   }
 
   /**
-   * 
-   * @param type $field_array 
+   *
+   * @param type $field_array
    */
   function insert($field_array) {
 // find where to insert
@@ -500,7 +529,7 @@ class marc implements Iterator {
 
     $fld = explode($this->fieldTerminator, $isomarc);
     $dummy = array_pop($fld);
-//print_r($fld); 
+//print_r($fld);
 
     $indx = 0;
     $fldno = '000';
@@ -524,8 +553,8 @@ class marc implements Iterator {
   }
 
   /**
-   * 
-   * @return an array of with all the fields 
+   *
+   * @return an array of with all the fields
    */
   function getArray() {
     return $this->marc_array;
@@ -537,8 +566,8 @@ class marc implements Iterator {
   }
 
   /**
-   * 
-   * @return string the marc record as lineformat  
+   *
+   * @return string the marc record as lineformat
    */
   function toLineFormat() {
     $strng = "";
