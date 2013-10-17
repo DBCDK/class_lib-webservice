@@ -50,7 +50,7 @@ class z3950 {
             yaz_sort($this->z_id, '');
             yaz_range($this->z_id, 1, 0);
             yaz_search($this->z_id, 'rpn', $this->rpn);
-            $wait = array('timeout' => $wait_seconds);
+            $wait = array('timeout' => intval($wait_seconds));
             yaz_wait($this->z_id, $wait);
             $this->set_error($this->z_id);
             if ($this->hits = yaz_hits($this->z_id)) {
@@ -103,7 +103,7 @@ class z3950 {
                 yaz_database($this->z_id, $this->database);
             $args = array('doc' => $xml, 'itemorder-setname' => '', 'syntax' => 'xml');
             yaz_es($this->z_id, $op, $args);
-            $wait = array('timeout' => $wait_seconds);
+            $wait = array('timeout' => intval($wait_seconds));
             yaz_wait($this->z_id, $wait);
             $this->set_error($this->z_id);
             return yaz_es_result($this->z_id);
