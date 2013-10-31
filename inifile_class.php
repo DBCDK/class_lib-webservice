@@ -85,6 +85,8 @@ class inifile {
   */
   private $ini_file_array = array() ;
 
+  private $inifile_hash = NULL;
+
   public $error = "";
 
 
@@ -166,6 +168,15 @@ class inifile {
       return $this->get_section($section);
     }
     return $this->get_value($key,$section);
+  }
+
+  /**
+  * returns the hash value of the inifile
+  *
+  * @returns md5 sum of the inifile
+  **/
+  public function get_inifile_hash() {
+    return $this->inifile_hash;
   }
 
   /**
@@ -280,6 +291,7 @@ class inifile {
     if (!$ini) {
       return false;
     }
+    $this->inifile_hash = md5($ini);
     $sections = array();
     $values = array();
     $globals = array();
