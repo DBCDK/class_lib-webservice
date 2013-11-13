@@ -101,10 +101,10 @@ class formatRecords {
     for ($no = 0; $no < count($records); $no = $no + $this->record_blocking) {
       $cache_key[$curls] = self::make_cache_key($records[$no]->_value->collection->_value->object, $param);
       if ($ret[$no] = $this->cache->get($cache_key[$curls])) {
-        verbose::log(DEBUG, 'cache hit ' . $cache_key[$curls]);
+        verbose::log(DEBUG, 'format cache hit ' . $cache_key[$curls]);
         continue;
       }
-      verbose::log(DEBUG, 'no cache hit');
+      verbose::log(DEBUG, 'no format cache hit');
       $ret_index[$curls] = $no;
       $form_req->formatSingleManifestationRequest->_value->originalData = &$records[$tot_curls];
       $this->curl->set_option(CURLOPT_TIMEOUT, $this->timeout, $curls);
@@ -112,11 +112,9 @@ class formatRecords {
       $this->curl->set_url($this->js_server_url[$next_js_server], $curls);
       $rec = $this->objconvert->obj2xmlNs($form_req);
       $this->curl->set_post_xml($rec, $curls);
-      //verbose::log(DEBUG, 'Using js_server no: ' . $next_js_server);
       $curls++;
       $tot_curls++;
       if ($curls == count($this->js_server_url) || $tot_curls == count($records)) {
-        //verbose::log(DEBUG, "Do curl");
         if (is_object($this->watch)) {
           $this->watch->start('js_server');
         }
