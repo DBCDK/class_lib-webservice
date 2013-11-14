@@ -56,6 +56,35 @@ class marc implements Iterator {
 
   /**
    *
+   * @param type $txt
+   * @return type string
+   */
+  private function striptxt($txt) {
+    $newtxt = "";
+    for ($i = 0; $i < strlen($txt); $i++) {
+      if (ctype_alnum($txt[$i]))
+        $newtxt .= $txt[$i];
+    }
+    return strtoupper($newtxt);
+  }
+
+  /**
+   *
+   * @param type $txt1
+   * @param type $txt2
+   * @return boolean
+   */
+  function FuzzyCompare($txt1, $txt2) {
+    $txt1 = $this->striptxt($txt1);
+    $txt2 = $this->striptxt($txt2);
+    if ($txt1 == $txt2)
+      return true;
+    else
+      return false;
+  }
+
+  /**
+   *
    * @param type $fieldName
    * @return type array's of fields
    * Returns all fields matching $fieldName
@@ -177,7 +206,7 @@ class marc implements Iterator {
    * @return array The subfields. The first character is the subfield code: 'aDet lille hus på...'
    * @throws marcException to many results
    */
-  function findSubFields($fieldName, $subFields, $maxres = 9999) {
+  function findSubFields($fieldName, $subFields, $maxres = 99999) {
     $subreturn = array();
     foreach ($this->marc_array as $value) {
       if ($value['field'] != $fieldName)
