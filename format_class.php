@@ -37,7 +37,7 @@ require_once 'OLS_class_lib/cql2solr_class.php';
  *
  */
 
-class formatRecords {
+class FormatRecords {
   protected $cache;                     // for caching formatted records
   protected $curl;                      // the curl connection
   protected $namespace;                 // the namespace for openformat
