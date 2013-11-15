@@ -90,6 +90,7 @@ class FormatRecords {
     }
     $output_format = $param->outputFormat->_value;
     $form_req->formatSingleManifestationRequest->_value->agency = $param->agency;
+    $form_req->formatSingleManifestationRequest->_value->holdBackEndDate = $param->holdBackEndDate;
     $form_req->formatSingleManifestationRequest->_value->language = $param->language;
     $form_req->formatSingleManifestationRequest->_value->outputFormat = $param->outputFormat;
     $form_req->formatSingleManifestationRequest->_value->trackingId = $param->trackingId;
