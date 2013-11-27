@@ -51,7 +51,7 @@ class aaa {
   private $fors_rights_url;     // url to forsRights server
   public $aaa_ip_groups = array();
 
-  public function __construct($aaa_setup) {
+  public function __construct($aaa_setup, $hash = '') {
     $this->fors_credentials = $aaa_setup['aaa_credentials'];
     if (isset($aaa_setup['aaa_cache_address']) and $aaa_setup['aaa_cache_address']) {
       $this->aaa_cache = new cache($aaa_setup['aaa_cache_address']);
@@ -64,6 +64,7 @@ class aaa {
     if (!$this->cache_key_prefix = $aaa_setup['aaa_cache_key_prefix']) {
       $this->cache_key_prefix = 'AAA';
     }
+    $this->cache_key_prefix .= $hash;
   }
 
   /**
