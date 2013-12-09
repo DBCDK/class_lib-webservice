@@ -23,6 +23,7 @@ require_once('tokenizer_class.php');
 require_once('cql2rpn_class.php');
 
 define('DEVELOP', FALSE);
+define('TREE', $_REQUEST['tree']);
 
 
 class SolrQuery extends tokenizer {
@@ -39,9 +40,9 @@ class SolrQuery extends tokenizer {
   var $best_match = FALSE;
   var $operator_translate = array();
 
-  public function __construct($xml, $config='', $language='') {
+  public function __construct($cql_xml, $config='', $language='') {
     $this->dom = new DomDocument();
-    $this->dom->Load($xml);
+    $this->dom->Load($cql_xml);
 
     $this->best_match = ($language == 'bestMatch');
     if ($language == 'cqldan') {
@@ -49,8 +50,8 @@ class SolrQuery extends tokenizer {
     }
     $this->case_insensitive = TRUE;
     $this->split_expression = '/(<=|>=|[ <>=()[\]])/';
-    $this->operators = $this->get_operators($language);
-    $this->indexes = $this->get_indexes();
+    $this->set_operators($language);
+    $this->set_indexes_and_aliases();
     $this->ignore = array('/^prox\//');
 
     $this->interval = array('<' => '[* TO %s]', 
@@ -88,6 +89,18 @@ class SolrQuery extends tokenizer {
     }
     if (DEVELOP) print_r($edismax);
     //if (DEVELOP) die();
+ 
+    if (TREE) {
+      require_once('cql2tree_class.php');
+      $parser = new cql_parser();
+      //$parser->define_prefix('dkcclterm', 'DKCCLTERM', $dkcclterm_f_uri);
+      $parser->parse($query);
+      $tree = $parser->result();
+      $diag = $parser->get_diagnostics();
+      var_dump($tree);
+      var_dump($diag);
+      die();
+    }
     return $edismax;
   }
 
@@ -110,29 +123,33 @@ class SolrQuery extends tokenizer {
   /** \brief Get list of registers and their types
    * 
    */
-  private function get_indexes() {
-    $indexes = array(); 
+  private function set_indexes_and_aliases() {
+    $idx = -1;
+    $this->indexes = $this->aliases = array(); 
     foreach ($this->dom->getElementsByTagName('indexInfo') as $info_item) {
-      foreach ($info_item->getElementsByTagName('name') as $name_item) {
-        $indexes[] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
+      foreach ($info_item->getElementsByTagName('index') as $index_item) {
+        $map_item = $index_item->getElementsByTagName('map')->item(0);
+        $name_item = $map_item->getElementsByTagName('name')->item(0);
+        $this->indexes[++$idx] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
+        foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
+          $this->aliases[$alias_item->nodeValue] = $this->indexes[$idx];
+        }
       }
     }
-    return $indexes;
   }
 
   /** \brief Get list of valid operators
    * @param 
    */
-  private function get_operators($language) {
-    $operators = array(); 
+  private function set_operators($language) {
+    $this->operators = array(); 
     $boolean_lingo = ($language == 'cqldan' ? 'dan' : 'eng');
     foreach ($this->dom->getElementsByTagName('supports') as $support_item) {
       $type = $support_item->getAttribute('type');
       if (in_array($type, array('relation', 'booleanChar', $boolean_lingo . 'BooleanModifier'))) {
-        $operators[] = $support_item->nodeValue;
+        $this->operators[] = $support_item->nodeValue;
       }
     }
-    return $operators;
   }
 
   /** \brief Makes an edismax query from the RPN-stack

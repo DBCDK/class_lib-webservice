@@ -46,6 +46,8 @@ class tokenizer {
   var $operators=array();
   /// List of indexes <array>
   var $indexes=array();
+  /// List of aliases <array>
+  var $aliases=array();
   /// List of ignores <array>
   var $ignore=array();
   /// Prefix for operator <array>
@@ -66,12 +68,23 @@ class tokenizer {
    * @return (bool)
    *
    */
-
   function is_operator($token) {
     if (in_array($token, $this->operators)) {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /** \brief translate tokens
+   *
+   * @param token (string)
+   * @return token (bool)
+   */
+  function unalias($token) {
+    if ($this->aliases[$token]) {
+      return $this->aliases[$token];
+    }
+    return $token;
   }
 
   /** \brief Check if token is index.
@@ -80,7 +93,6 @@ class tokenizer {
    * @return (bool)
    *
    */
-
   function is_index($token) {
 
     if ($this->case_insensitive) {
@@ -120,7 +132,6 @@ class tokenizer {
    * @return (array)
    *
    */
-
   function tokenize($string, $trans_table = array()) {
     $use_phrase = FALSE;
 
@@ -150,6 +161,7 @@ class tokenizer {
     foreach ($tokens as $k => $v) {
       $token=array();
 
+      $v = $this->unalias($v);
       //If the token is a index token
       if ($this->is_index($v)) {
         $token['type'] = INDEX;
