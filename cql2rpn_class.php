@@ -29,16 +29,19 @@ define('C_P_START', 4);
 define('C_P_END', 5);
 define('END_VALUE', '$END$END$');
 
+define('DEVELOP', $_REQUEST['develop']);
+
 class Cql2Rpn {
 
   /** \brief Produce a rpn-stack using the shunting yard algorithm
    *
    */
   public function parse_tokens($tokenlist) {
+    if (DEVELOP) { echo 'Cql2Rpn: ' . print_r($tokenlist, TRUE) . PHP_EOL; }
 // 0: advance, 1: stack  and advance, 2: unstack, 3: drop stack and advance, 4: unstack, stack and advance, 9:error
 //                             OP  NO_OP END INDEX P_START
     $action[C_OP]      = array( 2,  2,    1,  2,    1);
-    $action[C_NO_OP]   = array( 2,  4,    1,  1,    1);
+    $action[C_NO_OP]   = array( 4,  4,    1,  1,    1);
     $action[C_END]     = array( 2,  2,    0,  2,    9);
     $action[C_INDEX]   = array( 1,  1,    1,  2,    1);
     $action[C_P_START] = array( 1,  1,    1,  1,    1);
@@ -53,12 +56,17 @@ class Cql2Rpn {
         throw new Exception('CQL-1: CQL parse error');
       }
       $token = self::set_token_from_list($tokenlist, $token_no);
+      if (DEVELOP) {
+        echo '------------------' . PHP_EOL . $operand_no . ': ' . print_r($token, TRUE) . print_r($stack, TRUE) . print_r($rpn, TRUE) . PHP_EOL;
+      }
       if ((count($rpn) > 1 && count($stack) == 1 && $token->value == END_VALUE) || 
-          ($token->type == OPERAND && $token->value)) {
+          ($token->type == OPERAND && $token->value) ||
+          ($token->type == INDEX)) {
         if ($operand_no++) {
           $token->type = OPERATOR;
           $token->value = 'NO_OP';
           $token_no--;
+          if (DEVELOP) { echo 'Change token: ' . print_r($token, TRUE) . PHP_EOL; }
         }
       }
       if ($token->type == OPERAND || $token->type == INDEX) {
@@ -73,6 +81,7 @@ class Cql2Rpn {
           $token->state = self::set_token_state_from_value($token->value);
         }
         $top_state = $stack[count($stack) - 1]->state;
+        if (DEVELOP) { echo 'token->state: ' . $token->state . ' top_state: ' . $top_state . PHP_EOL; }
         switch ($action[$token->state][$top_state]) {
           case 0: 
             $token_no++;
@@ -103,6 +112,8 @@ class Cql2Rpn {
       }
     }
 
+    if (DEVELOP) { echo 'Cql2Rpn return: ' . print_r($rpn, TRUE) . PHP_EOL; }
+    if (DEVELOP) { die(); }
     return $rpn;
   }
 
