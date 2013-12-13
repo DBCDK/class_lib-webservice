@@ -302,9 +302,13 @@ abstract class webServiceServer {
       if (!$domain = $this->config->get_value('in_house_domain', 'setup'))
         $domain = '.dbc.dk';
       @ $remote = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-      $homie = (strpos($remote, $domain) + strlen($domain) == strlen($remote));
-      if ($homie)
-        $homie = (gethostbyname($remote) == $_SERVER['REMOTE_ADDR']); // paranoia check
+      $domains = explode(';', $domain);
+      foreach ($domains as $dm) {
+        $dm = trim($dm);
+        if ($homie = (strpos($remote, $dm) + strlen($dm) == strlen($remote)))
+          if ($homie = (gethostbyname($remote) == $_SERVER['REMOTE_ADDR'])) // paranoia check
+            break;
+        }
     }
     return $homie;
   }
