@@ -40,8 +40,8 @@ abstract class webServiceServer {
   protected $config; // inifile object
   protected $watch; // timer object
   protected $aaa; // Authentication, Access control and Accounting object
-  protected $xmldir='./'; // xml directory
-  protected $validate= array(); // xml validate schemas
+  protected $xmldir = './'; // xml directory
+  protected $validate = array(); // xml validate schemas
   protected $objconvert; // OLS object to xml convert
   protected $xmlconvert; // xml to OLS object convert
   protected $xmlns; // namespaces and prefixes
@@ -52,6 +52,7 @@ abstract class webServiceServer {
   protected $output_type='';
   protected $curl_recorder;
   protected $debug;
+  protected $url_override; // array with special url-commands for the actual service
 
 
   /** \brief Webservice constructer
@@ -94,6 +95,8 @@ abstract class webServiceServer {
     $this->version = $this->config->get_value('version', 'setup');
     $this->output_type = $this->config->get_value('default_output_type', 'setup');
     $this->dump_timer = $this->config->get_value('dump_timer', 'setup');
+    if (!$this->url_override = $this->config->get_value('url_override', 'setup'))
+      $this->url_override = array('HowRU' => 'HowRU', 'ShowInfo' => 'ShowInfo', 'Version' => 'Version');
 
     $test_section = $this->config->get_section('test');
     if (is_array($test_section['curl_record_urls'])) {
@@ -110,18 +113,12 @@ abstract class webServiceServer {
   *
   */
   public function handle_request() {
-    if ($_SERVER['QUERY_STRING'] == 'ShowInfo')
-      $this->ShowInfo($_REQUEST['ShowInfo']);
-    if ($_SERVER['QUERY_STRING'] == 'Version') {
-      die($this->version);
+    foreach ($this->url_override as $query_par => $function_name) {
+      if (strpos($_SERVER['QUERY_STRING'], $query_par) === 0 && method_exists($this, $function_name)) {
+        return $this-> {$function_name}();
+      }
     }
-    elseif ($_SERVER['QUERY_STRING'] == 'HowRU') {
-      $this->HowRU();
-    }
-    elseif (substr($_SERVER['QUERY_STRING'], 0, 14) == 'RegressionTest') {
-      $this->RegressionTest($_GET['RegressionTest']);
-    }
-    elseif (isset($_POST['xml'])) {
+    if (isset($_POST['xml'])) {
       $xml=trim(stripslashes($_POST['xml']));
       $this->soap_request($xml);
     }
@@ -254,7 +251,14 @@ abstract class webServiceServer {
   /** \brief
   *
   */
-  private function ShowInfo($level) {
+  private function version() {
+    die($this->version);
+  }
+
+  /** \brief
+  *
+  */
+  private function ShowInfo() {
     if (($showinfo = $this->config->get_value('showinfo', 'showinfo')) && $this->in_house()) {
       foreach ($showinfo as $line) {
         echo $this->showinfo_line($line) . "\n";
