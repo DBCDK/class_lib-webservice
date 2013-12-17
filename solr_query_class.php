@@ -138,7 +138,6 @@ class SolrQuery extends tokenizer {
         }
       }
     }
-var_dump($this->indexes); die();
   }
 
   /** \brief Get list of valid operators
