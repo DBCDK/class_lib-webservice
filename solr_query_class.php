@@ -128,14 +128,17 @@ class SolrQuery extends tokenizer {
     $this->indexes = $this->aliases = array(); 
     foreach ($this->dom->getElementsByTagName('indexInfo') as $info_item) {
       foreach ($info_item->getElementsByTagName('index') as $index_item) {
-        $map_item = $index_item->getElementsByTagName('map')->item(0);
-        $name_item = $map_item->getElementsByTagName('name')->item(0);
-        $this->indexes[++$idx] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
-        foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
-          $this->aliases[$alias_item->nodeValue] = $this->indexes[$idx];
+        if ($map_item = $index_item->getElementsByTagName('map')->item(0)) {
+          if ($name_item = $map_item->getElementsByTagName('name')->item(0)) {
+            $this->indexes[++$idx] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
+            foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
+              $this->aliases[$alias_item->nodeValue] = $this->indexes[$idx];
+            }
+          }
         }
       }
     }
+var_dump($this->indexes); die();
   }
 
   /** \brief Get list of valid operators
