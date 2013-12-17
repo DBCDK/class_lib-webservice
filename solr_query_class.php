@@ -129,7 +129,7 @@ class SolrQuery extends tokenizer {
     foreach ($this->dom->getElementsByTagName('indexInfo') as $info_item) {
       foreach ($info_item->getElementsByTagName('index') as $index_item) {
         if ($map_item = $index_item->getElementsByTagName('map')->item(0)) {
-          if ($name_item = $map_item->getElementsByTagName('name')->item(0)) {
+          if (!self::xs_boolean($map_item->getAttribute('hidden')) && $name_item = $map_item->getElementsByTagName('name')->item(0)) {
             $this->indexes[++$idx] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
             foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
               $this->aliases[$alias_item->nodeValue] = $this->indexes[$idx];
@@ -138,6 +138,10 @@ class SolrQuery extends tokenizer {
         }
       }
     }
+  }
+
+  private function xs_boolean($str) {
+    return ($str == 1 || $str == 'true');
   }
 
   /** \brief Get list of valid operators
