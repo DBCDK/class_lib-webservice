@@ -180,6 +180,7 @@ class SolrQuery extends tokenizer {
   /** \brief folds OPERANDs bound to indexes depending on INDEX-type
    */
   private function fold_operands($rpn) {
+    $old_recid_tab = array('150015' => 'ereol');
     $intervals = array('<' => '[* TO %s]', 
                       '<=' => '[* TO %s]', 
                       '>' => '[%s TO *]', 
@@ -198,6 +199,14 @@ class SolrQuery extends tokenizer {
           $curr_index = $r->value;
           break;
         case OPERAND:
+          if ($curr_index == 'rec.id' && preg_match('/[1-9][0-9]{5}:[xX0-9][0-9]{2,10}[xX0-9]/', $r->value)) {
+            if ($coll = $old_recid_tab[substr($r->value, 0, 6)]) {
+              $r->value = str_replace(':', '-' . $coll . ':', $r->value);
+            }
+            else {
+              $r->value = '870970-basis' . substr($r->value, 6);
+            }
+          }
           $r->value = str_replace($this->solr_escapes_from, $this->solr_escapes_to, $r->value);
           if ($curr_index) {
             $index_stack[] = $r;
