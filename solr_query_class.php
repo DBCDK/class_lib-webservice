@@ -180,7 +180,7 @@ class SolrQuery extends tokenizer {
   /** \brief folds OPERANDs bound to indexes depending on INDEX-type
    */
   private function fold_operands($rpn) {
-    $old_collection_tab = array(
+    $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
       '150005' => '150005-artikel',
       '150008' => '150008-academic',
       '150012' => '150012-leksikon',
@@ -228,11 +228,8 @@ class SolrQuery extends tokenizer {
           $curr_index = $r->value;
           break;
         case OPERAND:
-          if ($curr_index == 'rec.id' && preg_match('/[1-9][0-9]{5}:[xX0-9][0-9]{2,10}[xX0-9]/', $r->value)) {
-            if (!($coll = $old_collection_tab[substr($r->value, 0, 6)])) {
-              $coll = '870970-basis';
-            }
-            $r->value = $coll . substr($r->value, 6);
+          if ($curr_index == 'rec.id' && preg_match("/^([1-9][0-9]{5})(:.*)$/", $r->value, $match)) {
+            $r->value = (array_key_exists($match[1], $v2_v3) ? $v2_v3[$match[1]] : '870970-basis') . $match[2];
           }
           $r->value = str_replace($this->solr_escapes_from, $this->solr_escapes_to, $r->value);
           if ($curr_index) {
