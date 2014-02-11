@@ -180,35 +180,36 @@ class SolrQuery extends tokenizer {
   /** \brief folds OPERANDs bound to indexes depending on INDEX-type
    */
   private function fold_operands($rpn) {
-    $old_recid_tab = array('150005' => '150005-artikel',
-                           '150008' => '150008-academic',
-                           '150012' => '150012-leksikon',
-                           '150014' => '150014-album',
-                           '150015' => '870970-basis',
-                           '150016' => '870971-forfweb',
-                           '150017' => '870971-faktalink',
-                           '150018' => '150018-danhist',
-                           '150021' => '150021-bibliotek',
-                           '150023' => '150023-sicref',
-                           '150025' => '150008-public',
-                           '150027' => '150021-fjern',
-                           '150028' => '870970-basis',
-                           '150030' => '870970-spilmedier',
-                           '150032' => '150018-samfund',
-                           '150033' => '150033-dandyr',
-                           '150034' => '150018-religion',
-                           '150039' => '150015-forlag',
-                           '150040' => '150033-verdyr',
-                           '150043' => '150043-atlas',
-                           '150048' => '870970-basis',
-                           '150052' => '870970-basis',
-                           '150054' => '150018-biologi',
-                           '150055' => '150018-fysikkemi',
-                           '150056' => '150018-geografi',
-                           '159002' => '159002-lokalbibl',
-                           '870971' => '870971-avis',
-                           '870973' => '870973-anmeld',
-                           '870976' => '870976-anmeld');
+    $old_collection_tab = array(
+      '150005' => '150005-artikel',
+      '150008' => '150008-academic',
+      '150012' => '150012-leksikon',
+      '150014' => '150014-album',
+      '150015' => '870970-basis',
+      '150016' => '870971-forfweb',
+      '150017' => '870971-faktalink',
+      '150018' => '150018-danhist',
+      '150021' => '150021-bibliotek',
+      '150023' => '150023-sicref',
+      '150025' => '150008-public',
+      '150027' => '150021-fjern',
+      '150028' => '870970-basis',
+      '150030' => '870970-spilmedier',
+      '150032' => '150018-samfund',
+      '150033' => '150033-dandyr',
+      '150034' => '150018-religion',
+      '150039' => '150015-forlag',
+      '150040' => '150033-verdyr',
+      '150043' => '150043-atlas',
+      '150048' => '870970-basis',
+      '150052' => '870970-basis',
+      '150054' => '150018-biologi',
+      '150055' => '150018-fysikkemi',
+      '150056' => '150018-geografi',
+      '159002' => '159002-lokalbibl',
+      '870971' => '870971-avis',
+      '870973' => '870973-anmeld',
+      '870976' => '870976-anmeld');
     $intervals = array('<' => '[* TO %s]', 
                       '<=' => '[* TO %s]', 
                       '>' => '[%s TO *]', 
@@ -228,7 +229,7 @@ class SolrQuery extends tokenizer {
           break;
         case OPERAND:
           if ($curr_index == 'rec.id' && preg_match('/[1-9][0-9]{5}:[xX0-9][0-9]{2,10}[xX0-9]/', $r->value)) {
-            if (!($coll = $old_recid_tab[substr($r->value, 0, 6)])) {
+            if (!($coll = $old_collection_tab[substr($r->value, 0, 6)])) {
               $coll = '870970-basis';
             }
             $r->value = $coll . substr($r->value, 6);
