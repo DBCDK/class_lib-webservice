@@ -2,6 +2,8 @@
 /*
    Copyright (C) 2004 Index Data Aps, www.indexdata.dk
 
+   Parts Copyright © 2013 Dansk Bibliotekscenter a/s, www.dbc.dk
+
    This file is part of SRW/PHP
 
    This program is free software; you can redistribute it and/or modify
@@ -18,8 +20,14 @@
    it by writing to the Free Software Foundation, Inc., 59 Temple
    Place - Suite 330, Boston, MA 02111-1307, USA.
 
-   $Id: cql.php,v 1.1 2005-12-22 10:38:14 fvs Exp $
 */
+
+/**
+ * \brief Class for parsing a CQL query to the corresponding query tree
+ *
+ * CQL: http://www.loc.gov/standards/sru/cql/contextSets/theCqlContextSet.html
+ *
+ */
 
 class CQL_parser {
   private $qs; // query string
@@ -32,16 +40,38 @@ class CQL_parser {
   private $std_prefixes = array();
   private $diags = ''; // diagnostics array to be passed to SRW-response
   private $booleans = array('and', 'or', 'not', 'prox');
+  private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
+  private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
+  private $unsupported_relations = array('==', 'all', 'any', 'encloses', 'within');
+  private $supported_modifiers = array('unit' => array('word'), 'distance' => array('1'));
   private $parse_ok = TRUE; // cql parsing went ok
-  private $diagnostics; //handle to SRW_response object
+  private $diagnostics; 
 
-  public function CQL_parser() {
-  }
+  public function __construct() { }
   
+  /** \brief 
+   * @param namespaces (array)
+   **/
+  public function define_prefix_namespaces($namespaces) {
+    if (is_array($namespaces)) {
+      foreach ($namespaces as $prefix => $uri) {
+        self::define_prefix($prefix, $prefix, $uri);
+      }
+    }
+  }
+
+  /** \brief 
+   * @param prefix (string)
+   * @param title (string)
+   * @param uri (string)
+   **/
   public function define_prefix($prefix, $title, $uri) {
     $this->std_prefixes = self::add_prefix($this->std_prefixes, $prefix, $title, $uri);
   }
   
+  /** \brief 
+   * @param query (string)
+   **/
   public function parse($query) {
     $this->qs = $query;
     $this->ql = strlen($query);
@@ -55,20 +85,32 @@ class CQL_parser {
     return $this->parse_ok;
   }
   
+  /** \brief 
+   * 
+   **/
   public function result() {
     return $this->tree;
   }
   
+  /** \brief 
+   * @param query (string)
+   **/
   public function result2xml($ar) {
     return self::tree2xml_r($ar, 0);
   }
   
+  /** \brief 
+   * 
+   **/
   public function get_diagnostics() {
     return $this->diagnostics;
   }
 
   /* -------------------------------------------------------------------------------- */
 
+  /** \brief 
+   * 
+   **/
   private function move() {
     while ($this->qi < $this->ql && strchr(" \t\r\n", $this->qs[$this->qi])) 
       $this->qi++;
@@ -112,14 +154,22 @@ class CQL_parser {
       $this->val = substr($this->qs, $start_q, $this->qi - $start_q);
       $this->lval = strtolower($this->val);
     }
+    echo 'val: ' . $this->val . ' lval: ' . $this->lval . ' look: ' . $this->look . PHP_EOL;
   }
   
+  /** \brief 
+   * @param context (string)
+   **/
   private function modifiers($context) {
     $ar = array();
     while ($this->look == '/') {
       self::move();
       if ($this->look != 's' && $this->look != 'q') {
         self::add_diagnostic(10, "$this->qi");
+        return $ar;
+      }
+      if (!array_key_exists($this->lval, $this->supported_modifiers)) {
+        self::add_diagnostic(46, "$this->qi", $this->lval);
         return $ar;
       }
       $name = $this->lval;
@@ -140,6 +190,12 @@ class CQL_parser {
     return $ar;
   }
   
+  /** \brief 
+   * @param field (string)
+   * @param relation (string)
+   * @param context (string)
+   * @param modifiers (string)
+   **/
   private function cqlQuery($field, $relation, $context, $modifiers) {
     $left = self::searchClause($field, $relation, $context, $modifiers);
     while ($this->look == 's' && (in_array($this->lval, $this->booleans))) {
@@ -152,6 +208,12 @@ class CQL_parser {
     return $left;
   }
   
+  /** \brief 
+   * @param field (string)
+   * @param relation (string)
+   * @param context (string)
+   * @param modifiers (string)
+   **/
   private function searchClause($field, $relation, $context, $modifiers) {
     if ($this->look == '(') {
       self::move();
@@ -168,12 +230,18 @@ class CQL_parser {
       $first = $this->val; // dont know if field or term yet
       self::move();
       
-      if ($this->look == 'q' || ($this->look == 's' && !in_array($this->lval, $this->booleans))) {
+      if (($this->look == 'q' || ($this->look == 's') && in_array($this->lval, $this->defined_relations))) {
+        if (in_array($this->lval, $this->unsupported_relations)) {
+          self::add_diagnostic(19, "$this->qi", $this->lval);
+        }
         $rel = $this->val; // string relation
         self::move();
         return self::searchClause($first, $rel, $context, self::modifiers($context));
       }
-      elseif (strchr("<>=", $this->look[0])) {
+      elseif (in_array($this->look, $this->implicit_relations)) {
+        if (in_array($this->look, $this->unsupported_relations)) {
+          self::add_diagnostic(19, "$this->qi", $this->look);
+        }
         $rel = $this->look; // other relation <, = ,etc
         self::move();
         return self::searchClause($first, $rel, $context, self::modifiers($context));
@@ -187,10 +255,12 @@ class CQL_parser {
           $pre = substr($field, 0, $pos);
           $field = substr($field, $pos + 1, 100);
         }
-        $uri = '';
+        $uri = $prefix = '';
         for ($i = 0; $i < sizeof($context); $i++) {
-          if ($context[$i]['prefix'] == $pre) 
+          if ($context[$i]['prefix'] == $pre)  {
             $uri = $context[$i]['uri'];
+            $prefix = $context[$i]['prefix'];
+          }
         }
         
         $pos = strpos($relation, '.');
@@ -207,6 +277,7 @@ class CQL_parser {
         }
         return array('type' => 'searchClause', 
                      'field' => $field, 
+                     'prefix' => $prefix, 
                      'fielduri' => $uri, 
                      'relation' => $relation, 
                      'relationuri' => $reluri, 
@@ -238,6 +309,12 @@ class CQL_parser {
     }
   }
   
+  /** \brief 
+   * @param ar (string)
+   * @param prefix (string)
+   * @param title (string)
+   * @param uri (string)
+   **/
   private function add_prefix($ar, $prefix, $title, $uri) {
     if (!is_array($ar)) 
       $ar = array();
@@ -248,6 +325,10 @@ class CQL_parser {
     return $ar;
   }
   
+  /** \brief 
+   * @param ar (string)
+   * @param level (string)
+   **/
   private function tree2xml_modifiers($ar, $level) {
     if (sizeof($ar) == 0) {
       return "";
@@ -280,10 +361,17 @@ class CQL_parser {
     return $s;
   }
   
+  /** \brief 
+   * @param context (string)
+   **/
   private function tree2xml_indent($level) {
     return str_repeat(' ', $level * 2);
   }
   
+  /** \brief 
+   * @param ar (string)
+   * @param level (string)
+   **/
   private function tree2xml_r($ar, $level) {
     $s = '';
     if (!isset($ar['type'])) {
@@ -361,20 +449,29 @@ class CQL_parser {
     return $s;
   }
   
-  private function add_diagnostic($id, $details) {
+  /** \brief 
+   * @param id (integer)
+   * @param details (string)
+   **/
+  private function add_diagnostic($id, $pos, $details = '') {
     $this->parse_ok = FALSE;
     if (is_int($id) && $id >= 0 && is_string($details)) {
-      $this->diagnostics[][$id] = self::diag_message($id) . ' at pos: ' . $details;
+      $this->diagnostics[] = array('no' => $id, 'description' => self::diag_message($id), 'details' => $details, 'pos' => $pos);
     }
   }
 
+  /** \brief 
+   * @param id (integer)
+   **/
   private function diag_message($id) {
 /*
- * Total list at: http://www.loc.gov/standards/sru/resources/diagnostics-list.html
+ * Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html
  */
     $message = array (
     10 => 'Query syntax error',
-    13 => 'Invalid or unsupported use of parentheses');
+    13 => 'Invalid or unsupported use of parentheses',
+    19 => 'Unsupported relation',
+    46 => 'Unsupported boolean modifier');
 
     return $message[$id];
   }
