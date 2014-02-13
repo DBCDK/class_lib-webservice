@@ -42,8 +42,9 @@ class CQL_parser {
   private $booleans = array('and', 'or', 'not', 'prox');
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
-  private $unsupported_relations = array('==', 'all', 'any', 'encloses', 'within');
-  private $supported_modifiers = array('unit' => array('word'), 'distance' => array('1'));
+  private $unsupported_relations = array('==', '<>', 'all', 'any', 'encloses', 'within');
+  private $supported_modifiers = array('unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
+                                       'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41));
   private $parse_ok = TRUE; // cql parsing went ok
   private $diagnostics; 
 
@@ -170,16 +171,21 @@ class CQL_parser {
       }
       if (!array_key_exists($this->lval, $this->supported_modifiers)) {
         self::add_diagnostic(46, "$this->qi", $this->lval);
-        return $ar;
       }
       $name = $this->lval;
       self::move();
       if (strchr("<>=", $this->look[0])) {
         $rel = $this->look;
+        if (!preg_match($this->supported_modifiers[$name]['symbol'], $rel)) {
+          self::add_diagnostic(40, "$this->qi", $rel);
+        }
         self::move();
         if ($this->look != 's' && $this->look != 'q') {
           self::add_diagnostic(10, "$this->qi");
           return $ar;
+        }
+        if (!preg_match($this->supported_modifiers[$name]['unit'], $this->lval)) {
+          self::add_diagnostic($this->supported_modifiers[$name]['error'], "$this->qi", $this->lval);
         }
         $ar[$name] = array('value' => $this->lval, 'relation' => $rel);
         self::move();
@@ -464,14 +470,16 @@ class CQL_parser {
    * @param id (integer)
    **/
   private function diag_message($id) {
-/*
- * Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html
- */
-    $message = array (
-    10 => 'Query syntax error',
-    13 => 'Invalid or unsupported use of parentheses',
-    19 => 'Unsupported relation',
-    46 => 'Unsupported boolean modifier');
+/* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
+    static $message = 
+      array(10 => 'Query syntax error',
+            13 => 'Invalid or unsupported use of parentheses',
+            19 => 'Unsupported relation',
+            20 => 'Unsupported relation modifier',
+            40 => 'Unsupported proximity relation',
+            41 => 'Unsupported proximity distance',
+            42 => 'Unsupported proximity unit',
+            46 => 'Unsupported boolean modifier');
 
     return $message[$id];
   }
