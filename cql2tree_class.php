@@ -43,8 +43,10 @@ class CQL_parser {
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
   private $unsupported_relations = array('==', '<>', 'all', 'any', 'encloses', 'within');
-  private $supported_modifiers = array('unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
-                                       'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41));
+  private $supported_modifiers = array(
+              'prox' => array(
+                 'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
+                 'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
   private $parse_ok = TRUE; // cql parsing went ok
   private $diagnostics; 
 
@@ -155,13 +157,14 @@ class CQL_parser {
       $this->val = substr($this->qs, $start_q, $this->qi - $start_q);
       $this->lval = strtolower($this->val);
     }
-    echo 'val: ' . $this->val . ' lval: ' . $this->lval . ' look: ' . $this->look . PHP_EOL;
+    self::dump_state('move');
   }
   
   /** \brief 
    * @param context (string)
+   * @param target (string) the boolean or relation being modified
    **/
-  private function modifiers($context) {
+  private function modifiers($context, $target) {
     $ar = array();
     while ($this->look == '/') {
       self::move();
@@ -169,14 +172,16 @@ class CQL_parser {
         self::add_diagnostic(10, "$this->qi");
         return $ar;
       }
-      if (!array_key_exists($this->lval, $this->supported_modifiers)) {
-        self::add_diagnostic(46, "$this->qi", $this->lval);
-      }
       $name = $this->lval;
+      if (empty($this->supported_modifiers[$target][$name])) {
+        self::add_diagnostic(46, "$this->qi", $name);
+        return $ar;
+      }
+      $tgt_modifiers = &$this->supported_modifiers[$target][$name];
       self::move();
       if (strchr("<>=", $this->look[0])) {
         $rel = $this->look;
-        if (!preg_match($this->supported_modifiers[$name]['symbol'], $rel)) {
+        if (!preg_match($tgt_modifiers['symbol'], $rel)) {
           self::add_diagnostic(40, "$this->qi", $rel);
         }
         self::move();
@@ -184,8 +189,8 @@ class CQL_parser {
           self::add_diagnostic(10, "$this->qi");
           return $ar;
         }
-        if (!preg_match($this->supported_modifiers[$name]['unit'], $this->lval)) {
-          self::add_diagnostic($this->supported_modifiers[$name]['error'], "$this->qi", $this->lval);
+        if (!preg_match($tgt_modifiers['unit'], $this->lval)) {
+          self::add_diagnostic($tgt_modifiers['error'], "$this->qi", $this->lval);
         }
         $ar[$name] = array('value' => $this->lval, 'relation' => $rel);
         self::move();
@@ -204,12 +209,14 @@ class CQL_parser {
    **/
   private function cqlQuery($field, $relation, $context, $modifiers) {
     $left = self::searchClause($field, $relation, $context, $modifiers);
+    self::dump_state('cQ');
     while ($this->look == 's' && (in_array($this->lval, $this->booleans))) {
       $op = $this->lval;
       self::move();
-      $mod = self::modifiers($context);
+      $mod = self::modifiers($context, $op);
       $right = self::searchClause($field, $relation, $context, $modifiers);
       $left = array('type' => 'boolean', 'op' => $op, 'modifiers' => $mod, 'left' => $left, 'right' => $right);
+      self::dump_state('cQw');
     }
     return $left;
   }
@@ -242,7 +249,7 @@ class CQL_parser {
         }
         $rel = $this->val; // string relation
         self::move();
-        return self::searchClause($first, $rel, $context, self::modifiers($context));
+        return self::searchClause($first, $rel, $context, self::modifiers($context, $rel));
       }
       elseif (in_array($this->look, $this->implicit_relations)) {
         if (in_array($this->look, $this->unsupported_relations)) {
@@ -250,7 +257,7 @@ class CQL_parser {
         }
         $rel = $this->look; // other relation <, = ,etc
         self::move();
-        return self::searchClause($first, $rel, $context, self::modifiers($context));
+        return self::searchClause($first, $rel, $context, self::modifiers($context, $rel));
       }
       else {
         // it's a search term
@@ -482,6 +489,11 @@ class CQL_parser {
             46 => 'Unsupported boolean modifier');
 
     return $message[$id];
+  }
+
+  private function dump_state($where) {
+    $str = sprintf('%6s:: val: %-8s lval: %-8s look: %-2s qi: %-2s ql: %-2s', $where, $this->val, $this->lval, $this->look, $this->qi, $this->ql);
+    echo $str . PHP_EOL;
   }
 }
 
