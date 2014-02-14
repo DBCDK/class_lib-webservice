@@ -39,6 +39,9 @@ class SolrQuery extends tokenizer {
   var $phrase_index = array();
   var $best_match = FALSE;
   var $operator_translate = array();
+  var $cqlns = array();
+// TODO find a way to determine the content of filter_fields
+  var $filter_fields = array('term.type');
 
   public function __construct($cql_xml, $config='', $language='') {
     $this->dom = new DomDocument();
@@ -54,11 +57,12 @@ class SolrQuery extends tokenizer {
     $this->set_indexes_and_aliases();
     $this->ignore = array('/^prox\//');
 
-    $this->interval = array('<' => '[* TO %s]', 
+    $this->interval = array('=' => '%s',
+                            '<' => '[* TO %s]', 
                             '<=' => '[* TO %s]', 
                             '>' => '[%s TO *]', 
                             '>=' => '[%s TO *]');
-    $this->adjust_interval = array('<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
+    $this->adjust_interval = array('=' => 0, '<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
 
     if ($config) {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
@@ -91,14 +95,27 @@ class SolrQuery extends tokenizer {
     //if (DEVELOP) die();
  
     if (TREE) {
+      print_r($edismax);
       require_once('cql2tree_class.php');
-      $parser = new cql_parser();
-      //$parser->define_prefix('dkcclterm', 'DKCCLTERM', $dkcclterm_f_uri);
+      $parser = new CQL_parser();
+      $parser->define_prefix_namespaces($this->cqlns);
       $parser->parse($query);
       $tree = $parser->result();
-      $diag = $parser->get_diagnostics();
-      var_dump($tree);
-      var_dump($diag);
+      $diags = $parser->get_diagnostics();
+      if (TRUE) {
+        print_r($tree);
+        print_r($diags);
+      }
+      if ($diags) {
+        $edismax_r['error'] = $diags;;
+      }
+      else {
+        $trees = self::split_tree($tree);
+        print_r($trees);
+        $edismax_r['edismax'] = self::trees_2_edismax($trees);
+        $edismax_r['operands'] = count($edismax_r['edismax']['q']) + count($edismax_r['edismax']['fq']);
+        print_r($edismax_r);
+      }
       die();
     }
     return $edismax;
@@ -106,7 +123,7 @@ class SolrQuery extends tokenizer {
 
 
   /** \brief build a boost string
-   * @param boosts boost registers and values
+   * @param boosts (array) boost registers and values
    */
   public function make_boost($boosts) {
     if (is_array($boosts)) {
@@ -120,6 +137,99 @@ class SolrQuery extends tokenizer {
 
   // ------------------------- Private functions below -------------------------------------
 
+  /** \brief convert all cql-trees to edismax-strings
+   * @param trees (array) of trees
+   */
+  private function trees_2_edismax($trees) {
+    $ret = array();
+    foreach ($trees as $tree) {
+      list($type, $edismax) = self::tree_2_edismax($tree);
+      $ret[$type][] = $edismax;
+    }
+    return $ret;
+  }
+
+
+  /** \brief convert on cql-tree to edismax-string
+   * @param trees (array) of trees
+   */
+  private function tree_2_edismax($node, $level = 0) {
+    static $q_type;
+    if ($level == 0) {
+      $q_type = 'fq';
+    }
+    if ($node['type'] == 'boolean') {
+      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . $node['op'] . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
+    }
+    else {
+      if (!self::is_filter_field($node['prefix'], $node['field'])) {
+        $q_type = 'q';
+      }
+      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field']);
+    }
+    return ($level ? $ret : array($q_type, $ret));
+  }
+
+  /** \brief create edismax term query
+   * @param term (string)
+   * @param prefix (string)
+   * @param field (string)
+   */
+  private function make_solr_term($term, $relation, $prefix, $field) {
+    $quote = strpos($term, ' ') ? '"' : '';
+    if ($field && $field <> 'serverChoice') {
+      $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
+      if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
+        if ($quote) {
+          $m_slop = !in_array($prefix, $this->phrase_index) ? '~10' : '';    // TODO set slop depending of $prefix and $field
+        }
+        $m_term = $quote . $term . $quote . $m_slop;
+      }
+    }
+    else {
+      $m_term = $quote . $term . $quote;
+    }
+    return  $m_field . $m_term;
+  }
+
+  /** \brief Detects fields which can go into solrs fq=
+   * @param field (string)
+   */
+  private function make_term_interval($term, $relation, $quot) {
+    if (($interval = $this->interval[$relation]) && ($interval_adjust = $this->adjust_interval[$relation])) {
+      if (is_numeric($term)) {
+        return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
+      }
+      else {
+        $o_len = strlen($term) - 1;
+        return sprintf($interval, $quot . substr($term, 0, $o_len) .  chr(ord(substr($term,$o_len)) + $interval_adjust) . $quot);
+      }
+    }
+    return NULL;
+  }
+
+  /** \brief Detects fields which can go into solrs fq=
+   * @param field (string)
+   */
+  private function is_filter_field($prefix, $field) {
+    return in_array($prefix . '.' . $field, $this->filter_fields);
+  }
+
+
+  /** \brief Split cql tree into several and-trees
+   * @param cql tree
+   * @return array of tree
+   */
+  private function split_tree($tree) {
+    if ($tree['type'] == 'boolean' && $tree['op'] == 'and') {
+      return array_merge(self::split_tree($tree['left']), self::split_tree($tree['right']));
+    }
+    else {
+      return array($tree);
+    }
+    
+  }
+
   /** \brief Get list of registers and their types
    * 
    */
@@ -127,6 +237,9 @@ class SolrQuery extends tokenizer {
     $idx = -1;
     $this->indexes = $this->aliases = array(); 
     foreach ($this->dom->getElementsByTagName('indexInfo') as $info_item) {
+      foreach ($info_item->getElementsByTagName('set') as $set) {
+        $this->cqlns[$set->getAttribute('name')] = $set->getAttribute('identifier');
+      }
       foreach ($info_item->getElementsByTagName('index') as $index_item) {
         if ($map_item = $index_item->getElementsByTagName('map')->item(0)) {
           if (!self::xs_boolean($map_item->getAttribute('hidden')) && $name_item = $map_item->getElementsByTagName('name')->item(0)) {
@@ -140,12 +253,15 @@ class SolrQuery extends tokenizer {
     }
   }
 
+  /** \brief Get list of valid operators
+   * @param str (string)
+   */
   private function xs_boolean($str) {
     return ($str == 1 || $str == 'true');
   }
 
   /** \brief Get list of valid operators
-   * @param 
+   * @param language (string)
    */
   private function set_operators($language) {
     $this->operators = array(); 
