@@ -38,6 +38,7 @@ class CQL_parser {
   private $lval; // lower case of value when string
   private $tree = array();
   private $std_prefixes = array();
+  private $indexes = array();
   private $diags = ''; // diagnostics array to be passed to SRW-response
   private $booleans = array('and', 'or', 'not', 'prox');
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
@@ -75,13 +76,20 @@ class CQL_parser {
   /** \brief 
    * @param query (string)
    **/
+  public function define_indexes($indexes) {
+    $this->indexes = $indexes;
+  }
+
+  /** \brief 
+   * @param query (string)
+   **/
   public function parse($query) {
     $this->qs = $query;
     $this->ql = strlen($query);
     $this->qi = 0;
     $this->look = TRUE;
     self::move();
-    $this->tree = self::cqlQuery("cql.serverChoice", "scr", $this->std_prefixes, array());
+    $this->tree = self::cqlQuery('cql.serverChoice', 'scr', $this->std_prefixes, array());
     if ($this->look != FALSE) 
       self::add_diagnostic(10, "$this->qi");
     
@@ -268,6 +276,17 @@ class CQL_parser {
           $pre = substr($field, 0, $pos);
           $field = substr($field, $pos + 1, 100);
         }
+        if ($alias = $this->indexes[$field][$pre]['alias']) {
+          $slop = $alias['slop'];
+          $pre = $alias['prefix'];
+          $field = $alias['field'];
+        }
+        else {
+          $slop = $this->indexes[$field][$pre]['slop'];
+        }
+        if (empty($this->indexes[$field][$pre])) {
+          self::add_diagnostic(16, "$this->qi", $pre . '.' . $field);
+        }
         $uri = $prefix = '';
         for ($i = 0; $i < sizeof($context); $i++) {
           if ($context[$i]['prefix'] == $pre)  {
@@ -294,6 +313,7 @@ class CQL_parser {
                      'fielduri' => $uri, 
                      'relation' => $relation, 
                      'relationuri' => $reluri, 
+                     'slop' => $slop,
                      'modifiers' => $modifiers, 
                      'term' => $first);
       }
@@ -481,6 +501,7 @@ class CQL_parser {
     static $message = 
       array(10 => 'Query syntax error',
             13 => 'Invalid or unsupported use of parentheses',
+            16 => 'Unsupported index',
             19 => 'Unsupported relation',
             20 => 'Unsupported relation modifier',
             40 => 'Unsupported proximity relation',
@@ -492,6 +513,7 @@ class CQL_parser {
   }
 
   private function dump_state($where) {
+    return;
     $str = sprintf('%6s:: val: %-8s lval: %-8s look: %-2s qi: %-2s ql: %-2s', $where, $this->val, $this->lval, $this->look, $this->qi, $this->ql);
     echo $str . PHP_EOL;
   }

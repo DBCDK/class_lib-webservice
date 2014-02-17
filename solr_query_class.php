@@ -19,284 +19,27 @@
  *
  */
 
-require_once('tokenizer_class.php');
+require_once('cql2tree_class.php');
 require_once('cql2rpn_class.php');
 
 define('DEVELOP', FALSE);
 define('TREE', $_REQUEST['tree']);
 
 
-class SolrQuery extends tokenizer {
+class SolrQuery {
 
-  var $dom;
-  var $map;
+  var $cql_dom;
   // full set of escapes as seen in the solr-doc. We use those who so far has been verified
   //var $solr_escapes = array('+','-','&&','||','!','(',')','{','}','[',']','^','"','~','*','?',':','\\');
   var $solr_escapes = array('+', '-', ':', '!', '"');
   var $solr_ignores = array();         // this should be kept empty
-  var $solr_escapes_from = array();
-  var $solr_escapes_to = array();
   var $phrase_index = array();
   var $best_match = FALSE;
   var $operator_translate = array();
+  var $indexes = array();
+  var $default_slop = 999;
   var $cqlns = array();
-// TODO find a way to determine the content of filter_fields
-  var $filter_fields = array('term.type');
-
-  public function __construct($cql_xml, $config='', $language='') {
-    $this->dom = new DomDocument();
-    $this->dom->Load($cql_xml);
-
-    $this->best_match = ($language == 'bestMatch');
-    if ($language == 'cqldan') {
-      $this->operator_translate = array('OG' => 'AND', 'ELLER' => 'OR', 'IKKE' => 'NOT');
-    }
-    $this->case_insensitive = TRUE;
-    $this->split_expression = '/(<=|>=|[ <>=()[\]])/';
-    $this->set_operators($language);
-    $this->set_indexes_and_aliases();
-    $this->ignore = array('/^prox\//');
-
-    $this->interval = array('=' => '%s',
-                            '<' => '[* TO %s]', 
-                            '<=' => '[* TO %s]', 
-                            '>' => '[%s TO *]', 
-                            '>=' => '[%s TO *]');
-    $this->adjust_interval = array('=' => 0, '<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
-
-    if ($config) {
-      $this->phrase_index = $config->get_value('phrase_index', 'setup');
-    }
-
-    foreach ($this->solr_escapes as $ch) {
-      $this->solr_escapes_from[] = $ch;
-      $this->solr_escapes_to[] = '\\' . $ch;
-    }
-    foreach ($this->solr_ignores as $ch) {
-      $this->solr_escapes_from[] = $ch;
-      $this->solr_escapes_to[] = '';
-    }
-  }
-
-
-  /** \brief Parse a cql-query and build the solr edismax search string
-   * 
-   */
-  public function cql_2_edismax($query) {
-    try {
-      $tokens = $this->tokenize($query, $this->operator_translate);
-      if (DEVELOP) { echo 'Query: ' . $query . PHP_EOL . print_r($tokens, TRUE) . PHP_EOL; }
-      $rpn = Cql2Rpn::parse_tokens($tokens);
-      $edismax = self::rpn_2_edismax($rpn);
-    } catch (Exception $e) {
-      $edismax = array('error' => $e->getMessage());
-    }
-    if (DEVELOP) print_r($edismax);
-    //if (DEVELOP) die();
- 
-    if (TREE) {
-      print_r($edismax);
-      require_once('cql2tree_class.php');
-      $parser = new CQL_parser();
-      $parser->define_prefix_namespaces($this->cqlns);
-      $parser->parse($query);
-      $tree = $parser->result();
-      $diags = $parser->get_diagnostics();
-      if (TRUE) {
-        print_r($tree);
-        print_r($diags);
-      }
-      if ($diags) {
-        $edismax_r['error'] = $diags;;
-      }
-      else {
-        $trees = self::split_tree($tree);
-        print_r($trees);
-        $edismax_r['edismax'] = self::trees_2_edismax($trees);
-        $edismax_r['operands'] = count($edismax_r['edismax']['q']) + count($edismax_r['edismax']['fq']);
-        print_r($edismax_r);
-      }
-      die();
-    }
-    return $edismax;
-  }
-
-
-  /** \brief build a boost string
-   * @param boosts (array) boost registers and values
-   */
-  public function make_boost($boosts) {
-    if (is_array($boosts)) {
-      foreach ($boosts as $idx => $val) {
-        if ($idx && $val)
-          $ret .= ($ret ? ' ' : '') . $idx . '^' . $val;
-      }
-    }
-    return $ret;
-  }
-
-  // ------------------------- Private functions below -------------------------------------
-
-  /** \brief convert all cql-trees to edismax-strings
-   * @param trees (array) of trees
-   */
-  private function trees_2_edismax($trees) {
-    $ret = array();
-    foreach ($trees as $tree) {
-      list($type, $edismax) = self::tree_2_edismax($tree);
-      $ret[$type][] = $edismax;
-    }
-    return $ret;
-  }
-
-
-  /** \brief convert on cql-tree to edismax-string
-   * @param trees (array) of trees
-   */
-  private function tree_2_edismax($node, $level = 0) {
-    static $q_type;
-    if ($level == 0) {
-      $q_type = 'fq';
-    }
-    if ($node['type'] == 'boolean') {
-      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . $node['op'] . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
-    }
-    else {
-      if (!self::is_filter_field($node['prefix'], $node['field'])) {
-        $q_type = 'q';
-      }
-      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field']);
-    }
-    return ($level ? $ret : array($q_type, $ret));
-  }
-
-  /** \brief create edismax term query
-   * @param term (string)
-   * @param prefix (string)
-   * @param field (string)
-   */
-  private function make_solr_term($term, $relation, $prefix, $field) {
-    $quote = strpos($term, ' ') ? '"' : '';
-    if ($field && $field <> 'serverChoice') {
-      $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
-      if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
-        if ($quote) {
-          $m_slop = !in_array($prefix, $this->phrase_index) ? '~10' : '';    // TODO set slop depending of $prefix and $field
-        }
-        $m_term = $quote . $term . $quote . $m_slop;
-      }
-    }
-    else {
-      $m_term = $quote . $term . $quote;
-    }
-    return  $m_field . $m_term;
-  }
-
-  /** \brief Detects fields which can go into solrs fq=
-   * @param field (string)
-   */
-  private function make_term_interval($term, $relation, $quot) {
-    if (($interval = $this->interval[$relation]) && ($interval_adjust = $this->adjust_interval[$relation])) {
-      if (is_numeric($term)) {
-        return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
-      }
-      else {
-        $o_len = strlen($term) - 1;
-        return sprintf($interval, $quot . substr($term, 0, $o_len) .  chr(ord(substr($term,$o_len)) + $interval_adjust) . $quot);
-      }
-    }
-    return NULL;
-  }
-
-  /** \brief Detects fields which can go into solrs fq=
-   * @param field (string)
-   */
-  private function is_filter_field($prefix, $field) {
-    return in_array($prefix . '.' . $field, $this->filter_fields);
-  }
-
-
-  /** \brief Split cql tree into several and-trees
-   * @param cql tree
-   * @return array of tree
-   */
-  private function split_tree($tree) {
-    if ($tree['type'] == 'boolean' && $tree['op'] == 'and') {
-      return array_merge(self::split_tree($tree['left']), self::split_tree($tree['right']));
-    }
-    else {
-      return array($tree);
-    }
-    
-  }
-
-  /** \brief Get list of registers and their types
-   * 
-   */
-  private function set_indexes_and_aliases() {
-    $idx = -1;
-    $this->indexes = $this->aliases = array(); 
-    foreach ($this->dom->getElementsByTagName('indexInfo') as $info_item) {
-      foreach ($info_item->getElementsByTagName('set') as $set) {
-        $this->cqlns[$set->getAttribute('name')] = $set->getAttribute('identifier');
-      }
-      foreach ($info_item->getElementsByTagName('index') as $index_item) {
-        if ($map_item = $index_item->getElementsByTagName('map')->item(0)) {
-          if (!self::xs_boolean($map_item->getAttribute('hidden')) && $name_item = $map_item->getElementsByTagName('name')->item(0)) {
-            $this->indexes[++$idx] = $name_item->getAttribute('set').'.'.$name_item->nodeValue;
-            foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
-              $this->aliases[$alias_item->nodeValue] = $this->indexes[$idx];
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /** \brief Get list of valid operators
-   * @param str (string)
-   */
-  private function xs_boolean($str) {
-    return ($str == 1 || $str == 'true');
-  }
-
-  /** \brief Get list of valid operators
-   * @param language (string)
-   */
-  private function set_operators($language) {
-    $this->operators = array(); 
-    $boolean_lingo = ($language == 'cqldan' ? 'dan' : 'eng');
-    foreach ($this->dom->getElementsByTagName('supports') as $support_item) {
-      $type = $support_item->getAttribute('type');
-      if (in_array($type, array('relation', 'booleanChar', $boolean_lingo . 'BooleanModifier'))) {
-        $this->operators[] = $support_item->nodeValue;
-      }
-    }
-  }
-
-  /** \brief Makes an edismax query from the RPN-stack
-   */
-  private function rpn_2_edismax($rpn) {
-    $ret = array();
-    $folded_rpn = self::fold_operands($rpn);
-    $ret['operands'] = 0;
-    foreach ($folded_rpn as $r) {
-      if ($r->type == OPERAND) {
-        $ret['operands']++;
-      }
-    }
-    $ret['edismax'] = self::folded_2_edismax($folded_rpn);
-
-    if ($this->best_match) {
-      $ret['best_match'] = self::remove_bool_and_expand_indexes($folded_rpn);
-    }
-    return $ret;
-  }
-
-  /** \brief folds OPERANDs bound to indexes depending on INDEX-type
-   */
-  private function fold_operands($rpn) {
-    $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
+  var $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
       '150005' => '150005-artikel',
       '150008' => '150008-academic',
       '150012' => '150012-leksikon',
@@ -326,113 +69,239 @@ class SolrQuery extends tokenizer {
       '870971' => '870971-avis',
       '870973' => '870973-anmeld',
       '870976' => '870976-anmeld');
-    $intervals = array('<' => '[* TO %s]', 
-                      '<=' => '[* TO %s]', 
-                      '>' => '[%s TO *]', 
-                      '>=' => '[%s TO *]');
-    $adjust_intervals = array('<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
-    $curr_index = '';
-    $edismax = '';
-    $index_stack = array();
-    $folded = array();
-    $operand->type = OPERAND;
-    if (DEVELOP) { echo 'fold_op: ' . print_r($rpn, TRUE) . PHP_EOL; }
-    foreach ($rpn as $r) {
-      if (DEVELOP) { echo $r->type . ' ' . $r->value . ' ' . print_r($operand, TRUE) . PHP_EOL; }
-      switch ($r->type) {
-        case INDEX:
-          $curr_index = $r->value;
-          break;
-        case OPERAND:
-          if ($curr_index == 'rec.id' && preg_match("/^([1-9][0-9]{5})(:.*)$/", $r->value, $match)) {
-            $r->value = (array_key_exists($match[1], $v2_v3) ? $v2_v3[$match[1]] : '870970-basis') . $match[2];
-          }
-          $r->value = str_replace($this->solr_escapes_from, $this->solr_escapes_to, $r->value);
-          if ($curr_index) {
-            $index_stack[] = $r;
-          }
-          else {
-            $folded[] = $r;
-          }
-          break;
-        case OPERATOR:
-          switch ($r->value) {
-            case '<':
-            case '>':
-            case '<=':
-            case '>=':
-              if (empty($curr_index)) {
-                throw new Exception('CQL-4: Unknown register');
-              }
-              $interval = $intervals[$r->value];
-              $interval_adjust = $adjust_intervals[$r->value];
-              $imploded = self::implode_stack($index_stack);
-              if (is_numeric($imploded)) {
-                $operand->value = $curr_index . ':' . 
-                                  sprintf($interval, intval($imploded) + $interval_adjust);
-              }
-              else {
-                $o_len = strlen($imploded) - 1;
-                $operand->value = $curr_index . ':' . 
-                                  sprintf($interval, substr($imploded, 0, $o_len) . 
-                                                     chr(ord(substr($imploded,$o_len)) + $interval_adjust));
-              }
-              if ($operand->value) {
-                $folded[] = $operand;
-              }
-              $curr_index = '';
-              $index_stack = array();
-              break;
-            case '=':
-              if (empty($curr_index)) {
-                throw new Exception('CQL-4: Unknown register');
-              }
-              $operand->value = self::implode_indexed_stack($index_stack, $curr_index);
-              if (DEVELOP) { echo 'Imploded: ' . $operand->value . PHP_EOL; }
-              if ($operand->value) {
-                $folded[] = $operand;
-              }
-              $curr_index = '';
-              $index_stack = array();
-              break;
-            case 'ADJ':
-              if (empty($curr_index)) {
-                throw new Exception('CQL-4: Unknown register');
-              }
-              $imploded = self::implode_stack($index_stack);
-              $operand->value = $curr_index . ':"' . $imploded . '"~10';
-              if ($operand->value) {
-                $folded[] = $operand;
-              }
-              $curr_index = '';
-              $index_stack = array();
-              break;
-            default:
-              if ($curr_index) {
-                $index_stack[] = $r;
-              }
-              else {
-                if (isset($operand->value) && $operand->value) {
-                  $folded[] = $operand;
-                }
-                $folded[] = $r;
-              }
-          }
-          unset($operand);
-          $operand->type = OPERAND;
-          break;
-        default:
-          throw new Exception('CQL-5: Internal error: Unknown rpn-element-type');
-      }
-      if (DEVELOP && ($r->type == OPERATOR)) { echo 'folded: ' . print_r($folded, TRUE) . PHP_EOL; }
+
+  public function __construct($cql_xml, $config='', $language='') {
+    $this->cql_dom = new DomDocument();
+    $this->cql_dom->Load($cql_xml);
+
+    $this->best_match = ($language == 'bestMatch');
+    if ($language == 'cqldan') {
+      $this->operator_translate = array('OG' => 'AND', 'ELLER' => 'OR', 'IKKE' => 'NOT');
     }
-    if (isset($operand->value) && $operand->value) {
-      $folded[] = $operand;
+    $this->set_operators($language);
+    $this->set_cqlns();
+    $this->set_indexes();
+    $this->ignore = array('/^prox\//');
+
+    $this->interval = array('=' => '%s',
+                            '<' => '[* TO %s]', 
+                            '<=' => '[* TO %s]', 
+                            '>' => '[%s TO *]', 
+                            '>=' => '[%s TO *]');
+    $this->adjust_interval = array('=' => 0, '<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
+
+    if ($config) {
+      $this->phrase_index = $config->get_value('phrase_index', 'setup');
     }
-    if (DEVELOP) { echo 'rpn: ' . print_r($rpn, TRUE) . 'folded: ' . print_r($folded, TRUE); }
-    return $folded;
+
   }
 
+
+  /** \brief Parse a cql-query and build the solr edismax search string
+   * 
+   */
+  public function cql_2_edismax($query) {
+    $parser = new CQL_parser();
+    $parser->define_prefix_namespaces($this->cqlns);
+    $parser->define_indexes($this->indexes);
+    $parser->parse($query);
+    $tree = $parser->result();
+    $diags = $parser->get_diagnostics();
+    if ($diags) {
+      $ret['error'] = $diags;;
+    }
+    else {
+      $trees = self::split_tree($tree);
+      $ret['edismax'] = self::trees_2_edismax($trees);
+      $ret['operands'] = count($ret['edismax']['q']) + count($ret['edismax']['fq']);
+    }
+//var_dump($ret); die();
+    return $ret;
+  }
+
+
+  /** \brief build a boost string
+   * @param boosts (array) boost registers and values
+   */
+  public function make_boost($boosts) {
+    if (is_array($boosts)) {
+      foreach ($boosts as $idx => $val) {
+        if ($idx && $val)
+          $ret .= ($ret ? ' ' : '') . $idx . '^' . $val;
+      }
+    }
+    return $ret;
+  }
+
+  // ------------------------- Private functions below -------------------------------------
+
+  /** \brief convert all cql-trees to edismax-strings
+   * @param trees (array) of trees
+   */
+  private function trees_2_edismax($trees) {
+        $ret = array('q' => array(), 'fq' => array());
+    foreach ($trees as $tree) {
+      list($type, $edismax) = self::tree_2_edismax($tree);
+      $ret[$type][] = $edismax;
+    }
+    return $ret;
+  }
+
+
+  /** \brief convert on cql-tree to edismax-string
+   * @param trees (array) of trees
+   */
+  private function tree_2_edismax($node, $level = 0) {
+    static $q_type;
+    if ($level == 0) {
+      $q_type = 'fq';
+    }
+    if ($node['type'] == 'boolean') {
+      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . $node['op'] . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
+    }
+    else {
+      if (!self::is_filter_field($node['prefix'], $node['field'])) {
+        $q_type = 'q';
+      }
+      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
+    }
+    return ($level ? $ret : array($q_type, $ret));
+  }
+
+  /** \brief create edismax term query
+   * @param term (string)
+   * @param prefix (string)
+   * @param field (string)
+   */
+  private function make_solr_term($term, $relation, $prefix, $field, $slop) {
+    if ($prefix == 'rec' && $field == 'id' && preg_match("/^([1-9][0-9]{5})(:.*)$/", $term, $match)) {
+      $term = (array_key_exists($match[1], $this->v2_v3) ? $this->v2_v3[$match[1]] : '870970-basis') . $match[2];
+    }
+    $quote = strpos($term, ' ') ? '"' : '';
+    if ($field && ($field <> 'serverChoice')) {
+      $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
+      if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
+        if ($quote) {
+          $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop: '';
+        }
+        $m_term = $quote . self::escape_solr_term($term) . $quote . $m_slop;
+      }
+    }
+    else {
+      $m_term = $quote . self::escape_solr_term($term) . $quote;
+    }
+    return  $m_field . $m_term;
+  }
+
+  /** \brief Escape character and remove characters to be ignored
+   * @param field (string)
+   */
+  private function escape_solr_term($term) {
+  static $solr_escapes_from;
+  static $solr_escapes_to;
+    if (!isset($solr_escapes_from)) {
+      foreach ($this->solr_escapes as $ch) {
+        $solr_escapes_from[] = $ch;
+        $solr_escapes_to[] = '\\' . $ch;
+      }
+      foreach ($this->solr_ignores as $ch) {
+        $solr_escapes_from[] = $ch;
+        $solr_escapes_to[] = '';
+      }
+    }
+    return str_replace($solr_escapes_from, $solr_escapes_to, $term);
+  }
+
+  /** \brief Detects fields which can go into solrs fq=
+   * @param field (string)
+   */
+  private function make_term_interval($term, $relation, $quot) {
+    if (($interval = $this->interval[$relation]) && ($interval_adjust = $this->adjust_interval[$relation])) {
+      if (is_numeric($term)) {
+        return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
+      }
+      else {
+        $o_len = strlen($term) - 1;
+        return sprintf($interval, $quot . substr($term, 0, $o_len) .  chr(ord(substr($term,$o_len)) + $interval_adjust) . $quot);
+      }
+    }
+    return NULL;
+  }
+
+  /** \brief Detects fields which can go into solrs fq=
+   * @param field (string)
+   */
+  private function is_filter_field($prefix, $field) {
+    return $this->indexes[$field][$prefix]['filter'];
+  }
+
+
+  /** \brief Split cql tree into several and-trees
+   * @param cql tree
+   * @return array of tree
+   */
+  private function split_tree($tree) {
+    if ($tree['type'] == 'boolean' && $tree['op'] == 'and') {
+      return array_merge(self::split_tree($tree['left']), self::split_tree($tree['right']));
+    }
+    else {
+      return array($tree);
+    }
+    
+  }
+
+  private function set_cqlns() {
+    foreach ($this->cql_dom->getElementsByTagName('indexInfo') as $info_item) {
+      foreach ($info_item->getElementsByTagName('set') as $set) {
+        $this->cqlns[$set->getAttribute('name')] = $set->getAttribute('identifier');
+      }
+    }
+  }
+  private function set_indexes() {
+    foreach ($this->cql_dom->getElementsByTagName('indexInfo') as $info_item) {
+      foreach ($info_item->getElementsByTagName('index') as $index_item) {
+        if ($map_item = $index_item->getElementsByTagName('map')->item(0)) {
+          if (!self::xs_boolean($map_item->getAttribute('hidden')) && $name_item = $map_item->getElementsByTagName('name')->item(0)) {
+            $filter = self::xs_boolean($name_item->getAttribute('filter'));
+            if (NULL == ($slop = $name_item->getAttribute('slop'))) {
+              $slop = $this->default_slop;
+            }
+            $this->indexes[$name_item->nodeValue][$name_item->getAttribute('set')] = array('filter' => $filter, 'slop' => $slop);
+            foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
+              if (NULL == ($slop = $alias_item->getAttribute('slop'))) {
+                $slop = $this->default_slop;
+              }
+              $this->indexes[$alias_item->nodeValue][$alias_item->getAttribute('set')]['alias'] = 
+                     array('slop' => $slop,
+                           'prefix' => $name_item->getAttribute('set'), 
+                           'field' => $name_item->nodeValue);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /** \brief Get list of valid operators
+   * @param str (string)
+   */
+  private function xs_boolean($str) {
+    return ($str == 1 || $str == 'true');
+  }
+
+  /** \brief Get list of valid operators
+   * @param language (string)
+   */
+  private function set_operators($language) {
+    $this->operators = array(); 
+    $boolean_lingo = ($language == 'cqldan' ? 'dan' : 'eng');
+    foreach ($this->cql_dom->getElementsByTagName('supports') as $support_item) {
+      $type = $support_item->getAttribute('type');
+      if (in_array($type, array('relation', 'booleanChar', $boolean_lingo . 'BooleanModifier'))) {
+        $this->operators[] = $support_item->nodeValue;
+      }
+    }
+  }
 
   /** \brief
    */
@@ -471,90 +340,5 @@ class SolrQuery extends tokenizer {
     return $terms;
   }
 
-  /** \brief Unstacks and set solr-syntax depending on index-type
-   */
-  private function implode_indexed_stack($stack, $index, $adjacency = '') {
-    list($idx_type) = explode('.', $index);
-    if (in_array($idx_type, $this->phrase_index)) {
-      return $index . ':"' . self::implode_stack($stack) . '"' . $adjacency;
-    }
-    elseif ($this->best_match) {
-      return $index . ':(' . self::implode_stack($stack) . ')' . $adjacency;
-    }
-    else {
-      return $index . ':(' . self::implode_stack($stack, 'AND') . ')' . $adjacency;
-    }
-  }
-
-  /** \brief Unstacks and set/remove operator between operands
-   */
-  private function implode_stack($stack, $default_op = '') {
-    $ret = '';
-    $st = array();
-    if ($default_op) {
-      $default_op = ' ' . trim($default_op) . ' ';
-    }
-    else {
-      $default_op = ' ';
-    }
-    foreach ($stack as $s) {
-      if ($s->type == OPERATOR) {
-        if ($s->value <> 'NO_OP') {
-          $ret .= $st[count($st)-2] . ' ' . $s->value . ' ' . $st[count($st)-1];
-          unset($st[count($st)-1]);
-          unset($st[count($st)-1]);
-        }
-      }
-      else {
-        $st[count($st)] = $s->value;
-      }
-    }
-    foreach ($st as $s) {
-      $ret .= (!empty($ret) ? $default_op : '') . $s;
-    }
-    return $ret;
-  }
-
-  /** \brief Unstack folded stack and produce solr-search
-   *         If bestMatch remove operators (for functionality) and parenthesis (for speed)
-   */
-  private function folded_2_edismax($folded) {
-    if (DEVELOP) {
-      for ($i = count($folded) - 1; $i; $i--) {
-        echo $i . ' ' . $folded[$i]->value . PHP_EOL;
-      }
-    }
-    $stack = $folded;
-    $edismax = self::folded_unstack($stack);
-    if (substr($edismax, 0, 1) == '(' && substr($edismax, -1) == ')') {
-      $edismax = substr($edismax, 1, -1);
-    }
-    if (DEVELOP) { echo 'ed 22: ' . $edismax . PHP_EOL; }
-    return $edismax;
-  }
-
-  private function folded_unstack(&$stack) {
-    if ($stack) {
-      $f = array_pop($stack);
-      if ($f->type == OPERATOR) {
-        $op = self::set_operator($f->value);
-        if (DEVELOP) { echo 'operator at: ' . $pos . PHP_EOL; }
-        $term1 = self::folded_unstack($stack);
-        $term2 = self::folded_unstack($stack);
-        return '(' . $term2 . ' ' . $op . ' ' . $term1 . ')';
-      }
-      else {
-        if (DEVELOP) { echo 'other at: ' . $pos . PHP_EOL; }
-        return $f->value;
-      }
-    }
-  }
-
-  private function set_operator($op) {
-    if ($this->best_match) { return ''; }
-    return ($op == 'NO_OP' ? 'AND' : $op);
-  }
-
 }
-
 
