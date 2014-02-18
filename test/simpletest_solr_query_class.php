@@ -106,14 +106,14 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_complex() {
-    $tests = array('facet.facet="karen blixen" AND term.term=bog' => 'facet.facet:"karen blixen" and term.term:(bog)');
+    $tests = array('facet.facet="karen blixen" AND term.term=bog' => 'facet.facet:"karen blixen" and term.term:bog');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
   }
 
   function get_edismax($cql) {
-    $help = $this->c2s->cql_2_edismax($cql);
+    $help = $this->c2s->parse($cql);
 //var_dump($help);
     if (isset($help['error'])) {
       return $help['error'][0]['no'];
