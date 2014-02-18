@@ -41,6 +41,8 @@ class CQL_parser {
   private $indexes = array();
   private $diags = ''; // diagnostics array to be passed to SRW-response
   private $booleans = array('and', 'or', 'not', 'prox');
+  private $unsupported_booleans = array('prox');
+  private $boolean_translate = array();
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
   private $unsupported_relations = array('==', '<>', 'all', 'any', 'encloses', 'within');
@@ -53,10 +55,24 @@ class CQL_parser {
 
   public function __construct() { }
   
+  /** \brief for supporting national versions of and, or, not
+   * @param boolean (array)
+   **/
+  public function set_boolean_translate($booleans) {
+    if (is_array($booleans)) {
+      foreach ($booleans as $alt => $bool) {
+        if (in_array($bool, $this->booleans)) {
+          $this->boolean_translate[$alt] = $bool;
+          $this->booleans[] = $alt;
+        }
+      }
+    }
+  }
+
   /** \brief 
    * @param namespaces (array)
    **/
-  public function define_prefix_namespaces($namespaces) {
+  public function set_prefix_namespaces($namespaces) {
     if (is_array($namespaces)) {
       foreach ($namespaces as $prefix => $uri) {
         self::define_prefix($prefix, $prefix, $uri);
@@ -76,7 +92,7 @@ class CQL_parser {
   /** \brief 
    * @param query (string)
    **/
-  public function define_indexes($indexes) {
+  public function set_indexes($indexes) {
     $this->indexes = $indexes;
   }
 
@@ -219,6 +235,12 @@ class CQL_parser {
     $left = self::searchClause($field, $relation, $context, $modifiers);
     self::dump_state('cQ');
     while ($this->look == 's' && (in_array($this->lval, $this->booleans))) {
+      if ($help = $this->boolean_translate[$this->lval]) {
+        $this->lval = $help;
+      }
+      if (in_array($this->lval, $this->unsupported_booleans)) {
+        self::add_diagnostic(37, "$this->qi", $this->lval);
+      }
       $op = $this->lval;
       self::move();
       $mod = self::modifiers($context, $op);
@@ -504,6 +526,7 @@ class CQL_parser {
             16 => 'Unsupported index',
             19 => 'Unsupported relation',
             20 => 'Unsupported relation modifier',
+            37 => 'Unsupported boolean operator',
             40 => 'Unsupported proximity relation',
             41 => 'Unsupported proximity distance',
             42 => 'Unsupported proximity unit',
