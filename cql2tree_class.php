@@ -2,8 +2,6 @@
 /*
    Copyright (C) 2004 Index Data Aps, www.indexdata.dk
 
-   Parts Copyright © 2013 Dansk Bibliotekscenter a/s, www.dbc.dk
-
    This file is part of SRW/PHP
 
    This program is free software; you can redistribute it and/or modify
@@ -20,6 +18,24 @@
    it by writing to the Free Software Foundation, Inc., 59 Temple
    Place - Suite 330, Boston, MA 02111-1307, USA.
 
+
+   Parts Copyright © 2014 Dansk Bibliotekscenter a/s, www.dbc.dk
+
+   This file is part of Open Library System.
+   Tempovej 7-11, DK-2750 Ballerup, Denmark. CVR: 15149043
+  
+   Open Library System is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+  
+   Open Library System is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+  
+   You should have received a copy of the GNU Affero General Public License
+   along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
@@ -135,7 +151,7 @@ class CQL_parser {
 
   /* -------------------------------------------------------------------------------- */
 
-  /** \brief 
+  /** \brief get next token by setting class vars qi, look, val and lval
    * 
    **/
   private function move() {
