@@ -355,13 +355,18 @@ abstract class webServiceServer {
   *  If all tests in a given set fails, the corresponding error will be displayed
   */
   private function HowRU() {
-    $curl = new curl();
-    $curl->set_option(CURLOPT_POST, 1);
     $tests = $this->config->get_value('test', 'howru');
     if ($tests) {
+      $curl = new curl();
+      $curl->set_option(CURLOPT_POST, 1);
       $reg_matchs = $this->config->get_value('preg_match', 'howru');
       $reg_errors = $this->config->get_value('error', 'howru');
-      $url = $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+      if (!$server_name = $this->config->get_value('server_name', 'howru')) {
+         if (!$server_name = $_SERVER['SERVER_NAME']) {
+           $server_name = $_SERVER['HTTP_HOST'];
+         }
+      }
+      $url = $server_name. $_SERVER['PHP_SELF'];
       if ($_SERVER['HTTPS'] == 'on') $url = 'https://' . $url;
       foreach ($tests as $i_test => $test) {
         if (is_array($test)) {
