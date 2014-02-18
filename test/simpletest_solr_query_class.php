@@ -61,7 +61,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'phrase.phrase=en to' => '10',
                    'phrase.phrase=en AND to' => 'phrase.phrase:en and to',
                    'dkcclterm.cclterm=en' => 'dkcclterm.cclterm:en',
-                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~999',
+                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"',
                    'dkcclterm.cclterm=en AND to' => 'dkcclterm.cclterm:en and to',
                    'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en or to)',
                    'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en or dkcclterm.cclterm:to)',
@@ -91,14 +91,13 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
-/*
   function test_interval() {
     $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO em]',
                    'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:[eo TO *]',
                    'dkcclphrase.cclphrase <= en' => 'dkcclphrase.cclphrase:[* TO en]',
                    'dkcclphrase.cclphrase >= en' => 'dkcclphrase.cclphrase:[en TO *]',
                    'dkcclterm.cclterm < en ' => 'dkcclterm.cclterm:[* TO em]',
-                   'dkcclterm.cclterm > en' => 'dkcclterm.cclterm:[en TO *]',
+                   'dkcclterm.cclterm > en' => 'dkcclterm.cclterm:[eo TO *]',
                    'dkcclterm.cclterm <= en' => 'dkcclterm.cclterm:[* TO en]',
                    'dkcclterm.cclterm >= en' => 'dkcclterm.cclterm:[en TO *]');
     foreach ($tests as $send => $recieve) {
@@ -107,12 +106,11 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_complex() {
-    $tests = array('facet.facet=karen blixen AND term.term=bog' => 'facet.facet:"karen blixen" AND term.term:(bog)');
+    $tests = array('facet.facet="karen blixen" AND term.term=bog' => 'facet.facet:"karen blixen" and term.term:(bog)');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
   }
-*/
 
   function get_edismax($cql) {
     $help = $this->c2s->cql_2_edismax($cql);
