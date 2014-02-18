@@ -38,7 +38,7 @@ class SolrQuery {
   var $operator_translate = array();
   var $indexes = array();
   var $default_slop = 999;
-  var $cqlns = array();
+  var $cqlns = array();  // namespaces for the search-fields
   var $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
       '150005' => '150005-artikel',
       '150008' => '150008-academic',
@@ -100,7 +100,7 @@ class SolrQuery {
   /** \brief Parse a cql-query and build the solr edismax search string
    * 
    */
-  public function cql_2_edismax($query) {
+  public function parse($query) {
     $parser = new CQL_parser();
     $parser->define_prefix_namespaces($this->cqlns);
     $parser->define_indexes($this->indexes);
@@ -113,9 +113,9 @@ class SolrQuery {
     else {
       $trees = self::split_tree($tree);
       $ret['edismax'] = self::trees_2_edismax($trees);
+      $ret['best_match'] = self::trees_2_bestmatch($trees);
       $ret['operands'] = count($ret['edismax']['q']) + count($ret['edismax']['fq']);
     }
-//var_dump($ret); die();
     return $ret;
   }
 
@@ -139,7 +139,7 @@ class SolrQuery {
    * @param trees (array) of trees
    */
   private function trees_2_edismax($trees) {
-        $ret = array('q' => array(), 'fq' => array());
+    $ret = array('q' => array(), 'fq' => array());
     foreach ($trees as $tree) {
       list($type, $edismax) = self::tree_2_edismax($tree);
       $ret[$type][] = $edismax;
@@ -168,15 +168,74 @@ class SolrQuery {
     return ($level ? $ret : array($q_type, $ret));
   }
 
-  /** \brief create edismax term query
+  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
+   * @param trees (array) of trees
+   */
+// TODO sortkey has to be created, look in remove_bool_and_expand_indexes()
+  private function trees_2_bestmatch($trees) {
+    foreach ($trees as $tree) {
+      $ret[] = self::tree_2_bestmatch($tree);
+    }
+    $q = implode(' or ', $ret);
+    $sort = self::make_bestmatch_sort($q);
+    return array('q' => array($q), 'fq' => array(), 'sort' => $sort);
+  }
+
+  /** \brief builds: t1 = term1, t1 = term2 to be used as extra solr-parameters referenced fom the sort-parameter
+   *         like "sum(query($t1, 25),query($t2,25),query($t3,25),query($t4,25)) asc" for 4 terms
+   * @param query (string) 
+   */
+  private function make_bestmatch_sort($query) {
+    $qs = explode(' or ', $query);
+    $fraction = floor(100 / count($qs));
+    foreach ($qs as $qi => $q) {
+      $n = 't' . $qi;
+      $ret[$n] = $q;
+      $sort .= $comma . 'query($' . $n . ',' . $fraction . ')';
+      $comma = ',';
+    }
+    $ret['sort'] = 'sum(' . $sort . ') asc';
+    return $ret;
+  }
+
+  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
+   * @param trees (array) of trees
+   */
+  private function tree_2_bestmatch($node, $level = 0) {
+    if ($node['type'] == 'boolean') {
+      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' or ' . self::tree_2_bestmatch($node['right'], $level+1);
+    }
+    else {
+      $ret = self::make_bestmatch_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
+    }
+    return $ret;
+  }
+
+  /** \brief create edismax term query for bestmatch
    * @param term (string)
+   * @param relation (string)
    * @param prefix (string)
    * @param field (string)
+   * @param slop (integer)
+   */
+  private function make_bestmatch_term($term, $relation, $prefix, $field, $slop) {
+    $ret = array();
+    $terms = explode(' ', $term);
+    foreach ($terms as $t) {
+      $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
+    }
+    return implode(' or ', $ret);
+  }
+
+  /** \brief create edismax term query
+   * @param term (string)
+   * @param relation (string)
+   * @param prefix (string)
+   * @param field (string)
+   * @param slop (integer)
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
-    if ($prefix == 'rec' && $field == 'id' && preg_match("/^([1-9][0-9]{5})(:.*)$/", $term, $match)) {
-      $term = (array_key_exists($match[1], $this->v2_v3) ? $this->v2_v3[$match[1]] : '870970-basis') . $match[2];
-    }
+    $term = self::convert_old_recid($term, $prefix, $field);
     $quote = strpos($term, ' ') ? '"' : '';
     if ($field && ($field <> 'serverChoice')) {
       $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
@@ -191,6 +250,20 @@ class SolrQuery {
       $m_term = $quote . self::escape_solr_term($term) . $quote;
     }
     return  $m_field . $m_term;
+  }
+
+  /** \brief convert old rec.id's to version 3 rec.id's
+   * @param term (string)
+   * @param prefix (string)
+   * @param field (string)
+   */
+  private function convert_old_recid($term, $prefix, $field) {
+    if ($prefix == 'rec' && $field == 'id' && preg_match("/^([1-9][0-9]{5})(:.*)$/", $term, $match)) {
+      return (array_key_exists($match[1], $this->v2_v3) ? $this->v2_v3[$match[1]] : '870970-basis') . $match[2];
+    }
+    else {
+      return $term;
+    }
   }
 
   /** \brief Escape character and remove characters to be ignored
@@ -302,43 +375,6 @@ class SolrQuery {
         $this->operators[] = $support_item->nodeValue;
       }
     }
-  }
-
-  /** \brief
-   */
-  private function remove_bool_and_expand_indexes($folded) {
-    $ret = array();
-    foreach ($folded as $f) {
-      if ($f->type == OPERAND) {
-        foreach (self::explode_indexes($f->value) as $t)
-          $term[] = $t;
-      }
-    }
-    $fraction = floor(100 / count($term));
-    foreach ($term as $term_no => $t) {
-      $n = 't' . $term_no;
-      $ret[$n] = $t;
-      $sort .= $split . 'query($' . $n . ',' . $fraction . ')';
-      $split = ',';
-    }
-    $ret['sort'] = 'sum(' . $sort . ') asc';
-    return $ret;
-  }
-
-  /** \brief explode 'index:"A B"' or index:(A B) to index:A and index:B
-   */
-  private function explode_indexes($term) {
-    $parts = explode(':', $term, 2);
-    if (count($parts) == 1) {
-      $terms = array($term);
-    }
-    else {
-      $term_list = preg_replace('/["\()]/', '', $parts[1]);
-      foreach (explode(' ', $term_list) as $t) {
-        $terms[] = $parts[0] . ':' . $t;
-      }
-    }
-    return $terms;
   }
 
 }
