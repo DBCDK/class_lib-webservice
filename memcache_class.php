@@ -35,7 +35,7 @@
  *
 */
 
-class cache {
+class Cache {
   private $memcache=null;
   private $expire=600;
 
