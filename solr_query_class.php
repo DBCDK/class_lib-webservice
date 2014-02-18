@@ -114,7 +114,8 @@ class SolrQuery {
       $trees = self::split_tree($tree);
       $ret['edismax'] = self::trees_2_edismax($trees);
       $ret['best_match'] = self::trees_2_bestmatch($trees);
-      $ret['operands'] = count($ret['edismax']['q']) + count($ret['edismax']['fq']);
+      $ret['operands'] = self::trees_2_operands($trees);
+      //$ret['operands'] = count($ret['edismax']['q']) + count($ret['edismax']['fq']);
       if ($ret['operands'] && !count($ret['edismax']['q'])) {
         $ret['edismax']['q'][] = '*';
       }
@@ -183,6 +184,42 @@ class SolrQuery {
     return array('q' => array($q), 'fq' => array(), 'sort' => $sort);
   }
 
+  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
+   * @param trees (array) of trees
+   */
+  private function tree_2_bestmatch($node, $level = 0) {
+    if ($node['type'] == 'boolean') {
+      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' or ' . self::tree_2_bestmatch($node['right'], $level+1);
+    }
+    else {
+      $ret = self::make_bestmatch_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
+    }
+    return $ret;
+  }
+
+  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
+   * @param trees (array) of trees
+   */
+  private function trees_2_operands($trees) {
+    $ret = array();
+    foreach ($trees as $tree) {
+      $ret = array_merge($ret, self::tree_2_operands($tree));
+    }
+    return $ret;
+  }
+  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
+   * @param trees (array) of trees
+   */
+  private function tree_2_operands($node, $level = 0) {
+  static $ret;
+    if ($node['type'] == 'boolean') {
+      return array_merge(self::tree_2_operands($node['left']), self::tree_2_operands($node['right']));
+    }
+    else {
+      return explode(' ', $node['term']);
+    }
+  }
+
   /** \brief builds: t1 = term1, t1 = term2 to be used as extra solr-parameters referenced fom the sort-parameter
    *         like "sum(query($t1, 25),query($t2,25),query($t3,25),query($t4,25)) asc" for 4 terms
    * @param query (string) 
@@ -197,19 +234,6 @@ class SolrQuery {
       $comma = ',';
     }
     $ret['sort'] = 'sum(' . $sort . ') asc';
-    return $ret;
-  }
-
-  /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
-   * @param trees (array) of trees
-   */
-  private function tree_2_bestmatch($node, $level = 0) {
-    if ($node['type'] == 'boolean') {
-      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' or ' . self::tree_2_bestmatch($node['right'], $level+1);
-    }
-    else {
-      $ret = self::make_bestmatch_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
-    }
     return $ret;
   }
 
