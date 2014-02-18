@@ -112,6 +112,30 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_slop() {
+    $tests = array('term.slop="karen"' => 'term.slop:karen',
+                   'term.slop="karen blixen"' => 'term.slop:"karen blixen"~10');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_alias() {
+    $tests = array('slop="karen"' => 'term.slop:karen',
+                   'slop="karen blixen"' => 'term.slop:"karen blixen"~5');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_filter() {
+    $tests = array('term.filter=filter' => '*',
+                   'term.filter=filter and term.term="no filter"' => 'term.term:"no filter"~999');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function get_edismax($cql) {
     $help = $this->c2s->parse($cql);
 //var_dump($help);
@@ -138,7 +162,10 @@ class TestOfSolrQueryClass extends UnitTestCase {
    <index><map><name set="dkcclphrase">cclphrase</name></map></index>
    <index><map><name set="phrase">phrase</name></map></index>
    <index><map><name set="dkcclterm">cclterm</name></map></index>
+   <index><map><name set="term" filter="1">filter</name></map></index>
    <index><map><name set="term">term</name></map></index>
+   <index><map><name set="term" slop="10">slop</name>
+               <alias set="" slop="5">slop</alias></map></index>
    <index><map><name set="facet">facet</name></map></index>
   </indexInfo>
   <configInfo>
