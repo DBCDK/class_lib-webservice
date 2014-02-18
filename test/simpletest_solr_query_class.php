@@ -61,7 +61,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'phrase.phrase=en to' => '10',
                    'phrase.phrase=en AND to' => 'phrase.phrase:en and to',
                    'dkcclterm.cclterm=en' => 'dkcclterm.cclterm:en',
-                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"',
+                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~999',
                    'dkcclterm.cclterm=en AND to' => 'dkcclterm.cclterm:en and to',
                    'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en or to)',
                    'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en or dkcclterm.cclterm:to)',
