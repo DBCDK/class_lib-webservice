@@ -76,19 +76,18 @@ class SolrQuery {
 
     $this->best_match = ($language == 'bestMatch');
     if ($language == 'cqldan') {
-      $this->operator_translate = array('OG' => 'AND', 'ELLER' => 'OR', 'IKKE' => 'NOT');
+      $this->operator_translate = array('og' => 'and', 'eller' => 'or', 'ikke' => 'not');
     }
     $this->set_operators($language);
     $this->set_cqlns();
     $this->set_indexes();
     $this->ignore = array('/^prox\//');
 
-    $this->interval = array('=' => '%s',
-                            '<' => '[* TO %s]', 
+    $this->interval = array('<' => '[* TO %s]', 
                             '<=' => '[* TO %s]', 
                             '>' => '[%s TO *]', 
                             '>=' => '[%s TO *]');
-    $this->adjust_interval = array('=' => 0, '<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
+    $this->adjust_interval = array('<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
 
     if ($config) {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
@@ -102,8 +101,9 @@ class SolrQuery {
    */
   public function parse($query) {
     $parser = new CQL_parser();
-    $parser->define_prefix_namespaces($this->cqlns);
-    $parser->define_indexes($this->indexes);
+    $parser->set_prefix_namespaces($this->cqlns);
+    $parser->set_indexes($this->indexes);
+    $parser->set_boolean_translate($this->operator_translate);
     $parser->parse($query);
     $tree = $parser->result();
     $diags = $parser->get_diagnostics();
@@ -171,7 +171,6 @@ class SolrQuery {
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
    * @param trees (array) of trees
    */
-// TODO sortkey has to be created, look in remove_bool_and_expand_indexes()
   private function trees_2_bestmatch($trees) {
     foreach ($trees as $tree) {
       $ret[] = self::tree_2_bestmatch($tree);
@@ -241,13 +240,13 @@ class SolrQuery {
       $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
         if ($quote) {
-          $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop: '';
+          $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
         }
         $m_term = $quote . self::escape_solr_term($term) . $quote . $m_slop;
       }
     }
     else {
-      $m_term = $quote . self::escape_solr_term($term) . $quote;
+      $m_term = $quote . self::escape_solr_term($term) . $quote . ($quote ? '~' . $slop : '');
     }
     return  $m_field . $m_term;
   }
