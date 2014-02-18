@@ -21,7 +21,6 @@
 
 
 require_once 'OLS_class_lib/memcache_class.php';
-require_once 'OLS_class_lib/cql2solr_class.php';
 
 /**
  * \brief Class for formatting records from fedora object repository
