@@ -216,7 +216,8 @@ class SolrQuery {
    * @param field (string)
    */
   private function make_term_interval($term, $relation, $quot) {
-    if (($interval = $this->interval[$relation]) && ($interval_adjust = $this->adjust_interval[$relation])) {
+    if (($interval = $this->interval[$relation])) {
+      $interval_adjust = $this->adjust_interval[$relation];
       if (is_numeric($term)) {
         return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
       }
