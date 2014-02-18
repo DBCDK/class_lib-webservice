@@ -115,8 +115,7 @@ class SolrQuery {
       $ret['edismax'] = self::trees_2_edismax($trees);
       $ret['best_match'] = self::trees_2_bestmatch($trees);
       $ret['operands'] = self::trees_2_operands($trees);
-      //$ret['operands'] = count($ret['edismax']['q']) + count($ret['edismax']['fq']);
-      if ($ret['operands'] && !count($ret['edismax']['q'])) {
+      if (count($ret['operands']) && empty($ret['edismax']['q'])) {
         $ret['edismax']['q'][] = '*';
       }
     }
