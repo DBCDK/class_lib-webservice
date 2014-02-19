@@ -62,7 +62,7 @@ class CQL_parser {
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
   private $unsupported_relations = array('==', '<>', 'any', 'encloses', 'within');
-  private $supported_modifiers = array(
+  private $supported_modifiers = array(  // prox is not supported, but modifiers could be defines as this
               'prox' => array(
                  'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
                  'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
