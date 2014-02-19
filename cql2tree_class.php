@@ -61,7 +61,7 @@ class CQL_parser {
   private $boolean_translate = array();
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
-  private $unsupported_relations = array('==', '<>', 'all', 'any', 'encloses', 'within');
+  private $unsupported_relations = array('==', '<>', 'any', 'encloses', 'within');
   private $supported_modifiers = array(
               'prox' => array(
                  'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
