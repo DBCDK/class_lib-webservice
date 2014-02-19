@@ -37,7 +37,7 @@ class SolrQuery {
   var $best_match = FALSE;
   var $operator_translate = array();
   var $indexes = array();
-  var $default_slop = 999;
+  var $default_slop = 9999;
   var $cqlns = array();  // namespaces for the search-fields
   var $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
       '150005' => '150005-artikel',
