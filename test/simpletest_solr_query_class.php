@@ -61,7 +61,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'phrase.phrase=en to' => '10',
                    'phrase.phrase=en AND to' => 'phrase.phrase:en and to',
                    'dkcclterm.cclterm=en' => 'dkcclterm.cclterm:en',
-                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~999',
+                   'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~9999',
                    'dkcclterm.cclterm=en AND to' => 'dkcclterm.cclterm:en and to',
                    'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en or to)',
                    'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en or dkcclterm.cclterm:to)',
@@ -84,8 +84,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   function test_adjacency() {
     $tests = array('dkcclphrase.cclphrase ADJ "en to"' => 'dkcclphrase.cclphrase:"en to"',
                    'dkcclphrase.cclphrase ADJ "en to tre"' => 'dkcclphrase.cclphrase:"en to tre"',
-                   'term.term ADJ "en to"' => 'term.term:"en to"~999',
-                   'term.term ADJ "en to tre"' => 'term.term:"en to tre"~999');
+                   'term.term ADJ "en to"' => 'term.term:"en to"~9999',
+                   'term.term ADJ "en to tre"' => 'term.term:"en to tre"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
@@ -130,7 +130,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
 
   function test_filter() {
     $tests = array('term.filter=filter' => '*',
-                   'term.filter=filter and term.term="no filter"' => 'term.term:"no filter"~999');
+                   'term.filter=filter and term.term="no filter"' => 'term.term:"no filter"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
