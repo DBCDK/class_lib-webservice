@@ -20,7 +20,7 @@
  */
 
 require_once('cql2tree_class.php');
-require_once('cql2rpn_class.php');
+//require_once('cql2rpn_class.php');
 
 define('DEVELOP', FALSE);
 define('TREE', $_REQUEST['tree']);
@@ -75,13 +75,14 @@ class SolrQuery {
     $this->cql_dom->Load($cql_xml);
 
     $this->best_match = ($language == 'bestMatch');
-    if ($language == 'cqldan') {
-      $this->operator_translate = array('og' => 'and', 'eller' => 'or', 'ikke' => 'not');
-    }
-    $this->set_operators($language);
+    // No boolean translate in strict cql
+    //if ($language == 'cqldan') {
+      //$this->operator_translate = array('og' => 'and', 'eller' => 'or', 'ikke' => 'not');
+    //}
+    // not strict cql  $this->set_operators($language);
     $this->set_cqlns();
     $this->set_indexes();
-    $this->ignore = array('/^prox\//');
+    //$this->ignore = array('/^prox\//');
 
     $this->interval = array('<' => '[* TO %s]', 
                             '<=' => '[* TO %s]', 
@@ -103,7 +104,7 @@ class SolrQuery {
     $parser = new CQL_parser();
     $parser->set_prefix_namespaces($this->cqlns);
     $parser->set_indexes($this->indexes);
-    $parser->set_boolean_translate($this->operator_translate);
+    // not strict cql $parser->set_boolean_translate($this->operator_translate);
     $parser->parse($query);
     $tree = $parser->result();
     $diags = $parser->get_diagnostics();
@@ -391,6 +392,7 @@ class SolrQuery {
   /** \brief Get list of valid operators
    * @param language (string)
    */
+/* not used any more - operators are given in cql 
   private function set_operators($language) {
     $this->operators = array(); 
     $boolean_lingo = ($language == 'cqldan' ? 'dan' : 'eng');
@@ -401,6 +403,7 @@ class SolrQuery {
       }
     }
   }
+*/
 
 }
 

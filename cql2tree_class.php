@@ -71,7 +71,7 @@ class CQL_parser {
 
   public function __construct() { }
   
-  /** \brief for supporting national versions of and, or, not
+  /** \brief for supporting national versions of and, or, not - will violate strict cql
    * @param boolean (array)
    **/
   public function set_boolean_translate($booleans) {
