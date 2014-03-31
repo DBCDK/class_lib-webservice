@@ -17,6 +17,7 @@
 /**
  * Parse a cql-search and return the corresponding rpn stack
  *
+ * DEPRECATED - Replaced by cql2tree_class.php
  */
 
 

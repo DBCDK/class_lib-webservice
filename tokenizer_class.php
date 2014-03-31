@@ -19,6 +19,9 @@
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+* DEPRECATED - Replaced by cql2tree_class.php
+*/
 
 /**
 *

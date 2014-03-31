@@ -605,7 +605,7 @@ class Curl {
       curl_multi_remove_handle($this->curl_multi_handle, $this->curl_handle[$key]);
       curl_close($this->curl_handle[$key]);
     }
-    $this->curl_handle = null ;
+    $this->curl_handle = array();
 // keep the multihandle in order to reuse sockets
     //curl_multi_close($this->curl_multi_handle);
     //$this->curl_multi_handle = null ;
