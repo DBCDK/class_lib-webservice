@@ -212,7 +212,7 @@ abstract class webServiceServer {
               if ($soap_namespace == 'http://www.w3.org/2003/05/soap-envelope' && empty($_POST['xml']))
                 header('Content-Type: application/soap+xml');   // soap 1.2
               else
-                header('Content-Type: text/xml');
+                header('Content-Type: text/xml; charset=utf-8');
               echo $response_xml;
           }
           // request done and response send, dump timer
