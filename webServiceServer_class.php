@@ -489,10 +489,15 @@ abstract class webServiceServer {
         $params=$xmlobj->$request->_value;
         if (method_exists($this, $this->soap_action)) {
           if (is_object($this->aaa)) {
-            $auth = &$params->authentication->_value;
-            $this->aaa->init_rights($auth->userIdAut->_value,
-                                    $auth->groupIdAut->_value,
-                                    $auth->passwordAut->_value,
+            foreach (array('authentication', 'userIdAut', 'groupIdAut', 'passwordAut') as $par) {
+              if (!$$par = $this->config->get_value($par, 'aaa')) {
+                $$par = $par;
+              }
+            }
+            $auth = &$params->$authentication->_value;
+            $this->aaa->init_rights($auth->$userIdAut->_value,
+                                    $auth->$groupIdAut->_value,
+                                    $auth->$passwordAut->_value,
                                     $_SERVER['REMOTE_ADDR']);
           }
           return $this-> {$this->soap_action}($params);
