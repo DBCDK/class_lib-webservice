@@ -22,6 +22,7 @@
 
 /** \brief Webservice server
  *
+ * @author Finn Stausgaard - DBC
  *
  */
 

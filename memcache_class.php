@@ -33,6 +33,7 @@
  *   .
  *   $cache->set("my_settings", $my_settings);
  *
+ * @author Finn Stausgaard - DBC
 */
 
 class Cache {

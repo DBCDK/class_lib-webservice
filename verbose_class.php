@@ -47,6 +47,10 @@
  * Example:
  * verbose::open('my_trace_file.log', 77, 'H:i:s d:m:y'); \n
  * verbose::log(TRACE, 'db::look_up_user()');\n
+ *
+ * @author Finn Stausgaard - DBC
+**/
+
  */
 
 @ define('WARNING',0x01);

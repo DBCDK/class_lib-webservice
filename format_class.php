@@ -34,6 +34,7 @@ require_once 'OLS_class_lib/memcache_class.php';
  *   $formatRecords = new formatRecords($this->config->get_section('setup'), $this->xmlns['of'], $this->objconvert, $this->xmlconvert, $this->watch);
  *   $formatted = $formatRecords->format($form_req, $param);
  *
+ * @author Finn Stausgaard - DBC
  */
 
 class FormatRecords {

@@ -26,6 +26,7 @@
  *
  * need curl_class and memcache_class to be defined
  *
+ * @author Finn Stausgaard - DBC
 **/
 
 require_once('OLS_class_lib/memcache_class.php');

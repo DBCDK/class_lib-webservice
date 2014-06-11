@@ -28,6 +28,7 @@
  * 
  * if aaa_fors_right is defined, then data is fetched from the webservice defined by the parameter
  *
+ * @author Finn Stausgaard - DBC
 **/
 
 require_once('OLS_class_lib/oci_class.php');

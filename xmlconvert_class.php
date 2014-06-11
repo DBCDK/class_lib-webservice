@@ -20,6 +20,12 @@
 */
 
 
+/**
+ * \brief
+ *
+ * @author Finn Stausgaard - DBC
+ */
+
 class xmlconvert {
 
   public function __construct() {

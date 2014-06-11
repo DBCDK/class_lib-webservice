@@ -56,7 +56,9 @@
  *   $obj->tagname->_cdata = TRUE;
  *   will convert to a xml doc like: <tagname><![CDATA[A&A]]></tagname>
  *                   json like: {"tagname":{"$":"A&A"},"@namespaces":null}
-	*/
+ *
+ * @author Finn Stausgaard - DBC
+*/
 
 class objconvert {
 

@@ -20,6 +20,12 @@
 */
 
 
+/**
+ * \brief Quick try to let request be in json
+ *
+ * @author Finn Stausgaard - DBC
+ */
+
 
 class jsonconvert {
 
@@ -30,7 +36,7 @@ class jsonconvert {
   private $default_namespace = '';
 
   public function __construct($namespace='') {
-    $this->soap_header='<?xml version="1.0" encoding="%s"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
+    $this->soap_header='<?xml version="1.0" encoding="%s"?' . '><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
     $this->soap_footer='</SOAP-ENV:Body></SOAP-ENV:Envelope>';
     if ($namespace)
       $this->default_namespace = ' xmlns="' . $namespace . '"';

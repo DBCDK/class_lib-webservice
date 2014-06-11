@@ -19,6 +19,11 @@
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * \brief
+ *
+ * @author Finn Stausgaard - DBC
+*/
 
 class z3950 {
 
