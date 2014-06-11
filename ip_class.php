@@ -26,6 +26,7 @@
 *  if (ip_func::ip_in_interval("1.2.3.4", "1.2.2.2-1.2.2.9;1.2.3.1-1.2.3.8")) ...
 *
 *
+* @author Finn Stausgaard - DBC
 **/
 
 class ip_func {
@@ -44,22 +45,17 @@ class ip_func {
   * @returns boolean
   **/
   public static function ip_in_interval($ip, $intervals) {
-    $ip_int = self::ip2int($ip);
+    $ip_int = ip2long($ip);
     foreach (explode(";", $intervals) as $interval) {
       list($from, $to) = explode("-", $interval);
-      $from_int = $to_int = self::ip2int($from);
+      $from_int = $to_int = ip2long($from);
       if (!empty($to))
-        $to_int = self::ip2int($to);
+        $to_int = ip2long($to);
       if ($ip_int >= $from_int && $ip_int <= $to_int)
         return TRUE;
     }
 
     return FALSE;
-  }
-
-  private function ip2int($ip) {
-    list($a, $b, $c, $d) = explode(".", $ip);
-    return (($a * 256 + $b) * 256 + $c) * 256 + $d;
   }
 
 }
