@@ -51,8 +51,6 @@
  * @author Finn Stausgaard - DBC
 **/
 
- */
-
 @ define('WARNING',0x01);
 @ define('ERROR',0x02);
 @ define('FATAL',0x04);
