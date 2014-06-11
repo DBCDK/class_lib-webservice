@@ -478,8 +478,12 @@ abstract class webServiceServer {
   }
 
   /** \brief Find operation in object created from xml and and calls this function defined by developer in extended class.
+  * Authentication is by default found in the authentication node, in userIdAut, groupIdAut and passwordAut
+  * These names can be changed by doing so in the aaa-section, like: 
+  * userIdAut = theNameOfUserIdInThisService
   *
   * @param xmlobj <object>
+  * @return (object) from the service entry point called
   *
   */
   private function call_xmlobj_function($xmlobj) {
