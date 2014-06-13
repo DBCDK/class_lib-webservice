@@ -61,7 +61,7 @@ class materialId {
      * */
     function normalizeISBN($isbn) {
         $res = array();
-        foreach (str_split($isbn) as $c) {
+        foreach (preg_split('//', $isbn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
                 case 'x': case 'X':
                     if ((count($res) == 0) or (count($res) == 9)) {  // 'X' only allowed in first or last position
@@ -117,7 +117,7 @@ class materialId {
      * */
     function normalizeEAN($ean) {
         $res = array();
-        foreach (str_split($ean) as $c) {  // Remove any characters except numbers
+        foreach (preg_split('//', $ean, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
                 case '0': case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
@@ -158,7 +158,7 @@ class materialId {
      * */
     function normalizeISSN($issn) {
         $res = array();
-        foreach (str_split($issn) as $c) {
+        foreach (preg_split('//', $issn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
                 case 'x': case 'X':
                     if (count($res) == 7) {  // 'X' only allowed in last position
@@ -209,7 +209,7 @@ class materialId {
      * */
     function normalizeFaust($faust, $withSpaces = false) {
         $res = array();
-        foreach (str_split($faust) as $c) {  // Remove any characters except numbers
+        foreach (preg_split('//', $faust, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
                 case '0': case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
