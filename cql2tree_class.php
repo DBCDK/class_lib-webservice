@@ -258,7 +258,7 @@ class CQL_parser {
         self::add_diagnostic(37, "$this->qi", $this->lval);
       }
   // solr_4_4_0: for some unknown reason, the not operator has to be uppercase??
-      $op = strtoupper($this->lval);
+      $op = $this->lval;
       self::move();
       $mod = self::modifiers($context, $op);
       $right = self::searchClause($field, $relation, $context, $modifiers);
