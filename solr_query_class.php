@@ -161,7 +161,7 @@ class SolrQuery {
       $q_type = 'fq';
     }
     if ($node['type'] == 'boolean') {
-      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . $node['op'] . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
+      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . strtoupper($node['op']) . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
     }
     else {
       if (!self::is_filter_field($node['prefix'], $node['field'])) {
@@ -179,7 +179,7 @@ class SolrQuery {
     foreach ($trees as $tree) {
       $ret[] = self::tree_2_bestmatch($tree);
     }
-    $q = implode(' or ', $ret);
+    $q = implode(' OR ', $ret);
     $sort = self::make_bestmatch_sort($q);
     return array('q' => array($q), 'fq' => array(), 'sort' => $sort);
   }
@@ -189,7 +189,7 @@ class SolrQuery {
    */
   private function tree_2_bestmatch($node, $level = 0) {
     if ($node['type'] == 'boolean') {
-      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' or ' . self::tree_2_bestmatch($node['right'], $level+1);
+      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' OR ' . self::tree_2_bestmatch($node['right'], $level+1);
     }
     else {
       $ret = self::make_bestmatch_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
@@ -250,7 +250,7 @@ class SolrQuery {
     foreach ($terms as $t) {
       $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
     }
-    return implode(' or ', $ret);
+    return implode(' OR ', $ret);
   }
 
   /** \brief create edismax term query
@@ -341,7 +341,7 @@ class SolrQuery {
    * @return array of tree
    */
   private function split_tree($tree) {
-    if ($tree['type'] == 'boolean' && $tree['op'] == 'and') {
+    if ($tree['type'] == 'boolean' && strtolower($tree['op']) == 'and') {
       return array_merge(self::split_tree($tree['left']), self::split_tree($tree['right']));
     }
     else {

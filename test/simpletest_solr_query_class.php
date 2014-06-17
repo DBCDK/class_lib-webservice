@@ -40,12 +40,12 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_bool() {
-    $tests = array('et AND to' => 'et and to',
-                   'et AND to OR tre' => '((et and to) or tre)',
-                   'et AND to OR tre AND fire' => '((et and to) or tre) and fire',
+    $tests = array('et AND to' => 'et AND to',
+                   'et AND to OR tre' => '((et AND to) OR tre)',
+                   'et AND to OR tre AND fire' => '((et AND to) OR tre) AND fire',
                    'et to OR tre fire' => '10',
-                   '(et AND to) OR tre' => '((et and to) or tre)',
-                   'et AND (to OR tre)' => 'et and (to or tre)',
+                   '(et AND to) OR tre' => '((et AND to) OR tre)',
+                   'et AND (to OR tre)' => 'et AND (to OR tre)',
                    '(et AND to' => '13',
                    'et AND to)' => '10)');
     foreach ($tests as $send => $recieve) {
@@ -56,22 +56,22 @@ class TestOfSolrQueryClass extends UnitTestCase {
   function test_simple_field() {
     $tests = array('dkcclphrase.cclphrase=en' => 'dkcclphrase.cclphrase:en',
                    'dkcclphrase.cclphrase="en to"' => 'dkcclphrase.cclphrase:"en to"',
-                   'dkcclphrase.cclphrase=en AND to' => 'dkcclphrase.cclphrase:en and to',
+                   'dkcclphrase.cclphrase=en AND to' => 'dkcclphrase.cclphrase:en AND to',
                    'phrase.phrase=en' => 'phrase.phrase:en',
                    'phrase.phrase=en to' => '10',
-                   'phrase.phrase=en AND to' => 'phrase.phrase:en and to',
+                   'phrase.phrase=en AND to' => 'phrase.phrase:en AND to',
                    'dkcclterm.cclterm=en' => 'dkcclterm.cclterm:en',
                    'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~9999',
-                   'dkcclterm.cclterm=en AND to' => 'dkcclterm.cclterm:en and to',
-                   'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en or to)',
-                   'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en or dkcclterm.cclterm:to)',
+                   'dkcclterm.cclterm=en AND to' => 'dkcclterm.cclterm:en AND to',
+                   'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en OR to)',
+                   'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en OR dkcclterm.cclterm:to)',
                    'facet.facet=en' => 'facet.facet:en',
                    'facet.facet=en to' => '10',
                    'term.term=en' => 'term.term:en',
                    'term.term=en to' => '10',
-                   'term.term=en AND to' => 'term.term:en and to',
-                   'term.term=en OR to' => '(term.term:en or to)',
-                   'term.term=(en OR to)' => '(term.term:en or term.term:to)',
+                   'term.term=en AND to' => 'term.term:en AND to',
+                   'term.term=en OR to' => '(term.term:en OR to)',
+                   'term.term=(en OR to)' => '(term.term:en OR term.term:to)',
                    'phrase.xxx=to' => '16',
                    'xxx.term=to' => '16',
                    'facet.xxx=to' => '16',
@@ -106,7 +106,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_complex() {
-    $tests = array('facet.facet="karen blixen" AND term.term=bog' => 'facet.facet:"karen blixen" and term.term:bog');
+    $tests = array('facet.facet="karen blixen" AND term.term=bog' => 'facet.facet:"karen blixen" AND term.term:bog');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
@@ -143,7 +143,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
       return $help['error'][0]['no'];
     }
     if (isset($help['edismax']['q'])) {
-      return implode(' and ', $help['edismax']['q']);
+      return implode(' AND ', $help['edismax']['q']);
     }
     return 'no reply';
   }
