@@ -107,7 +107,52 @@ class bibdk_info {
 
     return $ret;
   }
-  
+
+ /** \brief  library info for libraries retrieved via openuserinfo webservice
+   * and merge with info from vip.
+   *
+   * @params array favourites; favorite libraries [agencyId] => [data]
+   * return array ret; [favourite][key]=> array[vip + openuserinfo userdata]
+   **/
+  public function get_oui_info($favourites){
+    $ret = array();
+    foreach($favourites as $key => $info){
+      $ret["favorit"][$key] = $this->_map_oui_user(unserialize($info['oui:userData']));
+      $bib_info = self::get_bib_info($key);
+      $ret["favorit"][$key] += $bib_info;
+    }
+    return $ret;
+  }
+
+  /** \brief map keys from openuserinfo webservice to keys used throughout old.bibliotek.dk
+   *  eg. cpr => client_cpr etc.
+   * @param array userData; userdata from openuserinfo webservice eg. [pincode=>1234, userName=testhest]
+   * return array info; mapped data eg. [client_pincode=>1234, client_name=>testhest]
+   *
+   **/
+  private function _map_oui_user($userData){
+    $oui_map = array('cpr' => 'client_cpr',
+		     'userId' => 'client_id',
+		     'barcode' => 'client_barcode',
+		     'cardno' => 'client_cardno',
+		     'customId' => 'client_text',
+		     'pincode' => 'client_pincode',
+		     'userName' => 'client_name',
+		     'userMail' => 'client_email',
+		     'userAddress' => 'client_address');
+
+    $info = array();
+    $id_value = NULL;
+    foreach ($oui_map as $key => $val) {
+      if (isset($userData[$key])) {
+	$info[$val] = $userData[$key];
+      }
+    }
+    return $info;
+  }
+
+ 
+ 
   
 /** \brief get_info
 *
