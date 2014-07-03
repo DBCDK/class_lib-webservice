@@ -179,7 +179,7 @@ class SolrQuery {
     foreach ($trees as $tree) {
       $ret[] = self::tree_2_bestmatch($tree);
     }
-    $q = implode(' OR ', $ret);
+    $q = implode(' or ', $ret);
     $sort = self::make_bestmatch_sort($q);
     return array('q' => array($q), 'fq' => array(), 'sort' => $sort);
   }
@@ -189,7 +189,7 @@ class SolrQuery {
    */
   private function tree_2_bestmatch($node, $level = 0) {
     if ($node['type'] == 'boolean') {
-      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' OR ' . self::tree_2_bestmatch($node['right'], $level+1);
+      $ret = self::tree_2_bestmatch($node['left'], $level+1) . ' or ' . self::tree_2_bestmatch($node['right'], $level+1);
     }
     else {
       $ret = self::make_bestmatch_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
@@ -250,7 +250,7 @@ class SolrQuery {
     foreach ($terms as $t) {
       $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
     }
-    return implode(' OR ', $ret);
+    return implode(' or ', $ret);
   }
 
   /** \brief create edismax term query
