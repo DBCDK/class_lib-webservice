@@ -144,6 +144,8 @@ class Curl {
    */
   private $curl_options ;
 
+  private $cookies = array();
+
 
   ////////////////////
   // PUBLIC METHODS //
@@ -257,8 +259,11 @@ class Curl {
       $this->curl_multi_handle = curl_multi_init();
     }
 
-    //add the handles
+    // set cookies and add the handles
     foreach ($this->curl_handle as $key => $handle) {
+      if ($this->cookies[$handle]) {
+        self::set_option(CURLOPT_COOKIE, implode(';', $this->cookies[$handle]));
+      }
       curl_multi_add_handle($this->curl_multi_handle, $this->curl_handle[$key]);
     }
 
@@ -413,6 +418,14 @@ class Curl {
   }
 
 
+
+  /**
+   * Set using cookies
+   * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+   */
+  public function use_cookies($handle_no=null) {
+    return self::set_option(CURLOPT_HEADERFUNCTION, array($this, 'callback_save_cookies'), $handle_no);
+  }
 
   /**
    * Set HTTP authentication value(s).
@@ -620,7 +633,7 @@ class Curl {
   /**
    * Check if there's a handle for the handle number, and if not, create the handle
    * and assign default values.
-    @param $handle_no    - Handle number. (integer)
+   * @param $handle_no    - Handle number. (integer)
    */
 
   private function handle_check($handle_no) {
@@ -631,6 +644,26 @@ class Curl {
       }
     }
   }
+
+  /**
+   * Callback function to catch header-lines and store cookies for later use
+   *
+   * @param $ch (ressource)       - cURL handle
+   * @param $header_line (string) - a header line
+   *
+   * return string  - the callback function has to return the length of the line
+   */
+  private function callback_save_cookies($ch, $header_line) {
+    if (substr($header_line, 0, 11) == 'Set-Cookie:') {
+      $parts = explode(';', substr($header_line, 11));
+      $cookie = trim($parts[0]);
+      if (empty($this->cookies[$ch]) || !in_array($cookie, $this->cookies[$ch])) {
+        $this->cookies[$ch][] = $cookie;
+      }
+    }
+    return strlen($header_line);
+  }
+
 
 }
 
