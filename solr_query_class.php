@@ -366,13 +366,19 @@ class SolrQuery {
             if (NULL == ($slop = $name_item->getAttribute('slop'))) {
               $slop = $this->default_slop;
             }
-            $this->indexes[$name_item->nodeValue][$name_item->getAttribute('set')] = array('filter' => $filter, 'slop' => $slop);
+            if (NULL == ($handler = $name_item->getAttribute('searchHandler'))) {
+              $handler = 'edismax';
+            }
+            $this->indexes[$name_item->nodeValue][$name_item->getAttribute('set')] = array('filter' => $filter, 
+                                                                                           'slop' => $slop, 
+                                                                                           'handler' => $handler);
             foreach ($map_item->getElementsByTagName('alias') as $alias_item) {
               if (NULL == ($slop = $alias_item->getAttribute('slop'))) {
                 $slop = $this->default_slop;
               }
               $this->indexes[$alias_item->nodeValue][$alias_item->getAttribute('set')]['alias'] = 
                      array('slop' => $slop,
+                           'handler' => $handler,
                            'prefix' => $name_item->getAttribute('set'), 
                            'field' => $name_item->nodeValue);
             }
