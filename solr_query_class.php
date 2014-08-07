@@ -34,6 +34,7 @@ class SolrQuery {
   var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '"', '~', ':');
   var $solr_ignores = array();         // this should be kept empty
   var $phrase_index = array();
+  var $search_term_format = array();
   var $best_match = FALSE;
   var $operator_translate = array();
   var $indexes = array();
@@ -70,9 +71,9 @@ class SolrQuery {
       '870973' => '870973-anmeld',
       '870976' => '870976-anmeld');
 
-  public function __construct($cql_xml, $config='', $language='') {
+  public function __construct($repository, $config='', $language='') {
     $this->cql_dom = new DomDocument();
-    $this->cql_dom->Load($cql_xml);
+    $this->cql_dom->Load($repository['cql_file']);
 
     $this->best_match = ($language == 'bestMatch');
     // No boolean translate in strict cql
@@ -92,8 +93,8 @@ class SolrQuery {
 
     if ($config) {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
+      $this->search_term_format = $repository['handler_format'];
     }
-
   }
 
 
@@ -161,13 +162,16 @@ class SolrQuery {
       $q_type = 'fq';
     }
     if ($node['type'] == 'boolean') {
-      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . ' ' . strtoupper($node['op']) . ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
+      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . 
+             ' ' . strtoupper($node['op']) . 
+             ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
     }
     else {
       if (!self::is_filter_field($node['prefix'], $node['field'])) {
         $q_type = 'q';
       }
-      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
+      $term_format = self::get_term_format($q_type, $node['prefix'], $node['field']);
+      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop'], $term_format);
     }
     return ($level ? $ret : array($q_type, $ret));
   }
@@ -260,7 +264,7 @@ class SolrQuery {
    * @param field (string)
    * @param slop (integer)
    */
-  private function make_solr_term($term, $relation, $prefix, $field, $slop) {
+  private function make_solr_term($term, $relation, $prefix, $field, $slop, $format = '%s') {
     $term = self::convert_old_recid($term, $prefix, $field);
     $quote = strpos($term, ' ') ? '"' : '';
     if ($field && ($field <> 'serverChoice')) {
@@ -275,7 +279,7 @@ class SolrQuery {
     else {
       $m_term = $quote . self::escape_solr_term($term) . $quote . ($quote ? '~' . $slop : '');
     }
-    return  $m_field . $m_term;
+    return  sprintf($format, $m_field . $m_term);
   }
 
   /** \brief convert old rec.id's to version 3 rec.id's
@@ -320,6 +324,9 @@ class SolrQuery {
       if (is_numeric($term)) {
         return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
       }
+      elseif ($date = self::is_date($term)) {
+        return sprintf($interval, $quot . date('Y-m-d\TH:i:s\Z', $date + $interval_adjust) . $quot);
+      }
       else {
         $o_len = strlen($term) - 1;
         return sprintf($interval, $quot . substr($term, 0, $o_len) .  chr(ord(substr($term,$o_len)) + $interval_adjust) . $quot);
@@ -328,13 +335,35 @@ class SolrQuery {
     return NULL;
   }
 
+  /** \brief Detects if a term is a date
+   * @param term (string)
+   */
+  private function is_date($term) {
+    return strtotime($term);
+  }
+
   /** \brief Detects fields which can go into solrs fq=
+   * @param prefix (string)
    * @param field (string)
    */
   private function is_filter_field($prefix, $field) {
     return $this->indexes[$field][$prefix]['filter'];
   }
 
+  /** \brief gets the format for the term - depinding od the search handler being used
+   * @param q_type (string) - q for normal search and fq for the filter query
+   * @param prefix (string)
+   * @param field (string)
+   *
+   * @return (string) - format-string for the term
+   */
+  private function get_term_format($q_type, $prefix, $field) {
+    $h = $this->indexes[$field][$prefix]['handler'];
+    if (NULL == ($ret = $this->search_term_format[$h][$q_type])) {
+      $ret = '%s';
+    }
+    return $ret;
+  }
 
   /** \brief Split cql tree into several and-trees
    * @param cql tree
