@@ -238,7 +238,7 @@ class inifile {
         fwrite($file_handle, "[" . $section . "]\n");
         if (is_array($array)) {
           foreach($array as $key => $value) {
-            $this -> write_value($file_handle, $key, $value);
+            $this->write_value($file_handle, $key, $value);
           }
         }
         fwrite($file_handle, "\n");
@@ -263,7 +263,7 @@ class inifile {
     if (is_array($value)) {
       $key = $prefix.$key;
       foreach($value as $n => $arr_value) {
-        $this -> write_value($file_handle, "[$n]", $arr_value, $key);
+        $this->write_value($file_handle, "[$n]", $arr_value, $key);
       }
     }
     else {
@@ -408,11 +408,11 @@ class inifile {
       return constant($val);
 
     $pos = strpos($val, '"');
-    if ($pos === false)
-      return $val;
+    if ($pos === FALSE)
+      return str_replace('%22', '"', $val);
 
     $parts = explode('"', $val);
-    for ($j=0; $j<sizeof($parts); $j++)
+    for ($j=0; $j < sizeof($parts); $j++)
       if (defined($parts[$j]))
         $parts[$j] = constant($parts[$j]);
 
