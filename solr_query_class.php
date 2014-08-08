@@ -85,11 +85,10 @@ class SolrQuery {
     $this->set_indexes();
     //$this->ignore = array('/^prox\//');
 
-    $this->interval = array('<' => '[* TO %s]', 
+    $this->interval = array('<' => '[* TO %s}', 
                             '<=' => '[* TO %s]', 
-                            '>' => '[%s TO *]', 
+                            '>' => '{%s TO *]', 
                             '>=' => '[%s TO *]');
-    $this->adjust_interval = array('<' => -1, '<=' => 0, '>' => 1, '>=' => 0);
 
     if ($config) {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
@@ -320,17 +319,7 @@ class SolrQuery {
    */
   private function make_term_interval($term, $relation, $quot) {
     if (($interval = $this->interval[$relation])) {
-      $interval_adjust = $this->adjust_interval[$relation];
-      if (is_numeric($term)) {
-        return sprintf($interval, $quot . intval($term) + $interval_adjust . $quot);
-      }
-      elseif ($date = self::is_date($term)) {
-        return sprintf($interval, $quot . date('Y-m-d\TH:i:s\Z', $date + $interval_adjust) . $quot);
-      }
-      else {
-        $o_len = strlen($term) - 1;
-        return sprintf($interval, $quot . substr($term, 0, $o_len) .  chr(ord(substr($term,$o_len)) + $interval_adjust) . $quot);
-      }
+      return sprintf($interval, $quot . $term . $quot);
     }
     return NULL;
   }
