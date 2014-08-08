@@ -19,7 +19,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
     else {
       throw new Exception('Cannot write tmp-file: ' . cql_file);
     }
-    $this->c2s = new SolrQuery(cql_file);
+    $this->c2s = new SolrQuery(array('cql_file' => cql_file));
     $this->c2s->phrase_index = array('dkcclphrase', 'phrase', 'facet');
     //$this->c2s->best_match = TRUE;
   }
