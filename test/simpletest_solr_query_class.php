@@ -92,12 +92,12 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_interval() {
-    $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO em]',
-                   'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:[eo TO *]',
+    $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO en}',
+                   'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:{en TO *]',
                    'dkcclphrase.cclphrase <= en' => 'dkcclphrase.cclphrase:[* TO en]',
                    'dkcclphrase.cclphrase >= en' => 'dkcclphrase.cclphrase:[en TO *]',
-                   'dkcclterm.cclterm < en ' => 'dkcclterm.cclterm:[* TO em]',
-                   'dkcclterm.cclterm > en' => 'dkcclterm.cclterm:[eo TO *]',
+                   'dkcclterm.cclterm < en ' => 'dkcclterm.cclterm:[* TO en}',
+                   'dkcclterm.cclterm > en' => 'dkcclterm.cclterm:{en TO *]',
                    'dkcclterm.cclterm <= en' => 'dkcclterm.cclterm:[* TO en]',
                    'dkcclterm.cclterm >= en' => 'dkcclterm.cclterm:[en TO *]');
     foreach ($tests as $send => $recieve) {
