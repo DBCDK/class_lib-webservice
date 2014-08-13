@@ -249,14 +249,14 @@ abstract class webServiceServer {
     $this->soap_request($xml);
   }
 
-  /** \brief
+  /** \brief Show the service version
   *
   */
   private function version() {
     die($this->version);
   }
 
-  /** \brief
+  /** \brief Show selected parts of the ini-file 
   *
   */
   private function ShowInfo() {
@@ -287,6 +287,9 @@ abstract class webServiceServer {
     return $line;
   }
 
+  /** \brief Helper function to showinfo_line()
+  *
+  */
   private function implode_ini_array($arr, $prefix = '') {
     $ret = "\n";
     foreach ($arr as $key => $val) {
