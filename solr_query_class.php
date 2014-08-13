@@ -39,6 +39,7 @@ class SolrQuery {
   var $operator_translate = array();
   var $indexes = array();
   var $default_slop = 9999;
+  var $error = '';
   var $cqlns = array();  // namespaces for the search-fields
   var $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
       '150005' => '150005-artikel',
@@ -119,6 +120,9 @@ class SolrQuery {
       if (count($ret['operands']) && empty($ret['edismax']['q'])) {
         $ret['edismax']['q'][] = '*';
       }
+      if ($this->error) {
+        $ret['error'] = $this->error;;
+      }
     }
     return $ret;
   }
@@ -143,14 +147,58 @@ class SolrQuery {
    * @param trees (array) of trees
    */
   private function trees_2_edismax($trees) {
+    //var_dump($trees);
     $ret = array('q' => array(), 'fq' => array());
-    foreach ($trees as $tree) {
-      list($type, $edismax) = self::tree_2_edismax($tree);
-      $ret[$type][] = $edismax;
+    $ret['handler'] = $ret;
+    foreach ($trees as $idx => $tree) {
+      list($edismax, $handler, $type) = self::tree_2_edismax($tree);
+      $ret['handler'][$type][$idx] = $handler;
+      $ret[$type][$idx] = $edismax;
     }
+    self::join_handler_nodes($ret);
+    //var_dump($ret); die();
     return $ret;
   }
 
+
+  /** \brief locate handlers (if any) and join nodes for each handler
+   * @param solr_nodes (array) one or more solr AND-nodes
+   */
+  private function join_handler_nodes(&$solr_nodes) {
+    $found = array();
+    foreach (array('q', 'fq') as $type) {
+      foreach ($solr_nodes['handler'][$type] as $handler) {
+        if ($handler) {
+          self::apply_handler($solr_nodes, $type, $handler);
+          $found[$handler][$type] = TRUE;
+          break;
+        }
+      }
+    }
+    foreach ($found as $handler) {
+      if (count($handler) > 1) {
+        $this->error[] = self::set_error(18, 'Mixed filter use for the applied indexes');
+      }
+    }
+  }
+
+  /** \brief locate handlers 
+   * @param solr_nodes (array) one or more solr AND nodes
+   * @param type (string) - q og fq
+   * @param handler (string) - name of handler
+   */
+  private function apply_handler(&$solr_nodes, $type, $handler) {
+    if ($handler && $format = $this->search_term_format[$handler][$type]) {
+      foreach ($solr_nodes['handler'][$type] as $idx => $h) {
+        if ($handler == $h) {
+          $q[] = $solr_nodes[$type][$idx];
+          unset($solr_nodes[$type][$idx]);
+          $last_idx = $idx;
+        }
+      }
+      $solr_nodes[$type][$last_idx] = sprintf($format, implode(' AND ', $q));
+    }
+  }
 
   /** \brief convert on cql-tree to edismax-string
    * @param trees (array) of trees
@@ -161,18 +209,35 @@ class SolrQuery {
       $q_type = 'fq';
     }
     if ($node['type'] == 'boolean') {
-      $ret = '(' . self::tree_2_edismax($node['left'], $level+1) . 
-             ' ' . strtoupper($node['op']) . 
-             ' ' . self::tree_2_edismax($node['right'], $level+1) . ')';
+      list($left_term, $left_handler) = self::tree_2_edismax($node['left'], $level+1);
+      list($right_term, $right_handler) = self::tree_2_edismax($node['right'], $level+1);
+      $ret = '(' . $left_term .  ' ' . strtoupper($node['op']) .  ' ' . $right_term . ')';
+      if ($left_handler == $right_handler) {
+        $term_handler = $right_handler;
+      }
+      elseif ($left_handler || $right_handler) {
+        $this->error[] = self::set_error(18, self::node_2_index($node['left']) . ', ' . self::node_2_index($node['right']));
+      }
     }
     else {
       if (!self::is_filter_field($node['prefix'], $node['field'])) {
         $q_type = 'q';
       }
-      $term_format = self::get_term_format($q_type, $node['prefix'], $node['field']);
-      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop'], $term_format);
+      $term_handler = self::get_term_handler($q_type, $node['prefix'], $node['field']);
+      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
     }
-    return ($level ? $ret : array($q_type, $ret));
+    return array($ret, $term_handler, $q_type);
+  }
+
+  /** \brief Set an error to send back to the client
+   * @param no (integer) 
+   * @param desc (string) 
+   */
+  private function set_error($no, $details = '') {
+  /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
+    static $message = 
+      array(18 => 'Unsupported combination of indexes');
+     return array('no' => $no, 'description' => $message[$no], 'details' => $details);  // pos are not defined
   }
 
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
@@ -263,11 +328,11 @@ class SolrQuery {
    * @param field (string)
    * @param slop (integer)
    */
-  private function make_solr_term($term, $relation, $prefix, $field, $slop, $format = '%s') {
+  private function make_solr_term($term, $relation, $prefix, $field, $slop) {
     $term = self::convert_old_recid($term, $prefix, $field);
     $quote = strpos($term, ' ') ? '"' : '';
     if ($field && ($field <> 'serverChoice')) {
-      $m_field = ($prefix ? $prefix . '.' : '') . $field . ':';
+      $m_field = self::join_prefix_and_field($prefix, $field) . ':';
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
         if ($quote) {
           $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
@@ -278,7 +343,22 @@ class SolrQuery {
     else {
       $m_term = $quote . self::escape_solr_term($term) . $quote . ($quote ? '~' . $slop : '');
     }
-    return  sprintf($format, $m_field . $m_term);
+    return  $m_field . $m_term;
+  }
+
+  /** \brief Create full search code from a search tree node
+   * @param node (struct)
+   */
+  private function node_2_index($node) {
+    return self::join_prefix_and_field($node['prefix'], $node['field']);
+  }
+
+  /** \brief Create full search code
+   * @param prefix (string)
+   * @param field (string)
+   */
+  private function join_prefix_and_field($prefix, $field) {
+    return ($prefix ? $prefix . '.' : '') . $field;
   }
 
   /** \brief convert old rec.id's to version 3 rec.id's
@@ -339,19 +419,15 @@ class SolrQuery {
     return $this->indexes[$field][$prefix]['filter'];
   }
 
-  /** \brief gets the format for the term - depinding od the search handler being used
+  /** \brief gets the handler for the term - depending od the search handler being used
    * @param q_type (string) - q for normal search and fq for the filter query
    * @param prefix (string)
    * @param field (string)
    *
-   * @return (string) - format-string for the term
+   * @return (string) - the name of the handler or ''
    */
-  private function get_term_format($q_type, $prefix, $field) {
-    $h = $this->indexes[$field][$prefix]['handler'];
-    if (NULL == ($ret = $this->search_term_format[$h][$q_type])) {
-      $ret = '%s';
-    }
-    return $ret;
+  private function get_term_handler($q_type, $prefix, $field) {
+    return $this->indexes[$field][$prefix]['handler'];
   }
 
   /** \brief Split cql tree into several and-trees
@@ -385,7 +461,7 @@ class SolrQuery {
               $slop = $this->default_slop;
             }
             if (NULL == ($handler = $name_item->getAttribute('searchHandler'))) {
-              $handler = 'edismax';
+              //$handler = 'edismax';
             }
             $this->indexes[$name_item->nodeValue][$name_item->getAttribute('set')] = array('filter' => $filter, 
                                                                                            'slop' => $slop, 
