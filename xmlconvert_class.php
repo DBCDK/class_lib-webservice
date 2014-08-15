@@ -56,10 +56,10 @@ class xmlconvert {
         continue;
       }
       if ($force_NS) {
-        $subnode->_namespace = $force_NS;
+        $subnode->_namespace = htmlspecialchars($force_NS);
       }
       elseif ($node->namespaceURI) {
-        $subnode->_namespace = $node->namespaceURI;
+        $subnode->_namespace = htmlspecialchars($node->namespaceURI);
       }
       if ($node->nodeName == '#text' || $node->nodeName == '#cdata-section') {
         if (trim($node->nodeValue) == '') {
@@ -76,7 +76,7 @@ class xmlconvert {
             $i = strpos($attr->nodeName, ':');
             $a_nodename = $attr->localName;
             if ($attr->namespaceURI)
-              $subnode->_attributes->{$a_nodename}->_namespace = $attr->namespaceURI;
+              $subnode->_attributes->{$a_nodename}->_namespace = htmlspecialchars($attr->namespaceURI);
             $subnode->_attributes->{$a_nodename}->_value = $attr->nodeValue;
           }
         }
