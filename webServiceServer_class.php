@@ -560,7 +560,7 @@ abstract class webServiceServer {
             $debug = '<input type="hidden" name="debug" value="' . $_GET['debug'] . '">';
 
           $html = str_replace('__REQS__', implode("\",\n\"", $reqs), $html); 
-          $html = str_replace('__XML__', htmlentities($_REQUEST['xml']), $html); 
+          $html = str_replace('__XML__', htmlspecialchars($_REQUEST['xml']), $html); 
           $html = str_replace('__OPTIONS__', $options, $html); 
         }
         else {
