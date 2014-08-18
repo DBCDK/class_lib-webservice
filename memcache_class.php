@@ -116,7 +116,14 @@ class Cache {
   }
 
   /**
-   * \brief Check if mem
+   * \brief set expire
+   **/
+  public function set_expire($expire) {
+    $this->expire = $expire;
+  }
+
+  /**
+   * \brief 
    **/
   public function check() {
     return isset($this->memcache);
