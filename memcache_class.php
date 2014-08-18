@@ -37,8 +37,8 @@
 */
 
 class Cache {
-  private $memcache=null;
-  private $expire=600;
+  private $memcache = null;
+  private $expire = 600;
 
   /**
    * \brief constructor
@@ -46,14 +46,17 @@ class Cache {
    * @param port (integer)
    * @param expire (integer)
    **/
-
   function __construct($host, $port=null, $expire=null) {
-    $this->memcache=new Memcache();
-    if (empty($port) && strpos($host, ":"))
+    $this->memcache = new Memcache();
+    if (empty($port) && strpos($host, ":")) {
       list($host, $port) = explode(":", $host, 2);
-    if (!@$this->memcache->connect($host,$port) )
-      $this->memcache=null;
-    if ($expire) $this->expire = $expire;
+    }
+    if (!@$this->memcache->connect($host,$port)) {
+      $this->memcache = null;
+    }
+    if ($expire) {
+      $this->expire = $expire;
+    }
   }
 
   function __destruct() { }
@@ -63,10 +66,10 @@ class Cache {
    * \brief Gets data store with key in the memcached server
    * @param key (string)
    **/
-
   public function get($key) {
-    if (is_object($this->memcache))
+    if (is_object($this->memcache)) {
       return $this->memcache->get($key);
+    }
     return FALSE;
   }
 
@@ -75,45 +78,47 @@ class Cache {
    * @param key (string)
    * @param data (string)
    **/
-
   public function set($key,$data, $expire = NULL) {
     if (is_object($this->memcache)) {
-      if (empty($expire))
+      if (empty($expire)) {
         $expire = $this->expire;
-      if ($this->memcache->replace($key, $data, FALSE, $expire))
+      }
+      if ($this->memcache->replace($key, $data, FALSE, $expire)) {
         return TRUE;
-      else
+      }
+      else {
         return $this->memcache->set($key, $data, FALSE, $expire);
-    } else
+      }
+    } else {
       return FALSE;
-
+    }
   }
 
   /**
    * \brief Delete data store with key in the memcached server
    * @param key (string)
    **/
-
   public function delete($key) {
-    if (is_object($this->memcache))
+    if (is_object($this->memcache)) {
       return $this->memcache->delete($key);
+    }
     return FALSE;
   }
 
   /**
    * \brief mark all items in cache as expired
    **/
-
   public function flush() {
-    if (is_object($this->memcache))
+    if (is_object($this->memcache)) {
       return $this->memcache->flush();
+    }
     return FALSE;
   }
 
+  /**
+   * \brief Check if mem
+   **/
   public function check() {
     return isset($this->memcache);
   }
 }
-
-
-?>
