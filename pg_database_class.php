@@ -119,7 +119,7 @@ class pg_database extends fet_database {
      *
      */
     if (($this->connection = pg_connect($this->connectionstring())) === false)
-      throw new fetException("no connection");
+      throw new fetException("no connection\n");
   }
 
   public function prepare($query_name, $query) {
