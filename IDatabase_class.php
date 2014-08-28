@@ -73,6 +73,7 @@ abstract class Fet_database implements IDatabase {
   protected $database;
   protected $host;
   protected $port;
+  protected $connection_timeout;
   protected $query;
   protected $connection;
   protected $offset;
@@ -80,7 +81,7 @@ abstract class Fet_database implements IDatabase {
   protected $bind_list;
   protected $transaction; //bool
 
-  public function __construct($username, $password, $database, $host = NULL, $port = NULL) {
+  public function __construct($username, $password, $database, $host = NULL, $port = NULL, 'connection_timeout' => NULL) {
     if ($host == '') $host = NULL;
     if ($port == '') $port = NULL;
 
@@ -89,6 +90,7 @@ abstract class Fet_database implements IDatabase {
     $this->database = $database;
     $this->host = $host;
     $this->port = $port;
+    $this->connection_timeout = $connection_timeout;
   }  
 
 
