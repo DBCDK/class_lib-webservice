@@ -176,6 +176,7 @@ class Pg_database extends Fet_database {
   }
 
   private function _execute($statement_key = NULL) {
+    static $prepared = array();
     // use transaction if set
     if ($this->transaction)
       @pg_query($this->connection, 'START TRANSACTION');
@@ -183,22 +184,29 @@ class Pg_database extends Fet_database {
     // check for bind-variables
     if (!empty($this->bind_list)) {
       $bind = array();
-      foreach ($this->bind_list as $binds) {
-        array_push($bind, $binds["value"]);
-        $this->query = preg_replace('/(' . $binds['name'] . ')([^a-zA-Z0-9_]|$)/', '\$' . count($bind) . '\\2', $this->query);
-      }
-      unset($this->bind_list);
       if (isset($statement_key)) {
         $this->query_name = $statement_key;
+        foreach ($this->bind_list as $binds) {
+          array_push($bind, $binds["value"]);
+        }
+        unset($this->bind_list);
       }
       else {
+        foreach ($this->bind_list as $binds) {
+          array_push($bind, $binds["value"]);
+          $this->query = preg_replace('/(' . $binds['name'] . ')([^a-zA-Z0-9_]|$)/', '\$' . count($bind) . '\\2', $this->query);
+        }
+        unset($this->bind_list);
         $this->query_name = $this->_queryname();
-        if (@pg_prepare($this->connection, $this->query_name, $this->query) === FALSE) {
-          $message = pg_last_error();
-          if ($this->transaction)
-            @pg_query($this->connection, 'ROLLBACK');
-          @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
-          throw new fetException($message);
+        if (empty($prepared[$this->query_name])) {
+          $prepared[$this->query_name] = TRUE;
+          if (@pg_prepare($this->connection, $this->query_name, $this->query) === FALSE) {
+            $message = pg_last_error();
+            if ($this->transaction)
+              @pg_query($this->connection, 'ROLLBACK');
+            @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
+            throw new fetException($message);
+          }
         }
       }
       if (($this->result = @pg_execute($this->connection, $this->query_name, $bind)) === FALSE) {
@@ -209,13 +217,14 @@ class Pg_database extends Fet_database {
         throw new fetException($message);
       }
     }
-    else
+    else {
     // if no bind-variables - just query
-    if (($this->result = @pg_query($this->connection, $this->query)) === FALSE) {
-      $message = pg_last_error();
-      if ($this->transaction)
-        @pg_query($this->connection, 'ROLLBACK');
-      throw new fetException($message);
+      if (($this->result = @pg_query($this->connection, $this->query)) === FALSE) {
+        $message = pg_last_error();
+        if ($this->transaction)
+          @pg_query($this->connection, 'ROLLBACK');
+        throw new fetException($message);
+      }
     }
     if ($this->transaction)
       @pg_query($this->connection, 'COMMIT');
