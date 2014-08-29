@@ -45,14 +45,15 @@ class ip_func {
   * @returns boolean
   **/
   public static function ip_in_interval($ip, $intervals) {
-    $ip_int = ip2long($ip);
-    foreach (explode(";", $intervals) as $interval) {
-      list($from, $to) = explode("-", $interval);
-      $from_int = $to_int = ip2long($from);
-      if (!empty($to))
-        $to_int = ip2long($to);
-      if ($ip_int >= $from_int && $ip_int <= $to_int)
-        return TRUE;
+    if ($ip_int = ip2long($ip)) {
+      foreach (explode(";", $intervals) as $interval) {
+        list($from, $to) = explode("-", $interval);
+        $from_int = $to_int = ip2long($from);
+        if (!empty($to))
+          $to_int = ip2long($to);
+        if ($ip_int >= $from_int && $ip_int <= $to_int)
+          return TRUE;
+      }
     }
 
     return FALSE;
