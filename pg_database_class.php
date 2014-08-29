@@ -30,12 +30,13 @@ require_once("IDatabase_class.php");
   $db->open();
   $db->execute();
   $db->close();
-  2. with array
-  $tablename='stats_opensearch';
-  $record=array('time' => '2010-01-01 00:00:00', 'timeid' => 'xxxx', 'seconds' => '12.2');
+  2. with bind
   $db->open();
-  $db->insert($tablename,$record);
-  $db->close();
+  $db->bind('bind_time', '2010-01-01');
+  $db->bind('bind_timeid', 'xxxx');
+  $db->bind('bind_seconds', 12.2);
+  $db->set_query('INSERT stats_opensearch ( time, timeid, seconds) VALUES ( :time, :bind_timeid, :bind_seconds');
+  $db->execute();
 
   UPDATE
   1. with sql
@@ -43,13 +44,13 @@ require_once("IDatabase_class.php");
   $db->open();
   $db->execute();
   $db->close();
-  2. with array(s)
-  $tablename="stats_opensearch";
-  $assign=array('time' => '2009', 'seconds' => '25');
-  $clause=array('timeid' => 'xxxx');
+  2. with bind
   $db->open();
-  $db->update($tablename, $assign, $clause);
-  $db->close();
+  $db->bind('bind_time', '2009');
+  $db->bind('bind_timeid', 'xxxx');
+  $db->bind('bind_seconds', 25);
+  $db->set_query('UPDATE stats_opensearch SET seconds=:bind_seconds, time=:bind_time WHERE timeid=:bind_timeid');
+  $db->execute();
 
   DELETE
   1. with sql
@@ -57,11 +58,12 @@ require_once("IDatabase_class.php");
   $db->open();
   $db->execute();
   $db->close();
-  2. with array
-  $clause = array('timeid' => 'xxxx', 'seconds' => '12.2');
+  2. with bind
   $db->open();
-  $db->delete('stats_opensearch', $clause);
-  $db->close();
+  $db->bind('bind_timeid', 'xxxx');
+  $db->bind('bind_seconds', 12.2);
+  $db->set_query('DELETE FROM stats_opensearch WHERE timeid=:bind_timeid AND seconds=:bind_seconds');
+  $db->execute();
 
  */
 
