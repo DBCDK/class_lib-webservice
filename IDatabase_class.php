@@ -55,9 +55,9 @@ interface IDatabase {
   public function close();
 
   /*methods implemented in base class (general methods)*/
-  public function insert($table, $record);
-  public function update($table, $assign, $clause = NULL);
-  public function delete($table, $clause = NULL);
+  public function deprecated_insert($table, $record);
+  public function deprecated_update($table, $assign, $clause = NULL);
+  public function deprecated_delete($table, $clause = NULL);
   public function set_query($query);
   public function set_pagination($offset, $limit);
   public function set_transaction($bool);
@@ -66,6 +66,7 @@ interface IDatabase {
 
 /** \brief
   Abstract database-class. The basic methods for the databases we wish to use.
+  DEPRECATED function for insert, update and delete. Use sql-statement and execute() instead
  */
 abstract class Fet_database implements IDatabase {
   protected $username;
@@ -122,7 +123,7 @@ abstract class Fet_database implements IDatabase {
 
     return nothing. throw fetException if execute fails.
    */
-  public function insert($table, $record) {
+  public function deprecated_insert($table, $record) {
     $sql = '';
     $fields = '';
     $values = '';
@@ -156,7 +157,7 @@ abstract class Fet_database implements IDatabase {
 
   return nothing. throw fetException if execute fails.
    */
-  public function update($table, $assign, $clause = NULL) {
+  public function deprecated_update($table, $assign, $clause = NULL) {
     $sql = '';
     $where = '';
 
@@ -197,7 +198,7 @@ abstract class Fet_database implements IDatabase {
 
   return nothing. throw fetException if execute fails.
    */
-  public function delete($table, $clause = NULL) {
+  public function deprecated_delete($table, $clause = NULL) {
     $sql = '';
     $where = '';
     if (is_array($clause))
@@ -257,7 +258,7 @@ abstract class Fet_database implements IDatabase {
   /**
     \brief make sql AND clause from given array
    */
-  private function make_clause($clause) {
+  private function deprecated_make_clause($clause) {
     $sql = "";    
     foreach ($clause as $key => $value) {
       if (strlen($sql)) 
