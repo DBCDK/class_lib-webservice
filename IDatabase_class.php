@@ -80,7 +80,7 @@ abstract class Fet_database implements IDatabase {
   protected $offset;
   protected $limit;
   protected $bind_list;
-  protected $transaction; //bool
+  protected $transaction = FALSE; //bool
 
   public function __construct($username, $password, $database, $host = NULL, $port = NULL, $connect_timeout = NULL) {
     if ($host == '') $host = NULL;
