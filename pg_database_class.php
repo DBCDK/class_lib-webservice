@@ -14,7 +14,10 @@ require_once("IDatabase_class.php");
   $db->bind('bind_seconds', 25);
   $db->set_query('SELECT time FROM stats_opensearch WHERE timeid = :bind_timeid AND seconds = :bind_seconds');
   $db->execute();
-  $row = $pg->get_row();
+  $rows = $pg->num_rows()
+  while ($rows--) {
+    $row = $pg->get_row();
+  }
   $db->close();
 
   SELECT without bind
@@ -88,6 +91,8 @@ class Pg_database extends Fet_database {
 
   private $query_name;
 
+  /** \brief
+   */
   public function __construct($connectionstring) {
     $cred = array('user' => '', 'password' => '', 'dbname' => '', 'host' => '', 'port' => '', 'connect_timeout' => '5');
     $part = explode(" ", $connectionstring);
@@ -101,10 +106,159 @@ class Pg_database extends Fet_database {
     parent::__construct($cred["user"], $cred["password"], $cred["dbname"], $cred["host"], $cred["port"], $cred["connect_timeout"]);
   }
 
+  /** \brief
+   */
+  public function __destruct() { }
+
+  /** \brief
+   * pg_pconnect has been altered to pg_connect.
+   * We have had a lot of database connections before the altering.
+   * Hopefully this will solve the problem.
+   * From php manuaL
+   * "You should not use pg_pconnect - it's broken. It will work but it doesn't really pool,
+   * and it's behaviour is unpredictable. It will only make you rise the max_connections
+   * parameter in postgresql.conf file until you run out of resources (which will slow
+   * your database down)."
+   */
+  public function open() {
+    if (($this->connection = pg_connect(self::connectionstring())) === FALSE)
+      throw new fetException('no connection');
+  }
+
+  /** \brief
+   * @param statement_name (string) - 
+   * @param query (string) - 
+   */
+  public function prepare($statement_name, $query) {
+    if (pg_prepare($this->connection, $statement_name, $query) === FALSE) {
+      $message = pg_last_error();
+      throw new fetException("Prepare fejler : $message\n");
+      // Følgende giver ikke rigtig nogen mening idet det også vil blive
+      // udført hvis man kommer til at prepare samme statement to gange.
+      // if ($this->transaction)
+      // @pg_query($this->connection, "ROLLBACK");
+      // @pg_query($this->connection, "DEALLOCATE ".$this->query_name);
+    }
+  }
+
+  /** \brief wrapper for private function _execute
+   * @param statement_name (string) - 
+   */
+  public function execute($statement_name = NULL) {
+    // set pagination
+    if ($this->offset > -1 && $this->limit)
+      $this->query.=' LIMIT ' . $this->limit . ' OFFSET ' . $this->offset;
+
+    try {
+      self::_execute($statement_name);
+    } catch (Exception $e) {
+      throw new fetException($e->__toString());
+    }
+  }
+
+  /** \brief
+   * @param query (string) - 
+   * @param params (array) - 
+   */
+  public function query_params($query = "", $params = array()) {
+    if (($this->result = @pg_query_params($this->connection, $query, $params)) === FALSE) {
+      $message = pg_last_error();
+      self::set_transaction_mode('ROLLBACK');
+      throw new fetException($message);
+    }
+  }
+
+  /** \brief Start a transaction and disable autocommit
+   */
+  public function start_transaction() {
+    $this->transaction = TRUE;
+    self::set_transaction_mode('START TRANSACTION');
+  }
+
+  /** \brief End the transaction and commit or rollback
+   */
+  public function end_transaction($commit = TRUE) {
+    if (!$this->transaction) {
+      throw new fetException('No transaction is found');
+    }
+    if ($commit) {
+      self::commit();
+    }
+    else {
+      self::rollback();
+    }
+    $this->transaction = FALSE;
+  }
+
+  /** \brief
+   */
+  public function num_rows() {
+    return pg_num_rows($this->result);
+  }
+
+  /** \brief
+   */
+  public function get_row() {
+    return pg_fetch_assoc($this->result);
+  }
+
+  /** \brief
+   */
+  public function commit() {
+    self::set_transaction_mode('COMMIT');
+    // postgres has autocommit enabled by default
+    // use only if TRANSACTIONS are used
+  }
+
+  /** \brief
+   */
+  public function rollback() {
+    self::set_transaction_mode('ROLLBACK');
+  }
+
+  /** \brief
+   */
+  public function close() {
+    @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
+    if ($this->connection)
+      pg_close($this->connection);
+  }
+
+  /** \brief
+   * @param sql (string) - 
+   * @param arr (string) - 
+   * @return
+   */
+  public function fetch($sql, $arr = "") {
+    if ($arr)
+      $this->query_params($sql, $arr);
+    else
+      $this->exe($sql);
+
+    $data_array = pg_fetch_all($this->result);
+    return $data_array;
+  }
+
+  /** \brief
+   * @param sql (string) - 
+   */
+  public function exe($sql) {
+    if (!$this->result = @pg_query($this->connection, $sql)) {
+      $message = pg_last_error();
+      throw new fetException("sql failed:$message \n $sql\n");
+    }
+  }
+
+  /* --------------------------------------------------------------------------------- '/
+
+  /** \brief
+   */
   private function set_large_object() {
     // TODO implement
   }
 
+  /** \brief
+   */
   private function connectionstring() {
     $ret = "";
 
@@ -125,163 +279,70 @@ class Pg_database extends Fet_database {
     return $ret;
   }
 
-  public function open() {
-    /**
-     * pg_pconnect has been altered to pg_connect.
-     * We have had a lot of database connections before the altering.
-     * Hopefully this will sold the problem.
-     * From php manuaL
-     * "You should not use pg_pconnect - it's broken. It will work but it doesn't really pool,
-     * and it's behaviour is unpredictable. It will only make you rise the max_connections
-     * parameter in postgresql.conf file until you run out of resources (which will slow
-     * your database down)."
-     *
-     */
-    if (($this->connection = pg_connect($this->connectionstring())) === FALSE)
-      throw new fetException('no connection');
-  }
-
-  public function prepare($query_name, $query) {
-    if (pg_prepare($this->connection, $query_name, $query) === FALSE) {
-      $message = pg_last_error();
-      throw new fetException("Prepare fejler : $message\n");
-      // Følgende giver ikke rigtig nogen mening idet det også vil blive
-      // udført hvis man kommer til at prepare samme statement to gange.
-      // if ($this->transaction)
-      // @pg_query($this->connection, "ROLLBACK");
-      // @pg_query($this->connection, "DEALLOCATE ".$this->query_name);
-    }
-  }
-
-  /**
-    wrapper for private function _execute
-   */
-  public function execute($statement_key = NULL) {
-    // set pagination
-    if ($this->offset > -1 && $this->limit)
-      $this->query.=' LIMIT ' . $this->limit . ' OFFSET ' . $this->offset;
-
-    try {
-      $this->_execute($statement_key);
-    } catch (Exception $e) {
-      throw new fetException($e->__toString());
-    }
-  }
-
-  /**
-    return a proper key for the query
+  /** \brief return a proper key for the query
    */
   private function _queryname() {
     return str_replace(array(' ', ',', '(', ')'), '_', $this->query);
   }
 
-  private function _execute($statement_key = NULL) {
+  /** \brief
+   * @param statement_name (string) - 
+   */
+  private function _execute($statement_name = NULL) {
     static $prepared = array();
-    // use transaction if set
-    if ($this->transaction)
-      @pg_query($this->connection, 'START TRANSACTION');
 
-    // check for bind-variables
-    if (!empty($this->bind_list)) {
-      $bind = array();
-      if (isset($statement_key)) {
-        $this->query_name = $statement_key;
-        foreach ($this->bind_list as $binds) {
-          array_push($bind, $binds["value"]);
-        }
-        unset($this->bind_list);
+    if (empty($this->bind_list)) {
+      if (($this->result = @pg_query($this->connection, $this->query)) === FALSE) {
+        $message = pg_last_error();
+        throw new fetException($message);
+      }
+    }
+    else {
+      $bind = self::set_bind_and_alter_query($statement_name === NULL);
+      if (isset($statement_name)) {
+        $this->query_name = $statement_name;
       }
       else {
-        foreach ($this->bind_list as $binds) {
-          array_push($bind, $binds["value"]);
-          $this->query = preg_replace('/(' . $binds['name'] . ')([^a-zA-Z0-9_]|$)/', '\$' . count($bind) . '\\2', $this->query);
-        }
-        unset($this->bind_list);
-        $this->query_name = $this->_queryname();
+        $this->query_name = self::_queryname();
         if (empty($prepared[$this->query_name])) {
           $prepared[$this->query_name] = TRUE;
           if (@pg_prepare($this->connection, $this->query_name, $this->query) === FALSE) {
             $message = pg_last_error();
-            if ($this->transaction)
-              @pg_query($this->connection, 'ROLLBACK');
-            @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
             throw new fetException($message);
           }
         }
       }
       if (($this->result = @pg_execute($this->connection, $this->query_name, $bind)) === FALSE) {
         $message = pg_last_error();
-        if ($this->transaction)
-          @pg_query($this->connection, 'ROLLBACK');
-        @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
         throw new fetException($message);
       }
     }
-    else {
-    // if no bind-variables - just query
-      if (($this->result = @pg_query($this->connection, $this->query)) === FALSE) {
-        $message = pg_last_error();
-        if ($this->transaction)
-          @pg_query($this->connection, 'ROLLBACK');
-        throw new fetException($message);
+  }
+
+  /** \brief
+   * @param use_bind_name (boolean) - 
+   * @return (array) - of bind values
+   */
+  private function set_bind_and_alter_query($use_bind_name) {
+    $bind_array = array();
+    foreach ($this->bind_list as $binds) {
+      array_push($bind_array, $binds["value"]);
+      if ($use_bind_name) {
+        $this->query = preg_replace('/(' . $binds['name'] . ')([^a-zA-Z0-9_]|$)/', '\$' . count($bind_array) . '\\2', $this->query);
       }
     }
+    unset($this->bind_list);
+    return $bind_array;
+  }
+
+  /** \brief set transaction mode if transaction is required
+   * @param transaction_parm (string) - 
+   */
+  private function set_transaction_mode($transaction_mode) {
     if ($this->transaction)
-      @pg_query($this->connection, 'COMMIT');
+      @pg_query($this->connection, $transaction_mode);
   }
 
-  public function query_params($query = "", $params = array()) {
-    if (($this->result = @pg_query_params($this->connection, $query, $params)) === FALSE) {
-      $message = pg_last_error();
-      if ($this->transaction)
-        @pg_query($this->connection, 'ROLLBACK');
-      throw new fetException($message);
-    }
-  }
-
-  public function get_row() {
-    return pg_fetch_assoc($this->result);
-  }
-
-  public function commit() {
-    if ($this->transaction)
-      pg_query($this->connection, 'COMMIT');
-    // postgres has autocommit enabled by default
-    // use only if TRANSACTIONS are used
-  }
-
-  public function rollback() {
-    if ($this->transaction)
-      pg_query($this->connection, 'ROLLBACK');
-    // use only if TRANSACTIONS are used
-  }
-
-  public function close() {
-    @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
-    if ($this->connection)
-      pg_close($this->connection);
-  }
-
-  public function fetch($sql, $arr = "") {
-    if ($arr)
-      $this->query_params($sql, $arr);
-    else
-      $this->exe($sql);
-
-    $data_array = pg_fetch_all($this->result);
-    return $data_array;
-  }
-
-  public function exe($sql) {
-    if (!$this->result = @pg_query($this->connection, $sql)) {
-      $message = pg_last_error();
-      throw new fetException("sql failed:$message \n $sql\n");
-    }
-  }
-
-  public function __destruct() {
-
-  }
 
 }
 
