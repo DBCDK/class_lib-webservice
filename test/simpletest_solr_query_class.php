@@ -136,6 +136,24 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_trunkation() {
+    $tests = array('term.term=karen*' => 'term.term:karen*',
+                   'term.term="karen*"' => 'term.term:karen*',   // this is wrong - should be term.term:"karen*"
+                   'term.term=(karen* AND wulf)' => 'term.term:karen* AND term.term:wulf',
+                   'term.term="karen* wulf"' => 'term.term:"karen* wulf"~9999');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_masking() {
+    $tests = array('term.term=kar?n' => 'term.term:kar?n',
+                   'term.term="kar?n"' => 'term.term:kar?n');   // this is wrong - should be term.term:"kar?n"
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function get_edismax($cql) {
     $help = $this->c2s->parse($cql);
 //var_dump($help);
