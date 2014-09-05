@@ -33,7 +33,7 @@ class TestOfOciDatabaseClass extends UnitTestCase {
   }
 
   function test_create() {
-    $this->assertEqual(self::do_sql('DROP TABLE oci_test'), 'ORA-00942: tabel eller view findes ikke --- DROP TABLE oci_test');
+    $this->assertEqual(self::do_sql('DROP TABLE oci_test'), 'ORA-00942: table or view does not exist --- DROP TABLE oci_test');
     $this->assertEqual(self::do_sql('CREATE TABLE oci_test (tal integer, str varchar(40))'), 'ok');
     $this->oci->commit();
   }
@@ -95,7 +95,7 @@ class TestOfOciDatabaseClass extends UnitTestCase {
   }
 
   function test_wrong_table() {
-    $this->assertPattern('/tabel eller view findes ikke/', self::do_sql('SELECT * FROM oci_not_there'));
+    $this->assertPattern('/table or view does not exist/', self::do_sql('SELECT * FROM oci_not_there'));
   }
 
   function test_cleanup() {
