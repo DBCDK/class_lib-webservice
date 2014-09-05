@@ -244,6 +244,8 @@ class oci {
 
  /**
   * \brief Returns number of updated rows.
+  * NB: This function does not return number of rows selected! For SELECT statements this function 
+  *     will return the number of rows, that were fetched to the buffer with oci_fetch*() functions. 
   * @return int
   */
 
