@@ -11,11 +11,9 @@ class TestOfVerboseClass extends UnitTestCase {
 
   function __construct() {
     parent::__construct();
-    //Verbose::open($this->verbose_file, 'WARNING+ERROR');
   }
 
   function __destruct() { 
-    //unlink($this->verbose_file);
   }
 
   function test_log_warning() {
@@ -31,7 +29,6 @@ class TestOfVerboseClass extends UnitTestCase {
     $txt = file_get_contents($this->verbose_file);
     // WARNING 14:01:54-16/09/14 2014-09-16T14:01:54:007936:32635 Warning test
     $this->assertPattern('/^WARNING [0-9:\-\/]+ [0-9:\-\/T]+ Warning test$/', $txt);
-    unlink($this->verbose_file);
   }
 
   function test_set_prefix() {
