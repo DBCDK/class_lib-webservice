@@ -6,7 +6,7 @@ require_once('simpletest/autorun.php');
 require_once('inifile_class.php');
 require_once('restconvert_class.php');
 
-class TestOfInifileClass extends UnitTestCase {
+class TestOfRestconvertClass extends UnitTestCase {
   private $config;
   private $rest;
   private $test_ini_name = '/tmp/test_restconvert.ini';
