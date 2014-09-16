@@ -8,7 +8,7 @@ require_once('restconvert_class.php');
 
 class TestOfRestconvertClass extends UnitTestCase {
   private $config;
-  private $rest;
+  private $cnv;
   private $test_ini_name = '/tmp/test_restconvert.ini';
 
   function __construct() {
@@ -19,7 +19,7 @@ class TestOfRestconvertClass extends UnitTestCase {
       fclose($fp);
     }
     $this->config = new inifile($this->test_ini_name);
-    $this->rest = new Restconvert('http://default.name.space');
+    $this->cnv = new Restconvert('http://default.name.space');
   }
 
   function __destruct() { 
@@ -29,7 +29,7 @@ class TestOfRestconvertClass extends UnitTestCase {
   function test_convert() {
     $_POST['action'] = 'operation';
     $_SERVER['QUERY_STRING'] = 'action=operation&par1=val1&par2=val2';
-    $xml = $this->rest->rest2soap($this->config);
+    $xml = $this->cnv->rest2soap($this->config);
     $this->assertPattern('/<operationRequest><par1>val1<\/par1><par2>val2<\/par2><\/operationRequest>/', $xml);
     $this->assertPattern('/xmlns="http:\/\/default.name.space"/', $xml);
     $this->assertPattern('/:Envelope.+:Body.*:Body.+:Envelope/', $xml);
