@@ -22,12 +22,15 @@
 
 /**
  * \brief Quick try to let request be in json
+ * Converts json to the 'corresponding" soap-request.
+ * 
+ * Converting is controlled by the [rest] section from the config-object (the ini-file)
  *
  * @author Finn Stausgaard - DBC
  */
 
 
-class jsonconvert {
+class Jsonconvert {
 
   //private $charset = 'ISO-8859-1';
   private $charset = "utf-8";
@@ -44,6 +47,8 @@ class jsonconvert {
 
   /** \brief Transform JSON parameters to SOAP-request
    *
+   * @param $config (object) the config object from the ini-file
+   * @return (string) Soap wrapped xml
    */
   public function json2soap($config) {
     $soap_actions = $config->get_value('soapAction', 'setup');
@@ -62,6 +67,11 @@ class jsonconvert {
     }
   }
 
+  /** \brief Build xml with data from query
+   *
+   * @param $obj (object) list of parameters 
+   * @return (string) xml
+   */
   private function to_xml($obj) {
     foreach ($obj as $tag => $val) {
       if (is_scalar($val)) {
@@ -79,10 +89,21 @@ class jsonconvert {
     return $ret;
   }
 
+  /** \brief Helper function to get a parameter from _GET or _POST
+   *
+   * @param $par (string) 
+   * @return (string) the associated value of $par
+   */
   private function get_post($par) {
     return ($_GET[$par] ? $_GET[$par] : $_POST[$par]);
   }
 
+  /** \brief Helper function to produce balanced xml
+   *
+   * @param $tag (string) 
+   * @param $val (string) 
+   * @return (string) balanced xml string
+   */
   private function tag_me($tag, $val) {
     return '<' . $tag . ">" . $val . '</' . $tag. ">";
   }
