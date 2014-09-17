@@ -20,7 +20,6 @@
  */
 
 require_once('cql2tree_class.php');
-//require_once('cql2rpn_class.php');
 
 define('DEVELOP', FALSE);
 define('TREE', $_REQUEST['tree']);
@@ -151,7 +150,8 @@ class SolrQuery {
     $ret = array('q' => array(), 'fq' => array());
     $ret['handler'] = $ret;
     foreach ($trees as $idx => $tree) {
-      list($edismax, $handler, $type) = self::tree_2_edismax($tree);
+      list($edismax, $handler, $type, $rank_field) = self::tree_2_edismax($tree);
+      $ret['ranking'][$idx] = $rank_field;
       $ret['handler'][$type][$idx] = $handler;
       $ret[$type][$idx] = $edismax;
     }
@@ -202,6 +202,7 @@ class SolrQuery {
 
   /** \brief convert on cql-tree to edismax-string
    * @param trees (array) of trees
+   * @return (array) The term, the associated search handler and the query type (q or fq)
    */
   private function tree_2_edismax($node, $level = 0) {
     static $q_type;
@@ -226,18 +227,30 @@ class SolrQuery {
       $term_handler = self::get_term_handler($q_type, $node['prefix'], $node['field']);
       $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
     }
-    return array($ret, $term_handler, $q_type);
+    return array($ret, $term_handler, $q_type, self::use_rank($node['prefix'], $node['field'], $node['modifiers']));
+  }
+
+  /** \brief if relation modifier "relevant" is used, creates ranking info
+   * @param prefix (string)
+   * @param field (string)
+   * @param modifiers (array)
+   */
+  private function use_rank($prefix, $field, $modifiers) {
+    if ($modifiers['relevant']) {
+      return $prefix . '.' . $field;
+    }
   }
 
   /** \brief Set an error to send back to the client
    * @param no (integer) 
    * @param desc (string) 
+   * @return (array) diagnostic structure
    */
   private function set_error($no, $details = '') {
   /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
     static $message = 
       array(18 => 'Unsupported combination of indexes');
-     return array('no' => $no, 'description' => $message[$no], 'details' => $details);  // pos are not defined
+     return array('no' => $no, 'description' => $message[$no], 'details' => $details);  // pos is not defined
   }
 
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
@@ -316,7 +329,9 @@ class SolrQuery {
     $ret = array();
     $terms = explode(' ', $term);
     foreach ($terms as $t) {
-      $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
+      if ($t) {
+        $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
+      }
     }
     return implode(' or ', $ret);
   }
@@ -329,13 +344,20 @@ class SolrQuery {
    * @param slop (integer)
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
+    $term = preg_replace('/\s\s+/', ' ', trim($term));
     $term = self::convert_old_recid($term, $prefix, $field);
     $quote = strpos($term, ' ') ? '"' : '';
     if ($field && ($field <> 'serverChoice')) {
       $m_field = self::join_prefix_and_field($prefix, $field) . ':';
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
         if ($quote) {
-          $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
+          if ($relation == 'any') {
+            $term = '(' . preg_replace('/\s+/', ' or ', $term) . ')';
+            $quote = '';
+          }
+          else {
+            $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
+          }
         }
         $m_term = $quote . self::escape_solr_term($term) . $quote . $m_slop;
       }
