@@ -39,7 +39,6 @@ class xmlconvert {
     if (empty($request)) return FALSE;
 
     $dom = new DomDocument();
-// BUG: preserveWhiteSpace is not reliable, so trim() is done below to be defensive
     $dom->preserveWhiteSpace = FALSE; 
     if (@ $dom->loadXML($request))
       return $this->xml2obj($dom);
