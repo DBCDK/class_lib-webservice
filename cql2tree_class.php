@@ -43,6 +43,8 @@
  *
  * CQL: http://www.loc.gov/standards/sru/cql/contextSets/theCqlContextSet.html
  *
+ * @author Adam Dickmeiss - Index Data
+ * @author Finn Stausgaard - DBC
  */
 
 class CQL_parser {
@@ -112,10 +114,12 @@ class CQL_parser {
     $this->indexes = $indexes;
   }
 
-  /** \brief 
+  /** \brief Parse a query
    * @param query (string)
+   * @return (boolean) TRUE if no errors were found, FALSE otherwise
    **/
   public function parse($query) {
+    $this->diagnostics = array();
     $this->qs = $query;
     $this->ql = strlen($query);
     $this->qi = 0;
@@ -128,21 +132,21 @@ class CQL_parser {
     return $this->parse_ok;
   }
   
-  /** \brief 
+  /** \brief Returns the result of a parse()
    * 
    **/
   public function result() {
     return $this->tree;
   }
   
-  /** \brief 
-   * @param query (string)
+  /** \brief Transform a result to a xml representation
+   * @param ar (string)
    **/
   public function result2xml($ar) {
     return self::tree2xml_r($ar, 0);
   }
   
-  /** \brief 
+  /** \brief retrieve dianostic structure
    * 
    **/
   public function get_diagnostics() {
@@ -179,12 +183,14 @@ class CQL_parser {
       $mark = $c;
       $this->qi++;
       $this->val = '';
+      //$this->val = $mark;
       while ($this->qi < $this->ql && $this->qs[$this->qi] != $mark) {
         if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) 
           $this->qi++;
         $this->val .= $this->qs[$this->qi];
         $this->qi++;
       }
+      //$this->val .= $mark;
       $this->lval = strtolower($this->val);
       if ($this->qi < $this->ql) 
         $this->qi++;
