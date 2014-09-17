@@ -26,7 +26,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_basal() {
-    $tree = self::get_tree('test');
+    list($tree, $diags) = self::get_tree('test');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'test');
     $this->assertEqual($tree['field'], 'serverChoice');
@@ -35,7 +35,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_bool() {
-    $tree = self::get_tree('test and some');
+    list($tree, $diags) = self::get_tree('test and some');
     $this->assertEqual($tree['type'], 'boolean');
     $this->assertEqual($tree['op'], 'and');
     $this->assertEqual($tree['left']['term'], 'test');
@@ -43,7 +43,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_simple_field() {
-    $tree = self::get_tree('dkcclphrase.cclphrase=test');
+    list($tree, $diags) = self::get_tree('dkcclphrase.cclphrase=test');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'test');
     $this->assertEqual($tree['field'], 'cclphrase');
@@ -53,7 +53,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_adjacency() {
-    $tree = self::get_tree('dkcclphrase.cclphrase ADJ "test some"');
+    list($tree, $diags) = self::get_tree('dkcclphrase.cclphrase ADJ "test some"');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'test some');
     $this->assertEqual($tree['field'], 'cclphrase');
@@ -63,7 +63,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_interval() {
-    $tree = self::get_tree('dkcclphrase.cclphrase<test');
+    list($tree, $diags) = self::get_tree('dkcclphrase.cclphrase<test');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'test');
     $this->assertEqual($tree['field'], 'cclphrase');
@@ -73,7 +73,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_complex() {
-    $tree = self::get_tree('facet.facet="karen blixen" AND term.term=bog');
+    list($tree, $diags) = self::get_tree('facet.facet="karen blixen" AND term.term=bog');
     $this->assertEqual($tree['type'], 'boolean');
     $this->assertEqual($tree['op'], 'and');
     $this->assertEqual($tree['left']['type'], 'searchClause');
@@ -91,18 +91,18 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_slop() {
-    $tree = self::get_tree('term.slop="karen blixen"');
+    list($tree, $diags) = self::get_tree('term.slop="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'karen blixen');
     $this->assertEqual($tree['slop'], 10);
-    $tree = self::get_tree('term.term="karen blixen"');
+    list($tree, $diags) = self::get_tree('term.term="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'karen blixen');
     $this->assertEqual($tree['slop'], 9999);
   }
 
   function test_alias() {
-    $tree = self::get_tree('slop="karen blixen"');
+    list($tree, $diags) = self::get_tree('slop="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'karen blixen');
     $this->assertEqual($tree['slop'], 5);
@@ -112,24 +112,29 @@ class TestOfCql2TreeClass extends UnitTestCase {
   }
 
   function test_errors() {
-    $diags = self::get_diagnostics('en prox/unit=word/distance=2 to');
+    list($tree, $diags) = self::get_tree('en prox/unit=word/distance=2 to');
     $this->assertEqual($diags[0]['no'], 37);
     $this->assertEqual($diags[0]['details'], 'prox');
     $this->assertEqual($diags[0]['pos'], '7');
-    $diags = self::get_diagnostics('ttt.xxx=test');
+    list($tree, $diags) = self::get_tree('ttt.xxx=test');
     $this->assertEqual($diags[0]['no'], 16);
     $this->assertEqual($diags[0]['details'], 'ttt.xxx');
     $this->assertEqual($diags[0]['pos'], '12');
   }
 
-  function get_tree($query) {
-    $this->c2t->parse($query);
-    return $this->c2t->result();
+  function test_any_relevant() {
+    list($tree, $diags) = self::get_tree('cql.keywords any/relevant "code computer calculator programming"');
+    $this->assertEqual($tree['type'], 'searchClause');
+    $this->assertEqual($tree['term'], 'code computer calculator programming');
+    $this->assertEqual($tree['field'], 'keywords');
+    $this->assertEqual($tree['prefix'], 'cql');
+    $this->assertEqual($tree['fielduri'], $this->cqlns['cql']);
+    $this->assertEqual($tree['modifiers'], array('relevant' => TRUE));
   }
 
-  function get_diagnostics($query) {
+  function get_tree($query) {
     $this->c2t->parse($query);
-    return $this->c2t->get_diagnostics();
+    return array($this->c2t->result(), $this->c2t->get_diagnostics());
   }
 
   function cqlns() {
@@ -146,6 +151,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   function indexes() {
     $this->indexes = 
       array('serverChoice' => array('cql' => array('filter' => false, 'slop' => 9999, 'handler' => '')),
+            'keywords' => array('cql' => array('filter' => false, 'slop' => 9999, 'handler' => '')),
             'cclphrase' => array('dkcclphrase' => array('filter' => false, 'slop' => 9999, 'handler' => '')),
             'phrase' => array('phrase' => array('filter' => false, 'slop' => 9999, 'handler' => '')),
             'cclterm' => array('dkcclterm' => array('filter' => false, 'slop' => 9999, 'handler' => '')),
