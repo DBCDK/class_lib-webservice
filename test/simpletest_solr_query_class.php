@@ -43,11 +43,11 @@ class TestOfSolrQueryClass extends UnitTestCase {
     $tests = array('et AND to' => 'et AND to',
                    'et AND to OR tre' => '((et AND to) OR tre)',
                    'et AND to OR tre AND fire' => '((et AND to) OR tre) AND fire',
-                   'et to OR tre fire' => '10',
+                   'et to OR tre fire' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 5)),
                    '(et AND to) OR tre' => '((et AND to) OR tre)',
                    'et AND (to OR tre)' => 'et AND (to OR tre)',
-                   '(et AND to' => '13',
-                   'et AND to)' => '10)');
+                   '(et AND to' => array(array('no' => 13, 'description' => 'Invalid or unsupported use of parentheses', 'details' => '', 'pos' => 10)),
+                   'et AND to)' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 10)));
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
@@ -58,7 +58,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'dkcclphrase.cclphrase="en to"' => 'dkcclphrase.cclphrase:"en to"',
                    'dkcclphrase.cclphrase=en AND to' => 'dkcclphrase.cclphrase:en AND to',
                    'phrase.phrase=en' => 'phrase.phrase:en',
-                   'phrase.phrase=en to' => '10',
+                   'phrase.phrase=en to' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 19)),
                    'phrase.phrase=en AND to' => 'phrase.phrase:en AND to',
                    'dkcclterm.cclterm=en' => 'dkcclterm.cclterm:en',
                    'dkcclterm.cclterm="en to"' => 'dkcclterm.cclterm:"en to"~9999',
@@ -66,16 +66,16 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'dkcclterm.cclterm=en OR to' => '(dkcclterm.cclterm:en OR to)',
                    'dkcclterm.cclterm=(en OR to)' => '(dkcclterm.cclterm:en OR dkcclterm.cclterm:to)',
                    'facet.facet=en' => 'facet.facet:en',
-                   'facet.facet=en to' => '10',
+                   'facet.facet=en to' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 17)),
                    'term.term=en' => 'term.term:en',
-                   'term.term=en to' => '10',
+                   'term.term=en to' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 15)),
                    'term.term=en AND to' => 'term.term:en AND to',
                    'term.term=en OR to' => '(term.term:en OR to)',
                    'term.term=(en OR to)' => '(term.term:en OR term.term:to)',
-                   'phrase.xxx=to' => '16',
-                   'xxx.term=to' => '16',
-                   'facet.xxx=to' => '16',
-                   'term.xxx=to' => '16');
+                   'phrase.xxx=to' => array(array('no' => 16, 'description' => 'Unsupported index', 'details' => 'phrase.xxx', 'pos' => 13)),
+                   'xxx.term=to' => array(array('no' => 16, 'description' => 'Unsupported index', 'details' => 'xxx.term', 'pos' => 11)),
+                   'facet.xxx=to' => array(array('no' => 16, 'description' => 'Unsupported index', 'details' => 'facet.xxx', 'pos' => 12)),
+                   'term.xxx=to' => array(array('no' => 16, 'description' => 'Unsupported index', 'details' => 'term.xxx', 'pos' => 11)));
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
@@ -154,11 +154,21 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_errors() {
+    $tests = array('en prox/unit=word/distance=2 to' => array(array('no' => 37, 'description' => 'Unsupported boolean operator', 'details' => 'prox', 'pos' => 7)),
+                   'en prox/unit=woord/distance=2 to' => array(array('no' => 37, 'description' => 'Unsupported boolean operator', 'details' => 'prox', 'pos' => 7), 
+                                                               array('no' => 42, 'description' => 'Unsupported proximity unit', 'details' => 'woord', 'pos' => 18))
+                  ); 
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function get_edismax($cql) {
     $help = $this->c2s->parse($cql);
-//var_dump($help);
     if (isset($help['error'])) {
-      return $help['error'][0]['no'];
+//var_dump($help);
+      return $help['error'];
     }
     if (isset($help['edismax']['q'])) {
       return implode(' AND ', $help['edismax']['q']);
