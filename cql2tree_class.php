@@ -63,9 +63,13 @@ class CQL_parser {
   private $boolean_translate = array();
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
-  private $unsupported_relations = array('==', '<>', 'any', 'encloses', 'within');
-  private $supported_modifiers = array(  // prox is not supported, but modifiers could be defines as this
-              'prox' => array(
+  private $unsupported_relations = array('==', '<>', 'encloses', 'within');
+  private $supported_modifiers = array( 
+              '=' => array(                 // =/relevant as a test
+                 'relevant' => array('symbol' => TRUE)),
+              'any' => array(                 // any/relevant as a test
+                 'relevant' => array('symbol' => TRUE)),
+              'prox' => array(                // prox is not supported, but modifiers could be defines as this
                  'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
                  'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
   private $parse_ok = TRUE; // cql parsing went ok
@@ -220,7 +224,7 @@ class CQL_parser {
       }
       $name = $this->lval;
       if (empty($this->supported_modifiers[$target][$name])) {
-        self::add_diagnostic(46, "$this->qi", $name);
+        self::add_diagnostic(46, "$this->qi", $target . '/' . $name);
         return $ar;
       }
       $tgt_modifiers = &$this->supported_modifiers[$target][$name];
