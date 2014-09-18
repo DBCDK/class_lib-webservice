@@ -123,6 +123,7 @@ class SolrQuery {
         $ret['error'] = $this->error;;
       }
     }
+    //var_dump($trees); var_dump($ret); die();
     return $ret;
   }
 
@@ -151,7 +152,9 @@ class SolrQuery {
     $ret['handler'] = $ret;
     foreach ($trees as $idx => $tree) {
       list($edismax, $handler, $type, $rank_field) = self::tree_2_edismax($tree);
-      $ret['ranking'][$idx] = $rank_field;
+      if ($rank_field) {
+        $ret['ranking'][$idx] = $rank_field;
+      }
       $ret['handler'][$type][$idx] = $handler;
       $ret[$type][$idx] = $edismax;
     }
@@ -205,9 +208,10 @@ class SolrQuery {
    * @return (array) The term, the associated search handler and the query type (q or fq)
    */
   private function tree_2_edismax($node, $level = 0) {
-    static $q_type;
+    static $q_type, $ranking;
     if ($level == 0) {
       $q_type = 'fq';
+      $ranking = '';
     }
     if ($node['type'] == 'boolean') {
       list($left_term, $left_handler) = self::tree_2_edismax($node['left'], $level+1);
@@ -227,7 +231,8 @@ class SolrQuery {
       $term_handler = self::get_term_handler($q_type, $node['prefix'], $node['field']);
       $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
     }
-    return array($ret, $term_handler, $q_type, self::use_rank($node['prefix'], $node['field'], $node['modifiers']));
+    $ranking = self::use_rank($node, $ranking);
+    return array($ret, $term_handler, $q_type, $ranking);
   }
 
   /** \brief if relation modifier "relevant" is used, creates ranking info
@@ -235,10 +240,16 @@ class SolrQuery {
    * @param field (string)
    * @param modifiers (array)
    */
-  private function use_rank($prefix, $field, $modifiers) {
-    if ($modifiers['relevant']) {
-      return $prefix . '.' . $field;
+  private function use_rank($node, $ranking) {
+    if ($node['modifiers']['relevant']) {
+      if ($ranking) {
+        $this->error[] = self::set_error(21, 'relation modifier relevant used more than once');
+      }
+      else {
+        return $node['prefix'] . '.' . $node['field'];
+      }
     }
+    return $ranking;
   }
 
   /** \brief Set an error to send back to the client
@@ -249,7 +260,8 @@ class SolrQuery {
   private function set_error($no, $details = '') {
   /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
     static $message = 
-      array(18 => 'Unsupported combination of indexes');
+      array(18 => 'Unsupported combination of indexes',
+            21 => 'Unsupported combination of relation modifers');
      return array('no' => $no, 'description' => $message[$no], 'details' => $details);  // pos is not defined
   }
 
