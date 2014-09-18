@@ -348,11 +348,11 @@ class SolrQuery {
     $term = self::convert_old_recid($term, $prefix, $field);
     $quote = strpos($term, ' ') ? '"' : '';
     if ($field && ($field <> 'serverChoice')) {
-      $m_field = self::join_prefix_and_field($prefix, $field) . ':';
+      $m_field = self::join_prefix_and_field($prefix, $field, ':');
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
         if ($quote) {
           if ($relation == 'any') {
-            $term = '(' . preg_replace('/\s+/', ' or ', $term) . ')';
+            $term = '(' . preg_replace('/\s+/', ' OR ', $term) . ')';
             $quote = '';
           }
           else {
@@ -379,8 +379,13 @@ class SolrQuery {
    * @param prefix (string)
    * @param field (string)
    */
-  private function join_prefix_and_field($prefix, $field) {
-    return ($prefix ? $prefix . '.' : '') . $field;
+  private function join_prefix_and_field($prefix, $field, $colon = '') {
+    if ($prefix == 'cql' && $field == 'keywords') {
+      return '';
+    }
+    else {
+      return ($prefix ? $prefix . '.' : '') . $field . $colon;
+    }
   }
 
   /** \brief convert old rec.id's to version 3 rec.id's
