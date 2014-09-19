@@ -367,6 +367,10 @@ class SolrQuery {
             $term = '(' . preg_replace('/\s+/', ' OR ', $term) . ')';
             $quote = '';
           }
+          elseif ($relation == 'all') {
+            $term = '(' . preg_replace('/\s+/', ' AND ', $term) . ')';
+            $quote = '';
+          }
           else {
             $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
           }
