@@ -64,7 +64,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($tree['field'], 'cclphrase');
     $this->assertEqual($tree['prefix'], 'dkcclphrase');
     $this->assertEqual($tree['fielduri'], $this->cqlns['dkcclphrase']);
-    $this->assertEqual($tree['relation'], 'ADJ');
+    $this->assertEqual($tree['relation'], 'adj');
   }
 
   function test_interval() {

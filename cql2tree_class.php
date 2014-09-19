@@ -67,6 +67,8 @@ class CQL_parser {
   private $supported_modifiers = array( 
               '=' => array(                 // =/relevant as a test
                  'relevant' => array('symbol' => TRUE)),
+              'all' => array(                 // all/relevant as a test
+                 'relevant' => array('symbol' => TRUE)),
               'any' => array(                 // any/relevant as a test
                  'relevant' => array('symbol' => TRUE)),
               'prox' => array(                // prox is not supported, but modifiers could be defines as this
@@ -304,7 +306,7 @@ class CQL_parser {
         if (in_array($this->lval, $this->unsupported_relations)) {
           self::add_diagnostic(19, "$this->qi", $this->lval);
         }
-        $rel = $this->val; // string relation
+        $rel = $this->lval; // string relation
         self::move();
         return self::searchClause($first, $rel, $context, self::modifiers($context, $rel));
       }
