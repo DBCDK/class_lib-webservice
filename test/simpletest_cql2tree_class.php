@@ -40,6 +40,11 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($tree['op'], 'and');
     $this->assertEqual($tree['left']['term'], 'test');
     $this->assertEqual($tree['right']['term'], 'some');
+    list($tree, $diags) = self::get_tree('test AND some');
+    $this->assertEqual($tree['type'], 'boolean');
+    $this->assertEqual($tree['op'], 'and');
+    $this->assertEqual($tree['left']['term'], 'test');
+    $this->assertEqual($tree['right']['term'], 'some');
   }
 
   function test_simple_field() {
