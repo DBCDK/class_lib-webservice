@@ -81,11 +81,31 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
-  function test_adjacency() {
-    $tests = array('dkcclphrase.cclphrase ADJ "en to"' => 'dkcclphrase.cclphrase:"en to"',
-                   'dkcclphrase.cclphrase ADJ "en to tre"' => 'dkcclphrase.cclphrase:"en to tre"',
-                   'term.term ADJ "en to"' => 'term.term:"en to"~9999',
-                   'term.term ADJ "en to tre"' => 'term.term:"en to tre"~9999');
+  function test_relation_adjacency() {
+    $tests = array('dkcclphrase.cclphrase adj "en to"' => 'dkcclphrase.cclphrase:"en to"',
+                   'dkcclphrase.cclphrase adj "en to tre"' => 'dkcclphrase.cclphrase:"en to tre"',
+                   'term.term adj "en to"' => 'term.term:"en to"~9999',
+                   'term.term adj "en to tre"' => 'term.term:"en to tre"~9999');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_relation_any() {
+    $tests = array('term.term any "en"' => 'term.term:en',
+                   'term.term any "   en  "' => 'term.term:en',
+                   'term.term any "en to tre"' => 'term.term:(en OR to OR tre)',
+                   'term.term any "  en   to   tre  "' => 'term.term:(en OR to OR tre)');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_relation_all() {
+    $tests = array('term.term all "en"' => 'term.term:en',
+                   'term.term all "   en  "' => 'term.term:en',
+                   'term.term all "en to tre"' => 'term.term:(en AND to AND tre)',
+                   'term.term all "  en   to   tre  "' => 'term.term:(en AND to AND tre)');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
