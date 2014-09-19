@@ -122,13 +122,37 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($diags[0]['pos'], '12');
   }
 
-  function test_any_relevant() {
-    list($tree, $diags) = self::get_tree('cql.keywords any/relevant "code computer calculator programming"');
+  function test_any_relation() {
+    list($tree, $diags) = self::get_tree('cql.keywords any "code computer calculator programming"');
     $this->assertEqual($tree['type'], 'searchClause');
     $this->assertEqual($tree['term'], 'code computer calculator programming');
+    $this->assertEqual($tree['relation'], 'any');
     $this->assertEqual($tree['field'], 'keywords');
     $this->assertEqual($tree['prefix'], 'cql');
     $this->assertEqual($tree['fielduri'], $this->cqlns['cql']);
+    $this->assertEqual($tree['modifiers'], array());
+  }
+
+  function test_all_relation() {
+    list($tree, $diags) = self::get_tree('cql.keywords all "code computer calculator programming"');
+    $this->assertEqual($tree['type'], 'searchClause');
+    $this->assertEqual($tree['term'], 'code computer calculator programming');
+    $this->assertEqual($tree['relation'], 'all');
+    $this->assertEqual($tree['field'], 'keywords');
+    $this->assertEqual($tree['prefix'], 'cql');
+    $this->assertEqual($tree['fielduri'], $this->cqlns['cql']);
+    $this->assertEqual($tree['modifiers'], array());
+  }
+
+  function test_relation_modifier_relevant() {
+    list($tree, $diags) = self::get_tree('cql.keywords =/relevant "code computer calculator programming"');
+    $this->assertEqual($tree['relation'], '=');
+    $this->assertEqual($tree['modifiers'], array('relevant' => TRUE));
+    list($tree, $diags) = self::get_tree('cql.keywords any/relevant "code computer calculator programming"');
+    $this->assertEqual($tree['relation'], 'any');
+    $this->assertEqual($tree['modifiers'], array('relevant' => TRUE));
+    list($tree, $diags) = self::get_tree('cql.keywords all/relevant "code computer calculator programming"');
+    $this->assertEqual($tree['relation'], 'all');
     $this->assertEqual($tree['modifiers'], array('relevant' => TRUE));
   }
 
