@@ -60,6 +60,8 @@ class TestOfPgDatabaseClass extends UnitTestCase {
     $this->assertEqual($this->pg->get_row(), array('tal' => 1, 'str' => 'en'));
     $this->assertEqual($this->pg->get_row(), array('tal' => 2, 'str' => 'to'));
     $this->assertEqual($this->pg->get_row(), FALSE);
+    $this->assertEqual(self::do_sql('SELECT * FROM pg_test'), 'ok');
+    $this->assertEqual($this->pg->get_all_rows(), array(array('tal' => 1, 'str' => 'en'), array('tal' => 2, 'str' => 'to')));
     $this->assertEqual(self::do_sql('SELECT * FROM pg_test WHERE tal = 3'), 'ok');
     $this->assertEqual($this->pg->num_rows(), 0);
   }

@@ -14,10 +14,13 @@ require_once("IDatabase_class.php");
   $db->bind('bind_seconds', 25);
   $db->set_query('SELECT time FROM stats_opensearch WHERE timeid = :bind_timeid AND seconds = :bind_seconds');
   $db->execute();
-  $rows = $pg->num_rows()
-  while ($rows--) {
+EITHER:
+  $rowcount = $pg->num_rows()
+  while ($rowcount--) {
     $row = $pg->get_row();
   }
+OR:
+  $rows = $pg->get_all_rows();
   $db->close();
 
   SELECT without bind
@@ -200,6 +203,12 @@ class Pg_database extends Fet_database {
    */
   public function get_row() {
     return pg_fetch_assoc($this->result);
+  }
+
+  /** \brief
+   */
+  public function get_all_rows() {
+    return pg_fetch_all($this->result);
   }
 
   /** \brief
