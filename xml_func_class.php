@@ -32,12 +32,13 @@ require_once("xmlwriter_class.php");
 class xml_func { 
   /* return an object as xml */
   public static function object_to_xml($obj) {
-    global $key;
-    global $xmlwriter;
+    //static $key; makes no sense as static
+    static $xmlwriter;
 
     if (! isset($xmlwriter)) {
       $xmlwriter=new XmlWrite();
     }
+    $xmlwriter->clear();
     
     if (is_object($obj)) {
       $xmlwriter->push(get_class($obj));
