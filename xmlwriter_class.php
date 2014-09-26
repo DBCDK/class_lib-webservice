@@ -9,6 +9,9 @@ class XmlWrite {
   var $stack = array();
   function XmlWrite($indent = '  ') {
     $this->indent = $indent;
+    self::clear();
+  }
+  function clear() {
     $this->xml = '<?xml version="1.0" encoding="utf-8"?>' . "\n";
   }
   function _indent() {
@@ -17,7 +20,7 @@ class XmlWrite {
     }
   }
   function push($element, $attributes = array()) {
-    $this->_indent();
+    self::_indent();
     $this->xml .= '<' . $element;
     foreach ($attributes as $key => $value) {
       $this->xml .= ' ' . $key . '="' . $this->fix_encoding($value) . '"';
@@ -29,22 +32,22 @@ class XmlWrite {
     $this->_indent();
     $this->xml .= '<' . $element;
     foreach ($attributes as $key => $value) {
-      $this->xml .= ' ' . $key . '="' . $this->fix_encoding($value) . '"';
+      $this->xml .= ' ' . $key . '="' . self::fix_encoding($value) . '"';
     }
-    $this->xml .= '>' . $this->fix_encoding($content) . '</' . $element . '>' . "\n";
+    $this->xml .= '>' . self::fix_encoding($content) . '</' . $element . '>' . "\n";
   }
   function emptyelement($element, $attributes = array()) {
-    $this->_indent();
+    self::_indent();
     $this->xml .= '<' . $element;
     foreach ($attributes as $key => $value) {
-      $this->xml .= ' ' . $key . '="' . $this->fix_encoding($value) . '"';
+      $this->xml .= ' ' . $key . '="' . self::fix_encoding($value) . '"';
     }
     
     $this->xml .= " />\n";
   }
   function pop() {
     $element = array_pop($this->stack);
-    $this->_indent();
+    self::_indent();
     $this->xml .= "</$element>\n";
   }
   
