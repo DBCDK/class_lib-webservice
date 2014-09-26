@@ -43,9 +43,9 @@ class xml_func {
     if (is_object($obj)) {
       $xmlwriter->push(get_class($obj));
       $vars=get_object_vars($obj);
-      foreach ($vars as $key=>$var) {
+      foreach ($vars as $key => $var) {
         if (is_scalar($var)) {
-          $xmlwriter->element($key,$var);
+          $xmlwriter->element($key, $var);
         }
         else {
           self::object_to_xml($var);        
@@ -54,9 +54,9 @@ class xml_func {
       $xmlwriter->pop();
     }
     elseif (is_array($obj)) {
-      foreach ($obj as $whatever=>$val) {
+      foreach ($obj as $whatever => $val) {
         if (is_scalar($val)) {
-          $xmlwriter->element($key,$val);
+          $xmlwriter->element($key, $val);
         }
         else {
           self::object_to_xml($val);
@@ -70,12 +70,12 @@ class xml_func {
   /* fix UTF8-encoding */
   public static function UTF8($data) {
     $encoding = mb_detect_encoding($data) ;
-    if ($encoding == "UTF-8" && mb_check_encoding($data,"UTF-8")) {
+    if ($encoding == "UTF-8" && mb_check_encoding($data, "UTF-8")) {
       //hmm . '&' doesn't encode properly TODO find a proper fix
-      return str_ireplace('&','&#38;',$data);
+      return str_ireplace('&', '&#38;', $data);
     }
     else {
-      return  str_ireplace('&','&#38;',utf8_encode($data)); 
+      return  str_ireplace('&', '&#38;', utf8_encode($data)); 
     }
   }
 
