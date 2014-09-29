@@ -7,7 +7,7 @@ require_once('xml_func_class.php');
 
 define('XMLHEADER', '<?xml version="1.0" encoding="utf-8"?>');
 
-class TestOfCurlClass extends UnitTestCase {
+class TestOfXmlFuncClass extends UnitTestCase {
 
   function __construct() {
     parent::__construct();
