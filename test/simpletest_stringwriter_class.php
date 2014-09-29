@@ -5,7 +5,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR .
 require_once('simpletest/autorun.php');
 require_once('stringwriter_class.php');
 
-class TestOfCurlClass extends UnitTestCase {
+class TestOfStringWriterClass extends UnitTestCase {
   private $writer;
 
   function __construct() {
