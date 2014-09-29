@@ -5,7 +5,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR .
 require_once('simpletest/autorun.php');
 require_once('echowriter_class.php');
 
-class TestOfCurlClass extends UnitTestCase {
+class TestOfEchoWriterClass extends UnitTestCase {
   private $writer;
 
   function __construct() {
