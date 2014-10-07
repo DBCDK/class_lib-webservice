@@ -229,10 +229,18 @@ class SolrQuery {
         $q_type = 'q';
       }
       $term_handler = self::get_term_handler($q_type, $node['prefix'], $node['field']);
-      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], $node['slop']);
+      $ret = self::make_solr_term($node['term'], $node['relation'], $node['prefix'], $node['field'], self::set_slop($node));
     }
     $ranking = self::use_rank($node, $ranking);
     return array($ret, $term_handler, $q_type, $ranking);
+  }
+
+  /** \brief modifies slop if word or string modifier is used
+   * @param $node array - modifiers and slop for the node
+   * @return string
+   */
+  private function set_slop($node) {
+    return ($node['modifiers']['word'] ? 9999 : ($node['modifiers']['string'] ? 1 : $node['slop']));
   }
 
   /** \brief if relation modifier "relevant" is used, creates ranking info

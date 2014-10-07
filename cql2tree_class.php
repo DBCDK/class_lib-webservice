@@ -66,6 +66,8 @@ class CQL_parser {
   private $unsupported_relations = array('==', '<>', 'encloses', 'within');
   private $supported_modifiers = array( 
               '=' => array(                 // =/relevant as a test
+                 'word' => array('symbol' => TRUE),
+                 'string' => array('symbol' => TRUE),
                  'relevant' => array('symbol' => TRUE)),
               'all' => array(                 // all/relevant as a test
                  'relevant' => array('symbol' => TRUE)),
