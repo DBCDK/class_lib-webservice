@@ -139,7 +139,8 @@ class bibdk_info {
 		     'pincode' => 'client_pincode',
 		     'userName' => 'client_name',
 		     'userMail' => 'client_email',
-		     'userAddress' => 'client_address');
+		     'userAddress' => 'client_address',
+		     'userTelephone' => 'client_phone');
 
     $info = array();
     $id_value = NULL;
