@@ -111,6 +111,30 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_relation_modifier_relevant() {
+    $tests = array('slop=/relevant "karen"' => 'term.slop:karen',
+                   'slop=/relevant "karen blixen"' => 'term.slop:"karen blixen"~5');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_relation_modifier_word() {
+    $tests = array('slop=/word "karen"' => 'term.slop:karen',
+                   'slop=/word "karen blixen"' => 'term.slop:"karen blixen"~9999');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_relation_modifier_string() {
+    $tests = array('slop=/string "karen"' => 'term.slop:karen',
+                   'slop=/string "karen blixen"' => 'term.slop:"karen blixen"~1');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function test_interval() {
     $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO en}',
                    'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:{en TO *]',
