@@ -161,6 +161,18 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($tree['modifiers'], array('relevant' => TRUE));
   }
 
+  function test_relation_modifier_word() {
+    list($tree, $diags) = self::get_tree('cql.keywords =/word "code computer calculator programming"');
+    $this->assertEqual($tree['relation'], '=');
+    $this->assertEqual($tree['modifiers'], array('word' => TRUE));
+  }
+
+  function test_relation_modifier_string() {
+    list($tree, $diags) = self::get_tree('cql.keywords =/string "code computer calculator programming"');
+    $this->assertEqual($tree['relation'], '=');
+    $this->assertEqual($tree['modifiers'], array('string' => TRUE));
+  }
+
   function get_tree($query) {
     $this->c2t->parse($query);
     return array($this->c2t->result(), $this->c2t->get_diagnostics());
