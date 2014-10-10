@@ -90,9 +90,11 @@ OR:
   // for error recovering
   bool pg_connection_reset(resource $connection)
  */
+
 class Pg_database extends Fet_database {
 
   private $query_name;
+  private $open_error_message;
 
   /** \brief
    */
@@ -114,6 +116,15 @@ class Pg_database extends Fet_database {
   public function __destruct() { }
 
   /** \brief
+    Because pg_connect writes error messages to php error_handler such messages is for a short moment caught by this function
+    Since it returns false, the normal error_handler also get the message
+   */
+  function catch_open_error($errno, $errstr, $errfile, $errline) {
+    $this->open_error_message = "errorno : $errno, $errstr, $errfile, $errline";
+    return false;
+  }
+
+  /** \brief
    * pg_pconnect has been altered to pg_connect.
    * We have had a lot of database connections before the altering.
    * Hopefully this will solve the problem.
@@ -124,8 +135,13 @@ class Pg_database extends Fet_database {
    * your database down)."
    */
   public function open() {
-    if (($this->connection = pg_connect(self::connectionstring())) === FALSE)
-      throw new fetException('no connection');
+    // TODO : When changing to php 5.5.0, restore_error_handler() should be changed to set_error_handler($old_error_handler) at both places
+    $old_error_handler = set_error_handler(array($this, "catch_open_error"));
+    if (($this->connection = pg_connect(self::connectionstring())) === FALSE) {
+      restore_error_handler();
+      throw new fetException($this->open_error_message);
+    }
+    restore_error_handler();
   }
 
   /** \brief
@@ -355,4 +371,11 @@ class Pg_database extends Fet_database {
 
 }
 
-?>
+//*
+//* Local variables:
+//* tab-width: 2
+//* c-basic-offset: 2
+//* End:
+//* vim600: sw=2 ts=2 fdm=marker expandtab
+//* vim<600: sw=2 ts=2 expandtab
+//*/
