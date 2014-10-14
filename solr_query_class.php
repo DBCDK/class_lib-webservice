@@ -365,8 +365,7 @@ class SolrQuery {
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
     $quote = strpos($term, '"') !== FALSE ? '"' : (strpos($term, "'") !== FALSE ? "'" : '');
-    $term = preg_replace('/\s\s+/', ' ', trim($term));  // remove multiple spaces
-    $term = preg_replace('/(^' . $quote . ' )|( ' . $quote . '$)/', $quote, $term);  // remove spaces next to quote
+    $term = self::normalize_term($term, $quote);
     $term = self::convert_old_recid($term, $prefix, $field);
     $space = strpos($term, ' ') !== FALSE;
     if ($field && ($field <> 'serverChoice')) {
@@ -374,12 +373,12 @@ class SolrQuery {
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
         if ($space) {
           if ($relation == 'any') {
-            $term = '(' . preg_replace('/\s+/', ' OR ', trim(str_replace($quote, '', $term))) . ')';
+            $term = '(' . preg_replace('/\s+/', ' OR ', str_replace($quote, '', $term)) . ')';
           }
           elseif ($relation == 'all') {
-            $term = '(' . preg_replace('/\s+/', ' AND ', trim(str_replace($quote, '', $term))) . ')';
+            $term = '(' . preg_replace('/\s+/', ' AND ', str_replace($quote, '', $term)) . ')';
           }
-          else {
+          elseif ($space) {
             $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
           }
         }
@@ -390,6 +389,15 @@ class SolrQuery {
       $m_term = self::escape_solr_term($term) . ($space ? '~' . $slop : '');
     }
     return  $m_field . $m_term;
+  }
+
+  /** \brief Normalize spaces in term. Remove multiple spaces and space next to $quote
+   * @param term (string)
+   * @param quote (char)
+   * @return string
+   */
+  private function normalize_term($term, $quote) {
+    return preg_replace('/(^' . $quote . ' )|( ' . $quote . '$)/', $quote, preg_replace('/\s\s+/', ' ', trim($term)));
   }
 
   /** \brief Create full search code from a search tree node
