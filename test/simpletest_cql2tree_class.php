@@ -60,7 +60,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   function test_adjacency() {
     list($tree, $diags) = self::get_tree('dkcclphrase.cclphrase ADJ "test some"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'test some');
+    $this->assertEqual($tree['term'], '"test some"');
     $this->assertEqual($tree['field'], 'cclphrase');
     $this->assertEqual($tree['prefix'], 'dkcclphrase');
     $this->assertEqual($tree['fielduri'], $this->cqlns['dkcclphrase']);
@@ -82,7 +82,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($tree['type'], 'boolean');
     $this->assertEqual($tree['op'], 'and');
     $this->assertEqual($tree['left']['type'], 'searchClause');
-    $this->assertEqual($tree['left']['term'], 'karen blixen');
+    $this->assertEqual($tree['left']['term'], '"karen blixen"');
     $this->assertEqual($tree['left']['field'], 'facet');
     $this->assertEqual($tree['left']['prefix'], 'facet');
     $this->assertEqual($tree['left']['fielduri'], $this->cqlns['facet']);
@@ -98,18 +98,18 @@ class TestOfCql2TreeClass extends UnitTestCase {
   function test_slop() {
     list($tree, $diags) = self::get_tree('term.slop="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'karen blixen');
+    $this->assertEqual($tree['term'], '"karen blixen"');
     $this->assertEqual($tree['slop'], 10);
     list($tree, $diags) = self::get_tree('term.term="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'karen blixen');
+    $this->assertEqual($tree['term'], '"karen blixen"');
     $this->assertEqual($tree['slop'], 9999);
   }
 
   function test_alias() {
     list($tree, $diags) = self::get_tree('slop="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'karen blixen');
+    $this->assertEqual($tree['term'], '"karen blixen"');
     $this->assertEqual($tree['slop'], 5);
     $this->assertEqual($tree['field'], 'slop');
     $this->assertEqual($tree['prefix'], 'term');
@@ -130,7 +130,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   function test_any_relation() {
     list($tree, $diags) = self::get_tree('cql.keywords any "code computer calculator programming"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'code computer calculator programming');
+    $this->assertEqual($tree['term'], '"code computer calculator programming"');
     $this->assertEqual($tree['relation'], 'any');
     $this->assertEqual($tree['field'], 'keywords');
     $this->assertEqual($tree['prefix'], 'cql');
@@ -141,7 +141,7 @@ class TestOfCql2TreeClass extends UnitTestCase {
   function test_all_relation() {
     list($tree, $diags) = self::get_tree('cql.keywords all "code computer calculator programming"');
     $this->assertEqual($tree['type'], 'searchClause');
-    $this->assertEqual($tree['term'], 'code computer calculator programming');
+    $this->assertEqual($tree['term'], '"code computer calculator programming"');
     $this->assertEqual($tree['relation'], 'all');
     $this->assertEqual($tree['field'], 'keywords');
     $this->assertEqual($tree['prefix'], 'cql');
