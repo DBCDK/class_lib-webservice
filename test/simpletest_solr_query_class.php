@@ -92,8 +92,9 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_relation_any() {
-    $tests = array('term.term any "en"' => 'term.term:en',
-                   'term.term any "   en  "' => 'term.term:en',
+    $tests = array('term.term any en' => 'term.term:en',
+                   'term.term any "en"' => 'term.term:"en"',
+                   'term.term any "   en  "' => 'term.term:"en"',
                    'term.term any "en to tre"' => 'term.term:(en OR to OR tre)',
                    'term.term any "  en   to   tre  "' => 'term.term:(en OR to OR tre)');
     foreach ($tests as $send => $recieve) {
@@ -102,8 +103,9 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_relation_all() {
-    $tests = array('term.term all "en"' => 'term.term:en',
-                   'term.term all "   en  "' => 'term.term:en',
+    $tests = array('term.term all en' => 'term.term:en',
+                   'term.term all "en"' => 'term.term:"en"',
+                   'term.term all "   en  "' => 'term.term:"en"',
                    'term.term all "en to tre"' => 'term.term:(en AND to AND tre)',
                    'term.term all "  en   to   tre  "' => 'term.term:(en AND to AND tre)');
     foreach ($tests as $send => $recieve) {
@@ -112,7 +114,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_relation_modifier_relevant() {
-    $tests = array('slop=/relevant "karen"' => 'term.slop:karen',
+    $tests = array('slop=/relevant karen' => 'term.slop:karen',
+                   'slop=/relevant "karen"' => 'term.slop:"karen"',
                    'slop=/relevant "karen blixen"' => 'term.slop:"karen blixen"~5');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
@@ -120,7 +123,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_relation_modifier_word() {
-    $tests = array('slop=/word "karen"' => 'term.slop:karen',
+    $tests = array('slop=/word karen' => 'term.slop:karen',
+                   'slop=/word "karen"' => 'term.slop:"karen"',
                    'slop=/word "karen blixen"' => 'term.slop:"karen blixen"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
@@ -128,7 +132,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_relation_modifier_string() {
-    $tests = array('slop=/string "karen"' => 'term.slop:karen',
+    $tests = array('slop=/string karen' => 'term.slop:karen',
+                   'slop=/string "karen"' => 'term.slop:"karen"',
                    'slop=/string "karen blixen"' => 'term.slop:"karen blixen"~1');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
@@ -157,7 +162,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_slop() {
-    $tests = array('term.slop="karen"' => 'term.slop:karen',
+    $tests = array('term.slop=karen' => 'term.slop:karen',
+                   'term.slop="karen"' => 'term.slop:"karen"',
                    'term.slop="karen blixen"' => 'term.slop:"karen blixen"~10');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
@@ -165,7 +171,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_alias() {
-    $tests = array('slop="karen"' => 'term.slop:karen',
+    $tests = array('slop=karen' => 'term.slop:karen',
+                   'slop="karen"' => 'term.slop:"karen"',
                    'slop="karen blixen"' => 'term.slop:"karen blixen"~5');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
@@ -182,7 +189,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
 
   function test_trunkation() {
     $tests = array('term.term=karen*' => 'term.term:karen*',
-                   'term.term="karen*"' => 'term.term:karen*',   // this is wrong - should be term.term:"karen*"
+                   'term.term="karen*"' => 'term.term:"karen*"', 
                    'term.term=(karen* AND wulf)' => 'term.term:karen* AND term.term:wulf',
                    'term.term="karen* wulf"' => 'term.term:"karen* wulf"~9999');
     foreach ($tests as $send => $recieve) {
@@ -192,7 +199,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
 
   function test_masking() {
     $tests = array('term.term=kar?n' => 'term.term:kar?n',
-                   'term.term="kar?n"' => 'term.term:kar?n');   // this is wrong - should be term.term:"kar?n"
+                   'term.term="kar?n"' => 'term.term:"kar?n"');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
