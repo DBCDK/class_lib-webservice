@@ -30,7 +30,7 @@ class SolrQuery {
   var $cql_dom;
   // full set of escapes as seen in the solr-doc. We use those who so far has been verified
   //var $solr_escapes = array('\\','+','-','&&','||','!','(',')','{','}','[',']','^','"','~','*','?',':');
-  var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '"', '~', ':');
+  var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '~', ':');
   var $solr_ignores = array();         // this should be kept empty
   var $phrase_index = array();
   var $search_term_format = array();
@@ -364,30 +364,30 @@ class SolrQuery {
    * @param slop (integer)
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
-    $term = preg_replace('/\s\s+/', ' ', trim($term));
+    $quote = strpos($term, '"') !== FALSE ? '"' : (strpos($term, "'") !== FALSE ? "'" : '');
+    $term = preg_replace('/\s\s+/', ' ', trim($term));  // remove multiple spaces
+    $term = preg_replace('/(^' . $quote . ' )|( ' . $quote . '$)/', $quote, $term);  // remove spaces next to quote
     $term = self::convert_old_recid($term, $prefix, $field);
-    $quote = strpos($term, ' ') ? '"' : '';
+    $space = strpos($term, ' ') !== FALSE;
     if ($field && ($field <> 'serverChoice')) {
       $m_field = self::join_prefix_and_field($prefix, $field, ':');
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
-        if ($quote) {
+        if ($space) {
           if ($relation == 'any') {
-            $term = '(' . preg_replace('/\s+/', ' OR ', $term) . ')';
-            $quote = '';
+            $term = '(' . preg_replace('/\s+/', ' OR ', trim(str_replace($quote, '', $term))) . ')';
           }
           elseif ($relation == 'all') {
-            $term = '(' . preg_replace('/\s+/', ' AND ', $term) . ')';
-            $quote = '';
+            $term = '(' . preg_replace('/\s+/', ' AND ', trim(str_replace($quote, '', $term))) . ')';
           }
           else {
             $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
           }
         }
-        $m_term = $quote . self::escape_solr_term($term) . $quote . $m_slop;
+        $m_term = self::escape_solr_term($term) . $m_slop;
       }
     }
     else {
-      $m_term = $quote . self::escape_solr_term($term) . $quote . ($quote ? '~' . $slop : '');
+      $m_term = self::escape_solr_term($term) . ($space ? '~' . $slop : '');
     }
     return  $m_field . $m_term;
   }

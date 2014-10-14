@@ -191,14 +191,14 @@ class CQL_parser {
       $mark = $c;
       $this->qi++;
       $this->val = '';
-      //$this->val = $mark;
+      $this->val = $mark;
       while ($this->qi < $this->ql && $this->qs[$this->qi] != $mark) {
         if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) 
           $this->qi++;
         $this->val .= $this->qs[$this->qi];
         $this->qi++;
       }
-      //$this->val .= $mark;
+      $this->val .= $mark;
       $this->lval = strtolower($this->val);
       if ($this->qi < $this->ql) 
         $this->qi++;
