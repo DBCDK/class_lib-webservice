@@ -82,7 +82,7 @@ class CQL_parser {
   public function __construct() { }
   
   /** \brief for supporting national versions of and, or, not - will violate strict cql
-   * @param boolean (array)
+   * @param array $boolean
    **/
   public function set_boolean_translate($booleans) {
     if (is_array($booleans)) {
@@ -95,8 +95,8 @@ class CQL_parser {
     }
   }
 
-  /** \brief 
-   * @param namespaces (array)
+  /** \brief Sets prefixes for the namespaces
+   * @param array $namespaces 
    **/
   public function set_prefix_namespaces($namespaces) {
     if (is_array($namespaces)) {
@@ -106,25 +106,25 @@ class CQL_parser {
     }
   }
 
-  /** \brief 
-   * @param prefix (string)
-   * @param title (string)
-   * @param uri (string)
+  /** \brief Define a prefix and the namespace associated with it
+   * @param string $prefix
+   * @param string $title
+   * @param string $uri
    **/
   public function define_prefix($prefix, $title, $uri) {
     $this->std_prefixes = self::add_prefix($this->std_prefixes, $prefix, $title, $uri);
   }
   
-  /** \brief 
-   * @param query (string)
+  /** \brief Sets the indexes 
+   * @param string $query
    **/
   public function set_indexes($indexes) {
     $this->indexes = $indexes;
   }
 
   /** \brief Parse a query
-   * @param query (string)
-   * @return (boolean) TRUE if no errors were found, FALSE otherwise
+   * @param string $query
+   * @retval boolean - TRUE if no errors were found, FALSE otherwise
    **/
   public function parse($query) {
     $this->diagnostics = array();
@@ -142,13 +142,15 @@ class CQL_parser {
   
   /** \brief Returns the result of a parse()
    * 
+   * @retval array - 
    **/
   public function result() {
     return $this->tree;
   }
   
   /** \brief Transform a result to a xml representation
-   * @param ar (string)
+   * @param string $ar
+   * @retval array - 
    **/
   public function result2xml($ar) {
     return self::tree2xml_r($ar, 0);
@@ -156,6 +158,7 @@ class CQL_parser {
   
   /** \brief retrieve dianostic structure
    * 
+   * @retval array - 
    **/
   public function get_diagnostics() {
     return $this->diagnostics;
@@ -214,9 +217,10 @@ class CQL_parser {
     self::dump_state('move');
   }
   
-  /** \brief 
-   * @param context (string)
-   * @param target (string) the boolean or relation being modified
+  /** \brief Collect the modifiers uses on the current boolean or relation
+   * @param string $context
+   * @param string $target - the boolean or relation being modified
+   * @retval array - of modifiers
    **/
   private function modifiers($context, $target) {
     $ar = array();
@@ -256,10 +260,11 @@ class CQL_parser {
   }
   
   /** \brief 
-   * @param field (string)
-   * @param relation (string)
-   * @param context (string)
-   * @param modifiers (string)
+   * @param string $field
+   * @param string $relation
+   * @param string $context
+   * @param string $modifiers
+   * @retval array
    **/
   private function cqlQuery($field, $relation, $context, $modifiers) {
     $left = self::searchClause($field, $relation, $context, $modifiers);
@@ -283,10 +288,11 @@ class CQL_parser {
   }
   
   /** \brief 
-   * @param field (string)
-   * @param relation (string)
-   * @param context (string)
-   * @param modifiers (string)
+   * @param string $field
+   * @param string $relation
+   * @param string $context
+   * @param string $modifiers
+   * @retval array
    **/
   private function searchClause($field, $relation, $context, $modifiers) {
     if ($this->look == '(') {
@@ -396,10 +402,11 @@ class CQL_parser {
   }
   
   /** \brief 
-   * @param ar (string)
-   * @param prefix (string)
-   * @param title (string)
-   * @param uri (string)
+   * @param string $ar
+   * @param string $prefix
+   * @param string $title
+   * @param string $uri
+   * @retval array
    **/
   private function add_prefix($ar, $prefix, $title, $uri) {
     if (!is_array($ar)) 
@@ -411,9 +418,10 @@ class CQL_parser {
     return $ar;
   }
   
-  /** \brief 
-   * @param ar (string)
-   * @param level (string)
+  /** \brief Build a xml representation of a modifier
+   * @param string $ar
+   * @param string $level
+   * @retval string
    **/
   private function tree2xml_modifiers($ar, $level) {
     if (sizeof($ar) == 0) {
@@ -447,16 +455,18 @@ class CQL_parser {
     return $s;
   }
   
-  /** \brief 
-   * @param context (string)
+  /** \brief Indents
+   * @param string $level
+   * @retval string
    **/
   private function tree2xml_indent($level) {
     return str_repeat(' ', $level * 2);
   }
   
-  /** \brief 
-   * @param ar (string)
-   * @param level (string)
+  /** \brief Build a xml representation of a tree
+   * @param string $ar
+   * @param string $level
+   * @retval string
    **/
   private function tree2xml_r($ar, $level) {
     $s = '';
@@ -535,9 +545,10 @@ class CQL_parser {
     return $s;
   }
   
-  /** \brief 
-   * @param id (integer)
-   * @param details (string)
+  /** \brief Build a diagnostic
+   * @param integer $id
+   * @param integer $pos
+   * @param string $details
    **/
   private function add_diagnostic($id, $pos, $details = '') {
     $this->parse_ok = FALSE;
@@ -546,8 +557,9 @@ class CQL_parser {
     }
   }
 
-  /** \brief 
-   * @param id (integer)
+  /** \brief Expand an error code to its corresponding errror text
+   * @param integer $id
+   * @retval string
    **/
   private function diag_message($id) {
 /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
@@ -566,6 +578,9 @@ class CQL_parser {
     return $message[$id];
   }
 
+  /** \brief 
+   * @param string $where
+   **/
   private function dump_state($where) {
     return;
     $str = sprintf('%6s:: val: %-8s lval: %-8s look: %-2s qi: %-2s ql: %-2s', $where, $this->val, $this->lval, $this->look, $this->qi, $this->ql);
