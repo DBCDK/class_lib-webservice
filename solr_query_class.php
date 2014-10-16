@@ -360,7 +360,10 @@ class SolrQuery {
    */
   private function make_bestmatch_term($term, $relation, $prefix, $field, $slop) {
     $ret = array();
-    $terms = explode(' ', $term);
+    if ($quote = self::is_quoted($term)) {
+      $term = str_replace($quote, '', $term);
+    }
+    $terms = explode(' ', self::normalize_term($term));
     foreach ($terms as $t) {
       if ($t) {
         $ret[] = self::make_solr_term($t, $relation, $prefix, $field, $slop);
@@ -378,7 +381,7 @@ class SolrQuery {
    * @retval string - 
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
-    $quote = strpos($term, '"') !== FALSE ? '"' : (strpos($term, "'") !== FALSE ? "'" : '');
+    $quote = self::is_quoted($term);
     $term = self::normalize_term($term, $quote);
     $term = self::convert_old_recid($term, $prefix, $field);
     $space = strpos($term, ' ') !== FALSE;
@@ -405,12 +408,20 @@ class SolrQuery {
     return  $m_field . $m_term;
   }
 
+  /** \brief Return the quote used or FALSE
+   * @param string $str
+   * @retval mixed - the quote or FALSE
+   */
+  private function is_quoted($str) {
+    return (strpos($str, '"') !== FALSE ? '"' : (strpos($str, "'") !== FALSE ? "'" : ''));
+  }
+
   /** \brief Normalize spaces in term. Remove multiple spaces and space next to $quote
    * @param string $term
    * @param char $quote
    * @retval string
    */
-  private function normalize_term($term, $quote) {
+  private function normalize_term($term, $quote='') {
     return preg_replace('/(^' . $quote . ' )|( ' . $quote . '$)/', $quote, preg_replace('/\s\s+/', ' ', trim($term)));
   }
 
