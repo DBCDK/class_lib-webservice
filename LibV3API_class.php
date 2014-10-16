@@ -9,63 +9,189 @@
  *
  * @date 11-07-2012
  */
-$startdir = dirname(__FILE__);
-$inclnk = $startdir . "/../inc";
+//$startdir = dirname(__FILE__);
+//$inclnk = $startdir . "/../inc";
 
-require_once "$inclnk/OLS_class_lib/verbose_class.php";
-require_once "$inclnk/OLS_class_lib/oci_class.php";
+require_once 'marc_class.php';
+require_once "verbose_class.php";
+require_once "oci_class.php";
 
 class LibV3API {
 
 //  private $oci;
+    private $withAuthor;
+    private $hbs;
+    private $return;
+    private $oci;
+    private $PhusOci;
+    private $BasisOci;
 
-  function __construct($ociuser, $ocipasswd, $ocidatabase) {
-    $this->oci = new oci($ociuser, $ocipasswd, $ocidatabase);
-    $this->oci->set_charset('WE8ISO8859P1');
-    $this->oci->connect();
-
-//    echo "ociuser:$ociuser $ocidatabase $ocipasswd\n";
-//    $sql = "alter session set NLS_LANG='AMERICAN_DENMARK.WE8ISO8859P1'";
-//    $sql = "alter session set NLS_LANGUAGE = AMERICAN";
-//    $this->oci->set_query($sql);
-//    $sql = "alter session set NLS_TERRITORY = DENMARK";
-//    $this->oci->set_query($sql);
-  }
-
-  function getMarcByLokalidBibliotek($lokalid, $bibliotek) {
-
-
-    $sql = "
-      select to_char(ajourdato,'YYYYMMDD HH24MISS')ajour,
-        to_char(opretdato,'YYYYMMDD HH24MISS')opret,
-        id,
-        danbibid,
-        lokalid,
-        bibliotek,
-        data
-      from poster where lokalid   = '$lokalid'
-                    and bibliotek = '$bibliotek'
-      ";
-//    echo $sql;
-    $result = $this->oci->fetch_all_into_assoc($sql);
-    if (count($result) == 0)
-      return $result;
-//    print_r($result);
-    $data = $result[0]['DATA'];
-    $id = $result[0]['ID'];
-    $marclngth = substr($data, 0, 5);
-    if ($marclngth > 4000) {
-      $sql = "
-    select data from poster_overflow where id = $id order by lbnr
-  ";
-      $overflow = $this->oci->fetch_all_into_assoc($sql);
-      foreach ($overflow as $record) {
-        $data .= $record['DATA'];
-      }
-      $result[0]['DATA'] = $data;
-//      print_r($result);
+    function __construct($ociuser, $ocipasswd, $ocidatabase) {
+        $this->oci = new oci($ociuser, $ocipasswd, $ocidatabase);
+        $this->oci->set_charset('WE8ISO8859P1');
+        $this->oci->connect();
+        $this->BasisOci = $this->oci;
     }
-    return $result;
-  }
+
+    function setPhusLogin($ociuser, $ocipasswd, $ocidatabase) {
+        $this->PhusOci = new oci($ociuser, $ocipasswd, $ocidatabase);
+        $this->PhusOci->set_charset('WE8ISO8859P1');
+        $this->PhusOci->connect();
+    }
+
+    /**
+     *
+     * @param type $name
+     * @param type $value
+     *
+     * set various parameters
+     * withAuthor: the 100/770 field in the record will be data from the authority database.
+     * hbs:  head bind section. all records (from this and up) will be fetched
+     *
+     */
+    function set($name, $value = true) {
+        switch ($name) {
+            case 'withAuthor' :
+                $this->withAuthor = $value;
+                break;
+            case 'hbs':
+                $this->hbs = $value;
+                break;
+            case 'Basis' :
+                $this->oci = $this->BasisOci;
+                break;
+            case 'Phus' :
+                $this->oci = $this->PhusOci;
+        }
+    }
+
+    /**
+     *
+     * @param string with iso2709 record $data
+     * @return iso2709 type
+     *
+     * test wether there is a subfield '5' and/or '6' in field
+     * 100/700.  If so replace data with the data fra the
+     * authority record.
+     */
+    function insertAuthors($data) {
+        $marc = new marc();
+        $marc->fromIso($data);
+        $fields = array('100', '700');
+        foreach ($fields as $field) {
+            while ($marc->thisField($field)) {
+                while ($marc->thisSubfield('5')) {
+                    $bib = $marc->subfield();
+                }
+                while ($marc->thisSubfield('6')) {
+                    $lokalid = $marc->subfield();
+                }
+                if ($bib && $lokalid) {
+
+                    $autMarcs = $this->getMarcByLB($lokalid, $bib);
+                    $autmarc = new marc();
+                    $autmarc->fromIso($autMarcs[0]['DATA']);
+                    $lns = $autmarc->toLineFormat();
+                    $afields = array('100', '400');
+                    foreach ($afields as $afield) {
+                        $res = $autmarc->findFields($afield);
+                        if ($res) {
+                            $marc->remField();
+                            foreach ($res as $rec) {
+                                $marc->insert($rec);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $data = $marc->toIso();
+        return $data;
+    }
+
+    function fetchHBS($data) {
+        $marc = new marc();
+        $marc->fromIso($data);
+        $lokalid = false;
+        while ($marc->thisField('014')) {
+            while ($marc->thisSubfield('a')) {
+                $lokalid = $marc->subfield();
+            }
+        }
+        if ($lokalid) {
+            $bib = $marc->findSubFields('001', 'b');
+            $result['bibliotek'] = $bib[0];
+            $result['lokalid'] = $lokalid;
+        }
+        return $result;
+    }
+
+    function getMarcByDanbibid($danbibid, $bibliotek) {
+        $where = "where danbibid = $danbibid and bibliotek = $bibliotek ";
+        return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
+    }
+
+    function getMarcById($id) {
+        $where = "where id = $id";
+        return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
+    }
+
+    function getMarcByLokalidBibliotek($lokalid, $bibliotek, $wh = "", $base = 'basis') {
+        $this->return = array();
+        $result = $this->getMarcByLB($lokalid, $bibliotek, $wh);
+        $this->return[] = $result[0];
+        if ($this->hbs) {
+            $res = $this->fetchHBS($result[0]['DATA']);
+            while ($res) {
+                $result = $this->getMarcByLB($res['lokalid'], $res['bibliotek'], $wh);
+                $this->return[] = $result[0];
+                $res = $this->fetchHBS($result[0]['DATA']);
+            }
+        }
+
+        if ($this->withAuthor) {
+            for ($i = 0; $i < count($this->return); $i++) {
+                $this->return[$i]['DATA'] = $this->insertAuthors($this->return[$i]['DATA']);
+            }
+        }
+
+        return $this->return;
+    }
+
+    private function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'basis') {
+
+        if ($wh) {
+            $where = $wh;
+        } else {
+            $where = "where lokalid   = '$lokalid' and bibliotek = '$bibliotek'";
+        }
+
+        $sql = "select to_char(ajourdato, 'YYYYMMDD HH24MISS')ajour, to_char(opretdato, 'YYYYMMDD HH24MISS')opret,
+                id,
+                danbibid,
+                lokalid,
+                bibliotek,
+                data
+                from poster
+                $where ";
+
+        $result = $this->oci->fetch_all_into_assoc($sql);
+        if (count($result) == 0)
+            return $result;
+        $data = $result[0]['DATA'];
+        $id = $result[0]['ID'];
+        $marclngth = substr($data, 0, 5);
+        if ($marclngth > 4000) {
+            $sql = "select data from poster_overflow "
+                    . "where id = $id order by lbnr";
+            $overflow = $this->oci->fetch_all_into_assoc($sql);
+            foreach ($overflow as $record) {
+                $data .= $record['DATA'];
+            }
+            $result[0]['DATA'] = $data;
+        }
+
+        return $result;
+    }
 
 }
