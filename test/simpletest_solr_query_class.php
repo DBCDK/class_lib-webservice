@@ -205,6 +205,19 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_bestmatch() {
+    $tests = array('term.term="karen blixen"' => array('t0' => 'term.term:karen', 
+                                                       't1' => 'term.term:blixen', 
+                                                       'sort' => 'sum(query($t0,50),query($t1,50)) asc'),
+                   'term.term="  karen  amalie  blixen  "' => array('t0' => 'term.term:karen', 
+                                                                    't1' => 'term.term:amalie', 
+                                                                    't2' => 'term.term:blixen', 
+                                                                    'sort' => 'sum(query($t0,33),query($t1,33),query($t2,33)) asc'));
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send, TRUE), $recieve);
+    }
+  }
+
   function test_errors() {
     $tests = array('en prox/unit=word/distance=2 to' => array(array('no' => 37, 'description' => 'Unsupported boolean operator', 'details' => 'prox', 'pos' => 7)),
                    'en prox/unit=woord/distance=2 to' => array(array('no' => 37, 'description' => 'Unsupported boolean operator', 'details' => 'prox', 'pos' => 7), 
@@ -215,13 +228,15 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
-  function get_edismax($cql) {
+  function get_edismax($cql, $bestmatch = FALSE) {
     $help = $this->c2s->parse($cql);
     if (isset($help['error'])) {
-//var_dump($help);
       return $help['error'];
     }
-    if (isset($help['edismax']['q'])) {
+    if ($bestmatch) {
+      return $help['best_match']['sort'];
+    }
+    elseif (isset($help['edismax']['q'])) {
       return implode(' AND ', $help['edismax']['q']);
     }
     return 'no reply';
