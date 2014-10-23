@@ -191,7 +191,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
     $tests = array('term.term=karen*' => 'term.term:karen*',
                    'term.term="karen*"' => 'term.term:"karen*"', 
                    'term.term=(karen* AND wulf)' => 'term.term:karen* AND term.term:wulf',
-                   'term.term="karen* wulf"' => 'term.term:"karen* wulf"~9999');
+                   'term.term="karen* wulf"' => 'term.term:"karen* wulf"~9999',
+                   'term.term="karen\* wulf"' => 'term.term:"karen* wulf"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
