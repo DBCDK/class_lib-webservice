@@ -134,7 +134,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
   function test_relation_modifier_string() {
     $tests = array('slop=/string karen' => 'term.slop:karen',
                    'slop=/string "karen"' => 'term.slop:"karen"',
-                   'slop=/string "karen blixen"' => 'term.slop:"karen blixen"~1');
+                   'slop=/string "karen blixen"' => 'term.slop:"karen blixen"~0');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
