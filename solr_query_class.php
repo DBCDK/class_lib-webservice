@@ -245,7 +245,7 @@ class SolrQuery {
    * @retval string
    */
   private function set_slop($node) {
-    return ($node['modifiers']['word'] ? 9999 : ($node['modifiers']['string'] ? 1 : $node['slop']));
+    return ($node['modifiers']['word'] ? 9999 : ($node['modifiers']['string'] ? 0 : $node['slop']));
   }
 
   /** \brief if relation modifier "relevant" is used, creates ranking info
