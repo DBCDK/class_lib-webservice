@@ -39,6 +39,11 @@ class LibV3API {
         $this->PhusOci->connect();
     }
 
+    function close() {
+        $this->BasisOci->disconnect();
+        $this->PhusOci->disconnect();
+    }
+
     /**
      *
      * @param type $name
@@ -93,7 +98,12 @@ class LibV3API {
                     $autmarc->fromIso($autMarcs[0]['DATA']);
                     $lns = $autmarc->toLineFormat();
                     $afields = array('100', '400');
+                    $res = null;
+
                     foreach ($afields as $afield) {
+                        if ($res != null) {
+                            break;
+                        }
                         $res = $autmarc->findFields($afield);
                         if ($res) {
                             $marc->remField();
