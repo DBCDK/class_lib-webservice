@@ -46,7 +46,7 @@ class ShowPriority {
   * \brief Get a given prority list for the agency
   *
   * @param string $agency - agency-id
-  * @retval array - of agencies
+  * @retval array - array with agency as index and priority as value
   **/
   public function get_priority($agency) {
     $agency_list = array();
@@ -68,15 +68,15 @@ class ShowPriority {
         }
       }
       else {
-        if (substr($agency, 0, 1) == '7') {  // need to be first in list since 7-libraries use the 870970-priority
-          $agency_list[$agency] = count($agency_list);
-        }
         $dom = new DomDocument();
         $dom->preserveWhiteSpace = false;
         if (@ $dom->loadXML($res_xml)) {
           foreach ($dom->getElementsByTagName('agencyId') as $id) {
-            $agency_list[$id->nodeValue] = count($agency_list);
+            $agency_list[$id->nodeValue] = count($agency_list) + 1;
           }
+        }
+        if (!isset($agency_list[$agency])) {  
+          $agency_list[$agency] = 0;
         }
       }
       if ($this->agency_cache) {
