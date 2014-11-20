@@ -20,7 +20,7 @@ class LibV3API {
 
 //  private $oci;
     private $withAuthor;
-    private $hbs;
+    private $hsb;
     private $return;
     private $oci;
     private $PhusOci;
@@ -51,7 +51,7 @@ class LibV3API {
      *
      * set various parameters
      * withAuthor: the 100/770 field in the record will be data from the authority database.
-     * hbs:  head bind section. all records (from this and up) will be fetched
+     * hsb:  head bind section. all records (from this and up) will be fetched
      *
      */
     function set($name, $value = true) {
@@ -59,8 +59,8 @@ class LibV3API {
             case 'withAuthor' :
                 $this->withAuthor = $value;
                 break;
-            case 'hbs':
-                $this->hbs = $value;
+            case 'hsb':
+                $this->hsb = $value;
                 break;
             case 'Basis' :
                 $this->oci = $this->BasisOci;
@@ -119,7 +119,7 @@ class LibV3API {
         return $data;
     }
 
-    function fetchHBS($data) {
+    function fetchHSB($data) {
         $marc = new marc();
         $marc->fromIso($data);
         $lokalid = false;
@@ -146,16 +146,30 @@ class LibV3API {
         return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
     }
 
-    function getMarcByLokalidBibliotek($lokalid, $bibliotek, $wh = "", $base = 'basis') {
+    function getIdsByLokalidBibliotek($lokalid, $bibliotek) {
+        $ids = array();
+        $select = "select id from poster where lokalid = '$lokalid' and "
+                . "bibliotek = '$bibliotek' ";
+        $res = $this->oci->fetch_all_into_assoc($select);
+        foreach ($res as $id) {
+            $ids[] = $id['ID'];
+        }
+        return $ids;
+    }
+
+    function getMarcByLokalidBibliotek($lokalid, $bibliotek, $wh = "") {
         $this->return = array();
         $result = $this->getMarcByLB($lokalid, $bibliotek, $wh);
+        if (!$result) {
+            return $result;
+        }
         $this->return[] = $result[0];
-        if ($this->hbs) {
-            $res = $this->fetchHBS($result[0]['DATA']);
+        if ($this->hsb) {
+            $res = $this->fetchHSB($result[0]['DATA']);
             while ($res) {
-                $result = $this->getMarcByLB($res['lokalid'], $res['bibliotek'], $wh);
+                $result = $this->getMarcByLB($res['lokalid'], $res['bibliotek']);
                 $this->return[] = $result[0];
-                $res = $this->fetchHBS($result[0]['DATA']);
+                $res = $this->fetchHSB($result[0]['DATA']);
             }
         }
 
@@ -168,7 +182,7 @@ class LibV3API {
         return $this->return;
     }
 
-    private function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'basis') {
+    function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'basis') {
 
         if ($wh) {
             $where = $wh;
