@@ -50,6 +50,7 @@ abstract class webServiceServer {
   protected $tag_sequence; // tag sequence according to XSD or noame of XSD
   protected $soap_action;
   protected $dump_timer;
+  protected $dump_timer_ip;
   protected $output_type='';
   protected $curl_recorder;
   protected $debug;
@@ -96,6 +97,8 @@ abstract class webServiceServer {
     $this->version = $this->config->get_value('version', 'setup');
     $this->output_type = $this->config->get_value('default_output_type', 'setup');
     $this->dump_timer = $this->config->get_value('dump_timer', 'setup');
+    if ($this->config->get_value('dump_timer_ip', 'setup'))
+      $this->dump_timer_ip = ' ip:' . $_SERVER['REMOTE_ADDR'];
     if (!$this->url_override = $this->config->get_value('url_override', 'setup'))
       $this->url_override = array('HowRU' => 'HowRU', 'ShowInfo' => 'ShowInfo', 'Version' => 'Version');
 
@@ -218,8 +221,7 @@ abstract class webServiceServer {
           }
           // request done and response send, dump timer
           if ($this->dump_timer)
-            verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) .
-                         ':: ' . $this->watch->dump());
+            verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) .  ':: ' . $this->watch->dump() . $this->dump_timer_ip);
         }
         else
           $this->soap_error('Error in response validation.');
