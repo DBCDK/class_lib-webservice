@@ -77,6 +77,13 @@ class marc implements Iterator {
     function FuzzyCompare($txt1, $txt2, $loose = false) {
         $txt1 = $this->striptxt($txt1);
         $txt2 = $this->striptxt($txt2);
+        if (!$txt1 && $txt2) {
+            return false;
+        }
+        if ($txt1 && !$txt2) {
+            return false;
+        }
+
         if ($txt1 == $txt2) {
             return true;
         } else {
@@ -524,24 +531,33 @@ class marc implements Iterator {
      *
      * @param type $field_array
      */
-    function insert($field_array) {
+    function insert($field_arrays) {
 // find where to insert
-        $this->position = count($this->marc_array);
-        if (!empty($this->marc_array)) {
-            foreach ($this->marc_array as $key => $value) {
-                if ($value['field'] > $field_array['field']) {
-                    $this->position = $key;
-                    break;
+        if (!$field_arrays) {
+            return true;
+        }
+        if (array_key_exists('field', $field_arrays)) {
+            $x[] = $field_arrays;
+            $field_arrays = $x;
+        }
+        foreach ($field_arrays as $field_array) {
+            $this->position = count($this->marc_array);
+            if (!empty($this->marc_array)) {
+                foreach ($this->marc_array as $key => $value) {
+                    if ($value['field'] > $field_array['field']) {
+                        $this->position = $key;
+                        break;
+                    }
+                }
+
+                $this->marc_array[] = array();
+                for ($cnt = count($this->marc_array) - 1; $cnt && ($cnt >= $this->position); $cnt--) {
+                    $this->marc_array[$cnt] = $this->marc_array[$cnt - 1];
                 }
             }
-
-            $this->marc_array[] = array();
-            for ($cnt = count($this->marc_array) - 1; $cnt && ($cnt >= $this->position); $cnt--) {
-                $this->marc_array[$cnt] = $this->marc_array[$cnt - 1];
-            }
+            $this->marc_array[$this->position] = $field_array;
+            $this->position++;
         }
-        $this->marc_array[$this->position] = $field_array;
-        $this->position++;
     }
 
     function fromString($marcln) {
