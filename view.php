@@ -6,6 +6,8 @@ class view {
     private $parameters = array();
     private $parsed = false;
 
+  /** \brief -
+   */
     function __construct($template = "") {
         if (empty($template))
             $template = basename($_SERVER['SCRIPT_FILENAME'], 'php') . 'thtml';
@@ -17,15 +19,21 @@ class view {
         $this->templateFileName = $template;
     }
 
+  /** \brief -
+   */
     function __destruct() {
         if (!$this->parsed)
             $this->parse();
     }
 
+  /** \brief -
+   */
     public function set($var, $value) {
         $this->parameters[$var] = $value;
     }
 
+  /** \brief -
+   */
     public function parse() {
         foreach ($this->parameters as $parameter_variable_name => $parameter_value)
             $$parameter_variable_name = $parameter_value;
