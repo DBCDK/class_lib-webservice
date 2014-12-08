@@ -27,20 +27,20 @@ define('TREE', $_REQUEST['tree']);
 
 class SolrQuery {
 
-  var $cql_dom;
+  var $cql_dom;  ///< -
   // full set of escapes as seen in the solr-doc. We use those who so far has been verified
   //var $solr_escapes = array('\\','+','-','&&','||','!','(',')','{','}','[',']','^','"','~','*','?',':');
-  var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '~', ':');
-  var $solr_ignores = array();         // this should be kept empty
-  var $phrase_index = array();
-  var $search_term_format = array();
-  var $best_match = FALSE;
-  var $operator_translate = array();
-  var $indexes = array();
-  var $default_slop = 9999;
-  var $error = '';
-  var $cqlns = array();  // namespaces for the search-fields
-  var $v2_v3 = array(    // translate v2 rec.id to v3 rec.id
+  var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '~', ':');  ///< -
+  var $solr_ignores = array();         ///< this should be kept empty
+  var $phrase_index = array();  ///< -
+  var $search_term_format = array();  ///< -
+  var $best_match = FALSE;  ///< -
+  var $operator_translate = array();  ///< -
+  var $indexes = array();  ///< -
+  var $default_slop = 9999;  ///< -
+  var $error = '';  ///< -
+  var $cqlns = array();  ///< namespaces for the search-fields
+  var $v2_v3 = array(    ///< -
       '150005' => '150005-artikel',
       '150008' => '150008-academic',
       '150012' => '150012-leksikon',
@@ -69,8 +69,14 @@ class SolrQuery {
       '159002' => '159002-lokalbibl',
       '870971' => '870971-avis',
       '870973' => '870973-anmeld',
-      '870976' => '870976-anmeld');
+      '870976' => '870976-anmeld');    ///< translate v2 rec.id to v3 rec.id
 
+  /** \brief constructor
+   * 
+   * @param $repository string
+   * @param $config string
+   * @param $language string
+   */
   public function __construct($repository, $config='', $language='') {
     $this->cql_dom = new DomDocument();
     $this->cql_dom->Load($repository['cql_file']);
@@ -99,7 +105,7 @@ class SolrQuery {
 
   /** \brief Parse a cql-query and build the solr edismax search string
    * 
-   * @param string $query
+   * @param $query string
    * @retval struct
    */
   public function parse($query) {
@@ -131,7 +137,7 @@ class SolrQuery {
 
 
   /** \brief build a boost string
-   * @param array $boosts - boost registers and values
+   * @param $boosts array - boost registers and values
    * @retval string
    */
   public function make_boost($boosts) {
@@ -147,7 +153,7 @@ class SolrQuery {
   // ------------------------- Private functions below -------------------------------------
 
   /** \brief convert all cql-trees to edismax-strings
-   * @param array @trees - of trees
+   * @param @trees array - of trees
    * @retval struct
    */
   private function trees_2_edismax($trees) {
@@ -169,7 +175,7 @@ class SolrQuery {
 
 
   /** \brief locate handlers (if any) and join nodes for each handler
-   * @param array $solr_nodes - one or more solr AND-nodes
+   * @param $solr_nodes array - one or more solr AND-nodes
    */
   private function join_handler_nodes(&$solr_nodes) {
     $found = array();
@@ -190,9 +196,9 @@ class SolrQuery {
   }
 
   /** \brief locate handlers 
-   * @param array $solr_nodes - one or more solr AND nodes
-   * @param string $type - - q og fq
-   * @param string $handler - - name of handler
+   * @param $solr_nodes array - one or more solr AND nodes
+   * @param $type string - - q og fq
+   * @param $handler string - - name of handler
    */
   private function apply_handler(&$solr_nodes, $type, $handler) {
     if ($handler && $format = $this->search_term_format[$handler][$type]) {
@@ -208,8 +214,8 @@ class SolrQuery {
   }
 
   /** \brief convert on cql-tree to edismax-string
-   * @param array $node - of tree
-   * @param integer $level - level of recursion
+   * @param $node array - of tree
+   * @param $level integer - level of recursion
    * @retval array - The term, the associated search handler and the query type (q or fq)
    */
   private function tree_2_edismax($node, $level = 0) {
@@ -241,7 +247,7 @@ class SolrQuery {
   }
 
   /** \brief modifies slop if word or string modifier is used
-   * @param array $node - modifiers and slop for the node
+   * @param $node array - modifiers and slop for the node
    * @retval string
    */
   private function set_slop($node) {
@@ -249,8 +255,8 @@ class SolrQuery {
   }
 
   /** \brief if relation modifier "relevant" is used, creates ranking info
-   * @param array $node 
-   * @param string $ranking
+   * @param $node array
+   * @param $ranking string
    * $retval string
    */
   private function use_rank($node, $ranking) {
@@ -266,8 +272,8 @@ class SolrQuery {
   }
 
   /** \brief Set an error to send back to the client
-   * @param integer $no
-   * @param string $desc
+   * @param $no integer
+   * @param $desc string
    * @retval array - diagnostic structure
    */
   private function set_error($no, $details = '') {
@@ -279,7 +285,7 @@ class SolrQuery {
   }
 
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
-   * @param array $trees - of trees
+   * @param $trees array - of trees
    * @retval array - 
    */
   private function trees_2_bestmatch($trees) {
@@ -292,8 +298,8 @@ class SolrQuery {
   }
 
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
-   * @param array $node - of trees
-   * @param integer $level - level of recursion
+   * @param $node array - of trees
+   * @param $level integer - level of recursion
    * @retval array - 
    */
   private function tree_2_bestmatch($node, $level = 0) {
@@ -307,7 +313,7 @@ class SolrQuery {
   }
 
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
-   * @param array $trees - of tree
+   * @param $trees array - of tree
    * @retval array - 
    */
   private function trees_2_operands($trees) {
@@ -318,8 +324,8 @@ class SolrQuery {
     return $ret;
   }
   /** \brief convert all cql-trees to edismax-bestmatch-strings and set sort-scoring
-   * @param array $node - 
-   * @param integer $level - level of recursion
+   * @param $node array - 
+   * @param $level integer - level of recursion
    * @retval array - 
    */
   private function tree_2_operands($node, $level = 0) {
@@ -334,7 +340,7 @@ class SolrQuery {
 
   /** \brief builds: t1 = term1, t1 = term2 to be used as extra solr-parameters referenced fom the sort-parameter
    *         like "sum(query($t1, 25),query($t2,25),query($t3,25),query($t4,25)) asc" for 4 terms
-   * @param string $query
+   * @param $query string
    * @retval array - 
    */
   private function make_bestmatch_sort($query) {
@@ -351,11 +357,11 @@ class SolrQuery {
   }
 
   /** \brief create edismax term query for bestmatch
-   * @param string $term
-   * @param string $relation
-   * @param string $prefix
-   * @param string $field
-   * @param integer $slop
+   * @param $term string
+   * @param $relation string
+   * @param $prefix string
+   * @param $field string
+   * @param $slop integer
    * @retval string - 
    */
   private function make_bestmatch_term($term, $relation, $prefix, $field, $slop) {
@@ -373,11 +379,11 @@ class SolrQuery {
   }
 
   /** \brief create edismax term query
-   * @param string $term
-   * @param string $relation
-   * @param string $prefix
-   * @param string $field
-   * @param integer $slop
+   * @param $term string
+   * @param $relation string
+   * @param $prefix string
+   * @param $field string
+   * @param $slop integer
    * @retval string - 
    */
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
@@ -409,7 +415,7 @@ class SolrQuery {
   }
 
   /** \brief Return the quote used or FALSE
-   * @param string $str
+   * @param $str string
    * @retval mixed - the quote or FALSE
    */
   private function is_quoted($str) {
@@ -417,8 +423,8 @@ class SolrQuery {
   }
 
   /** \brief Normalize spaces in term. Remove multiple spaces and space next to $quote
-   * @param string $term
-   * @param char $quote
+   * @param $term string
+   * @param $quote char
    * @retval string
    */
   private function normalize_term($term, $quote='') {
@@ -426,7 +432,7 @@ class SolrQuery {
   }
 
   /** \brief Create full search code from a search tree node
-   * @param array $node
+   * @param $node array
    * @retval string
    */
   private function node_2_index($node) {
@@ -434,8 +440,8 @@ class SolrQuery {
   }
 
   /** \brief Create full search code
-   * @param string $prefix
-   * @param string $field
+   * @param $prefix string
+   * @param $field string
    * @retval string
    */
   private function join_prefix_and_field($prefix, $field, $colon = '') {
@@ -448,9 +454,9 @@ class SolrQuery {
   }
 
   /** \brief convert old rec.id's to version 3 rec.id's
-   * @param string $term
-   * @param string $prefix
-   * @param string $field
+   * @param $term string
+   * @param $prefix string
+   * @param $field string
    * @retval string
    */
   private function convert_old_recid($term, $prefix, $field) {
@@ -463,7 +469,7 @@ class SolrQuery {
   }
 
   /** \brief Escape character and remove characters to be ignored
-   * @param string $term
+   * @param $term string
    * @retval string
    */
   private function escape_solr_term($term) {
@@ -483,9 +489,9 @@ class SolrQuery {
   }
 
   /** \brief Detects fields which can go into solrs fq=
-   * @param string $term
-   * @param string $relation
-   * @param char $quot
+   * @param $term string
+   * @param $relation string
+   * @param $quot char
    * @retval string
    */
   private function make_term_interval($term, $relation, $quot) {
@@ -497,7 +503,7 @@ class SolrQuery {
   }
 
   /** \brief Detects if a term is a date
-   * @param string $term 
+   * @param $term string
    * @retval mixed - integer/boolean
    */
   private function is_date($term) {
@@ -505,8 +511,8 @@ class SolrQuery {
   }
 
   /** \brief Detects fields which can go into solrs fq=
-   * @param string $prefix
-   * @param string $field
+   * @param $prefix string
+   * @param $field string
    * @retval boolean
    */
   private function is_filter_field($prefix, $field) {
@@ -514,9 +520,9 @@ class SolrQuery {
   }
 
   /** \brief gets the handler for the term - depending od the search handler being used
-   * @param string $q_type - q for normal search and fq for the filter query
-   * @param string $prefix 
-   * @param string $field 
+   * @param $q_type string - q for normal search and fq for the filter query
+   * @param $prefix  string
+   * @param $field  string
    * @retval string - the name of the handler or ''
    */
   private function get_term_handler($q_type, $prefix, $field) {
@@ -524,7 +530,7 @@ class SolrQuery {
   }
 
   /** \brief Split cql tree into several and-trees
-   * @param array $tree
+   * @param $tree array
    * @retval array - of tree
    */
   private function split_tree($tree) {
@@ -581,7 +587,7 @@ class SolrQuery {
   }
 
   /** \brief Get list of valid operators
-   * @param string $str
+   * @param $str string
    * @retval boolean
    */
   private function xs_boolean($str) {
@@ -589,7 +595,7 @@ class SolrQuery {
   }
 
   /** \brief Get list of valid operators
-   * @param string $language
+   * @param $language string
    */
 /* not used any more - operators are given in cql 
   private function set_operators($language) {
