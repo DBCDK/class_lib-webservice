@@ -35,6 +35,14 @@ class ShowPriority {
   private $agency_cache;		    // cache object
   private $agency_uri;	        // uri of openagency service
 
+  /**
+  * \brief constructor
+  *
+  * @param $open_agency string -
+  * @param $cache_host string -
+  * @param $cache_port string - 
+  * @param $cache_seconds integer - 
+  */
   public function __construct($open_agency, $cache_host, $cache_port='', $cache_seconds = 0) {
     if ($cache_host) {
       $this->agency_cache = new cache($cache_host, $cache_port, $cache_seconds);
@@ -45,7 +53,7 @@ class ShowPriority {
   /**
   * \brief Get a given prority list for the agency
   *
-  * @param string $agency - agency-id
+  * @param $agency string - agency-id
   * @retval array - array with agency as index and priority as value
   **/
   public function get_priority($agency) {
