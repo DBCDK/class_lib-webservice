@@ -38,6 +38,8 @@ class UniversalSearch {
   private $marcx_ns;
   private $hits;
 
+  /** \brief -
+   */
   public function __construct($settings, $marcx_ns) {
     $this->settings = $settings;
     $this->marcx_ns = $marcx_ns;
@@ -60,6 +62,8 @@ class UniversalSearch {
     return self::zsearch($query, $start, $step);
   }
 
+  /** \brief - return number of hits
+   */
   public function get_hits() {
     return $this->hits;
   }

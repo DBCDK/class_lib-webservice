@@ -39,36 +39,36 @@ define('OPERAND', 'OPERAND');
 
 class tokenizer {
 
-  /// Token <string>
+  /// token - string
   var $token;
 
-  /// Expression to split by in preg format <string>
+  /// Expression to split by in preg format - string
   var $split_expression = '';
 
-  /// List of operators <array>
+  /// List of operators - array
   var $operators=array();
-  /// List of indexes <array>
+  /// List of indexes - array
   var $indexes=array();
-  /// List of aliases <array>
+  /// List of aliases - array
   var $aliases=array();
-  /// List of ignores <array>
+  /// List of ignores - array
   var $ignore=array();
-  /// Prefix for operator <array>
+  /// Prefix for operator - array
   var $index_prefixes=array();
 
-  /// List of tokens <array>
+  /// List of tokens - array
   var $tokenlist=array();
 
-  /// Sets weather operators and indexes are case insensitive <bool>
+  /// Sets weather operators and indexes are case insensitive - bool
   var $case_insensitive=FALSE;
 
-  // indexes which shold be searched as phrase
+  /// indexes which shold be searched as phrase
   var $phrase_index=array();
 
   /** \brief Check if token is operator. Operators must be uppercase
    *
-   * @param token (string)
-   * @return (bool)
+   * @param $token string
+   * @retval boolean
    *
    */
   function is_operator($token) {
@@ -80,8 +80,8 @@ class tokenizer {
 
   /** \brief translate tokens
    *
-   * @param token (string)
-   * @return token (bool)
+   * @param $token string
+   * @return boolean
    */
   function unalias($token) {
     if ($this->aliases[$token]) {
@@ -92,8 +92,8 @@ class tokenizer {
 
   /** \brief Check if token is index.
    *
-   * @param token (string)
-   * @return (bool)
+   * @param $token string
+   * @retval boolean
    *
    */
   function is_index($token) {
@@ -115,10 +115,23 @@ class tokenizer {
     return FALSE;
   }
 
+  /** \brief Check if token is a phrase index.
+   *
+   * @param $idx string
+   * @retval boolean
+   *
+   */
   function is_phrase_index($idx) {
     return $this->is_in_index($idx, $this->phrase_index);
   }
 
+  /** \brief Check if token is an index.
+   *
+   * @param $idx string
+   * @param $indexes array
+   * @retval boolean
+   *
+   */
   function is_in_index($idx, &$indexes) {
     if (is_array($indexes)) {
       foreach ($indexes as $i) {
@@ -131,8 +144,9 @@ class tokenizer {
 
   /** \brief Tokenize string
    *
-   * @param string (string)
-   * @return (array)
+   * @param $string string
+   * @param $trans_table array
+   * @retval array
    *
    */
   function tokenize($string, $trans_table = array()) {

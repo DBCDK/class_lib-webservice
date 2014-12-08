@@ -65,12 +65,12 @@
 
 class verbose {
 
-  static $verbose_file_name;
-  static $syslog_facility = NULL;
-  static $verbose_mask;
-  static $date_format;
-  static $my_pid = '';
-  static $tracking_id = '';
+  static $verbose_file_name;      ///< -
+  static $syslog_facility = NULL; ///< -
+  static $verbose_mask;           ///< -
+  static $date_format;            ///< -
+  static $my_pid = '';            ///< -
+  static $tracking_id = '';       ///< -
 
   private function __construct() {}
   private function __destruct() {}
