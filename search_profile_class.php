@@ -36,6 +36,14 @@ class search_profiles {
   private $profiles;		        // profiles for $agency
   private $agency_uri;	        // uri of openagency service
 
+  /**
+  * \brief constructor
+  *
+  * @param $open_agency string -
+  * @param $cache_host string -
+  * @param $cache_port string - 
+  * @param $cache_seconds integer - 
+  */
   public function __construct($open_agency, $cache_host, $cache_port='', $cache_seconds = 0) {
     if ($cache_host) {
       $this->profile_cache = new cache($cache_host, $cache_port, $cache_seconds);
@@ -46,10 +54,11 @@ class search_profiles {
   /**
   * \brief Get a given profile for the agency
   *
-  * @param $profile_name       name of profile
-  * @param $profile_version    version of profile: 2 or 3
+  * @param $agency string - name of profile
+  * @param $profile_name string - name of profile
+  * @param $profile_version integer - version of profile: 2 or 3
   *
-  * @returns profile if found, FALSE otherwise
+  * @retval mixed - profile if found, FALSE otherwise
   **/
   public function get_profile($agency, $profile_name, $profile_version) {
     if ($this->profile_cache) {
