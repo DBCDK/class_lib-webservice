@@ -78,8 +78,8 @@ class query_schema {
   /**
    * class constructor
    * Initializes the class
-   * @param string $url. The URL to be accessed by this instance of the class.
-   * @param array $schemas. The recursivly imported schemas.
+   * @param $url string. The URL to be accessed by this instance of the class.
+   * @param $schemas array. The recursivly imported schemas.
    */
 
   public function __construct( $url, $schemas=NULL ) {
@@ -132,7 +132,7 @@ class query_schema {
 
   /**
    * get sortsequences for the schemas, formatted for a .ini file.
-   * @returns string
+   * @retval string
    */
   public function ini_output() {
 
@@ -162,7 +162,7 @@ class query_schema {
 
   /**
    * get information on the named element, as specified in the schemas
-   * @returns XML document
+   * @retval XML document
    */
   public function get_element_xml( $element_name ) {
     $node = $this->get_element_by_name( $element_name );
@@ -177,7 +177,7 @@ class query_schema {
 
   /**
    * get a list of the elements in the named element, as specified in the schemas
-   * @returns array
+   * @retval array
    */
   public function get_element_sequence( $element_name ) {
     $node = $this->get_element_by_name( $element_name );
@@ -189,7 +189,7 @@ class query_schema {
 
   /**
    * get a list of the elements in the named element, with prefix, as specified in the schemas
-   * @returns array
+   * @retval array
    */
   public function get_element_sequence_prefix( $element_name ) {
     // $this->stopur -> start("get_element_sequence_prefix");
@@ -204,7 +204,7 @@ class query_schema {
 
   /**
    * get a list of the elements in the named element, with namespace, as specified in the schemas
-   * @returns array
+   * @retval array
    */
   public function get_element_sequence_namespace( $element_name ) {
     $node = $this->get_element_by_name( $element_name );
@@ -217,7 +217,7 @@ class query_schema {
 
   /**
    * get the schemas used
-   * @returns array
+   * @retval array
    */
   public function get_schemas() {
     return $this->schemas;
@@ -236,7 +236,7 @@ class query_schema {
 
   /**
    * add element name to array, recursivly
-   * @returns array
+   * @retval array
    */
   private function node_2_list( $node, $arr=NULL, $set_prefix=false, $set_ns=false ) {
 
@@ -267,7 +267,7 @@ class query_schema {
 
   /**
    * get information on the named element, as specified in the schema
-   * @returns DOMNode
+   * @retval DOMNode
    */
   private function get_element_by_name( $element_name ) {
 
@@ -308,7 +308,7 @@ class query_schema {
 
   /**
    * Search the schema for xs:element or xs:group nodes with a name equal to $element_name
-   * @returns DOMNode
+   * @retval DOMNode
    */
   private function dom_search( $element_name, $dom) {
 
@@ -330,7 +330,7 @@ class query_schema {
 
   /**
    * replace referenced xs:element and xs:group nodes
-   * @returns DOMNode
+   * @retval DOMNode
    */
   private function follow_node( $node, $dom ) {
 
@@ -385,7 +385,7 @@ class query_schema {
 
   /**
    * check if the schema is already loaded
-   * @returns boolean
+   * @retval boolean
    */
   private function is_loaded($namespace) {
     foreach ( $this->schemas as $schema )
@@ -397,7 +397,7 @@ class query_schema {
 
   /**
    *
-   * @returns string
+   * @retval string
    */
   private function get_namespace() {
     $namespace = NULL;
@@ -410,7 +410,7 @@ class query_schema {
 
   /**
    *
-   * @returns string
+   * @retval string
    */
   private function get_prefix() {
     $prefix = NULL;
@@ -421,7 +421,7 @@ class query_schema {
 
   /**
    * clone a node for appending to DOMDocument $doc
-   * @returns mode
+   * @retval mode
    */
   private function cloneNode($node,$doc) {
       $nd=$doc->createElement($node->nodeName);
