@@ -35,6 +35,11 @@ class Restconvert {
   private $soap_footer;
   private $default_namespace = '';
 
+  /**
+  * \brief constructor
+  *
+  * @param $namespace string -
+  */
   public function __construct($namespace='') {
     $this->soap_header='<?xml version="1.0" encoding="%s"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
     $this->soap_footer='</SOAP-ENV:Body></SOAP-ENV:Envelope>';
@@ -44,8 +49,8 @@ class Restconvert {
 
   /** \brief Transform REST parameters to SOAP-request
    *
-   * @param $config (object) the config object from the ini-file
-   * @return (string) Soap wrapped xml
+   * @param $config object - the config object from the ini-file
+   * @retval string - Soap wrapped xml
    */
   public function rest2soap(&$config) {
     $soap_actions = $config->get_value('soapAction', 'setup');
@@ -67,9 +72,9 @@ class Restconvert {
 
   /** \brief Build xml controlled by $action with data from query
    *
-   * @param $action (array) list of accepted parameters and the xml-structure they are to create
-   * @param $query (array) of parameters and values like parameter=value
-   * @return (string) xml
+   * @param $action array - list of accepted parameters and the xml-structure they are to create
+   * @param $query array - of parameters and values like parameter=value
+   * @retval string - xml
    */
   private function build_xml($action, $query) {
     foreach ($action as $key => $tag) {
@@ -88,8 +93,8 @@ class Restconvert {
 
   /** \brief Helper function to get a parameter from _GET or _POST
    *
-   * @param $par (string) 
-   * @return (string) the associated value of $par
+   * @param $par string 
+   * @retval string - the associated value of $par
    */
   private function get_post($par) {
     return ($_GET[$par] ? $_GET[$par] : $_POST[$par]);
@@ -97,8 +102,8 @@ class Restconvert {
 
   /** \brief Helper function to split values like parameter=value
    *
-   * @param $parval (string) 
-   * @return (array) of paramter and value
+   * @param $parval string 
+   * @retval array - of paramter and value
    */
   private function par_split($parval) {
     list($par, $val) = explode('=', $parval, 2);
@@ -107,9 +112,9 @@ class Restconvert {
 
   /** \brief Helper function to produce balanced xml
    *
-   * @param $tag (string) 
-   * @param $val (string) 
-   * @return (string) balanced xml string
+   * @param $tag string 
+   * @param $val string 
+   * @retval string - balanced xml string
    */
   function rest_tag_me($tag, $val) {
     if (!isset($val)) return;
