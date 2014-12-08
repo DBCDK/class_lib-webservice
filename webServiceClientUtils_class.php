@@ -5,22 +5,28 @@ require_once("curl_class.php");
 
 class webServiceClientUtils {
 
-	private $xml_request_path;
-	public $request_objects;
-	public $xmlconvert;
-	public $objconvert;
-  public $request_action;
+	private $xml_request_path; ///< -
+	public $request_objects; ///< -
+	public $xmlconvert; ///< -
+	public $objconvert; ///< -
+  public $request_action; ///< -
 
+  /** \brief -
+   */
 	function __construct ($xml_request_path) {
 		$this->xml_request_path=$xml_request_path;
 		$this->xmlconvert = new xmlconvert();
 		$this->objconvert = new objconvert();
 	}
 
+  /** \brief -
+   */
   public function set_request_action($request_action) {
     $this->request_action=$request_action;
   }
 
+  /** \brief -
+   */
 	public function insert_tag(&$request_object, $parent_tag, $tag_name, $tag_value, $tag_namespace) {
    foreach ($request_object as $k=>$v) {
       if($k==$parent_tag) {
@@ -45,6 +51,8 @@ class webServiceClientUtils {
     }
 	}
 
+  /** \brief -
+   */
 	public function check_error($obj, &$error=FALSE) {
 		 foreach ($obj as $k=>$v) {
      	if($k=="error" || $k=="faultstring") {
@@ -57,12 +65,16 @@ class webServiceClientUtils {
 		return $error;
 	}
 
+  /** \brief -
+   */
 	public function load_request($request_name) {
 		$request=file_get_contents($this->xml_request_path.$request_name.'.xml');
 		$obj=$this->xmlconvert->soap2obj($request);
 		$this->request_objects[$request_name]=$obj;
 	}
 
+  /** \brief -
+   */
 	public function change_tag_value(&$request_object, $target_tag_name, $target_tag_value) {
 		foreach ($request_object as $k=>$v) {
 			if($k==$target_tag_name) {
@@ -75,6 +87,8 @@ class webServiceClientUtils {
 		}
 	}
 
+  /** \brief -
+   */
   public function delete_tag(&$request_object, $target_tag_name) {
     foreach ($request_object as $k=>$v) {
       if($k==$target_tag_name) {
@@ -88,14 +102,20 @@ class webServiceClientUtils {
   }
 
 
+  /** \brief -
+   */
 	public function get_request_object($request_name) {
 		return $this->request_objects[$request_name];
 	}
 
+  /** \brief -
+   */
 	public function  show_request_objects() {
 		print_r($this->request_objects);
 	}
 
+  /** \brief -
+   */
 	public function send_request($request_name, $request_action) {
 		$curl = new curl(); 
 		$curl->set_timeout(30);

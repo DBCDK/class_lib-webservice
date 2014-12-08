@@ -38,28 +38,28 @@ require_once('OLS_class_lib/objconvert_class.php');
 
 abstract class webServiceServer {
 
-  protected $config; // inifile object
-  protected $watch; // timer object
-  protected $aaa; // Authentication, Access control and Accounting object
-  protected $xmldir = './'; // xml directory
-  protected $validate = array(); // xml validate schemas
-  protected $objconvert; // OLS object to xml convert
-  protected $xmlconvert; // xml to OLS object convert
-  protected $xmlns; // namespaces and prefixes
-  protected $default_namespace;
-  protected $tag_sequence; // tag sequence according to XSD or noame of XSD
-  protected $soap_action;
-  protected $dump_timer;
-  protected $dump_timer_ip;
-  protected $output_type='';
-  protected $curl_recorder;
-  protected $debug;
-  protected $url_override; // array with special url-commands for the actual service
+  protected $config; ///< inifile object
+  protected $watch; ///< timer object
+  protected $aaa; ///< Authentication, Access control and Accounting object
+  protected $xmldir = './'; ///< xml directory
+  protected $validate = array(); ///< xml validate schemas
+  protected $objconvert; ///< OLS object to xml convert
+  protected $xmlconvert; ///< xml to OLS object convert
+  protected $xmlns; ///< namespaces and prefixes
+  protected $default_namespace; ///< -
+  protected $tag_sequence; /**< tag sequence according to XSD or noame of XSD */
+  protected $soap_action; ///< -
+  protected $dump_timer; ///< -
+  protected $dump_timer_ip; ///< -
+  protected $output_type=''; ///< -
+  protected $curl_recorder; ///< -
+  protected $debug; ///< -
+  protected $url_override; ///< array with special url-commands for the actual service
 
 
   /** \brief Webservice constructer
    *
-  * @param inifile <filename>
+  * @param $inifile string
    *
    */
   public function  __construct($inifile) {
@@ -150,7 +150,7 @@ abstract class webServiceServer {
 
   /** \brief Handles and validates soap request
     *
-  * @param xml <string>
+  * @param $xml string
   */
   private function soap_request($xml) {
     // Debug verbose::log(TRACE, 'Request ' . $xml);
@@ -235,8 +235,6 @@ abstract class webServiceServer {
 
   /** \brief Handles rest request, converts it to xml and calls soap_request()
   *
-  * @param xml <string>
-  *
   */
   private function rest_request() {
     // convert to soap
@@ -272,6 +270,7 @@ abstract class webServiceServer {
 
   /** \brief expands __var__ to the corresponding setting
   *
+  * @param $line string
   */
   private function showinfo_line($line) {
     while (($s = strpos($line, '__')) !== FALSE) {
@@ -291,6 +290,8 @@ abstract class webServiceServer {
 
   /** \brief Helper function to showinfo_line()
   *
+  * @param $arr array
+  * @param $prefix string
   */
   private function implode_ini_array($arr, $prefix = '') {
     $ret = "\n";
@@ -325,6 +326,7 @@ abstract class webServiceServer {
 
   /** \brief RegressionTest tests the webservice
   *
+  * @param $arg string
   */
   private function RegressionTest($arg='') {
     if (! is_dir($this->xmldir.'/regression'))
@@ -400,9 +402,9 @@ abstract class webServiceServer {
 
   /** \brief Validates soap and xml
   *
-  * @param xml <string>
-  * @param schema filenames <array>
-  * @param validate name <string>
+  * @param $soap string
+  * @param $schemas array
+  * @param $validate_schema string
     *
   */
 
@@ -437,7 +439,7 @@ abstract class webServiceServer {
 
   /** \brief send an error header and soap fault
   *
-  * @param err <string>
+  * @param $err string
   *
   */
   protected function soap_error($err) {
@@ -464,9 +466,9 @@ abstract class webServiceServer {
 
   /** \brief Validates xml
   *
-  * @param xml <string>
-  * @param schema_filename <string>
-  * @param resolve_externals <bool>
+  * @param $xml string
+  * @param $schema_filename string
+  * @param $resolve_externals boolean
     *
   */
 
@@ -487,8 +489,8 @@ abstract class webServiceServer {
   * These names can be changed by doing so in the aaa-section, like: 
   * userIdAut = theNameOfUserIdInThisService
   *
-  * @param xmlobj <object>
-  * @return (object) from the service entry point called
+  * @param $xmlobj object
+  * @retval object - from the service entry point called
   *
   */
   private function call_xmlobj_function($xmlobj) {
