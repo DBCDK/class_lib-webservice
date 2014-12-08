@@ -42,12 +42,12 @@
 */
 
 class stopwatch {
-  var $timers;				// Currently running timers
-  var $sums;				// Sums of completed timers
-  var $prefix;				// Prefix of Output
-  var $delim;				// Delimitor of Output
-  var $postfix;				// Postfix of Output
-  var $format;				// Format of Output
+  var $timers;				///< Currently running timers
+  var $sums;				///< Sums of completed timers
+  var $prefix;				///< Prefix of Output
+  var $delim;				///< Delimitor of Output
+  var $postfix;				///< Postfix of Output
+  var $format;				///< Format of Output
 
   /**
    * \brief constructor
