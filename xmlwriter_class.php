@@ -4,9 +4,9 @@
 // Based on Lars Marius Garshol's Python XMLWriter class
 // See http://www.xml.com/pub/a/2003/04/09/py-xml.html
 class XmlWrite {
-  private var $xml;
-  private var $indent;
-  private var $stack = array();
+  private $xml;
+  private $indent;
+  private $stack = array();
 
   /** \brief -
    * @param $indent string
