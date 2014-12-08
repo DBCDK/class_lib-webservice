@@ -38,9 +38,8 @@ class Password {
   private function __destruct() {}
   private function __clone() {}
 
-  /**
-   * \brief Genrates a password 
-   * @param lenght (integer)
+  /** \brief Generates a password 
+   * @param $length integer
    **/
 
   public function generate($length) {
