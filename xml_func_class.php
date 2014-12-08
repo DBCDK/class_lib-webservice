@@ -30,7 +30,8 @@ require_once("xmlwriter_class.php");
 
 */
 class xml_func { 
-  /* return an object as xml */
+  /** \brief return an object as xml
+   */
   public static function object_to_xml($obj) {
     //static $key; makes no sense as static
     static $xmlwriter;
@@ -67,7 +68,8 @@ class xml_func {
     return $xmlwriter->getXml();
   } 
 
-  /* fix UTF8-encoding */
+  /** \brief fix UTF8-encoding
+   */
   public static function UTF8($data) {
     $encoding = mb_detect_encoding($data) ;
     if ($encoding == "UTF-8" && mb_check_encoding($data, "UTF-8")) {
