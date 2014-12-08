@@ -96,8 +96,10 @@ class Pg_database extends Fet_database {
   private $query_name;
   private $open_error_message;
 
-  /** \brief
-   */
+  /** \brief constructor
+  *
+  * @param $connectionstring string -
+  */
   public function __construct($connectionstring) {
     $cred = array('user' => '', 'password' => '', 'dbname' => '', 'host' => '', 'port' => '', 'connect_timeout' => '5');
     $part = explode(" ", $connectionstring);
@@ -111,7 +113,7 @@ class Pg_database extends Fet_database {
     parent::__construct($cred["user"], $cred["password"], $cred["dbname"], $cred["host"], $cred["port"], $cred["connect_timeout"]);
   }
 
-  /** \brief
+  /** \brief destructor
    */
   public function __destruct() { }
 
@@ -145,8 +147,8 @@ class Pg_database extends Fet_database {
   }
 
   /** \brief
-   * @param statement_name (string) - 
-   * @param query (string) - 
+   * @param statement_name string - 
+   * @param query string - 
    */
   public function prepare($statement_name, $query) {
     if (pg_prepare($this->connection, $statement_name, $query) === FALSE) {
@@ -161,7 +163,7 @@ class Pg_database extends Fet_database {
   }
 
   /** \brief wrapper for private function _execute
-   * @param statement_name (string) - 
+   * @param statement_name string - 
    */
   public function execute($statement_name = NULL) {
     // set pagination
@@ -176,8 +178,8 @@ class Pg_database extends Fet_database {
   }
 
   /** \brief
-   * @param query (string) - 
-   * @param params (array) - 
+   * @param query string - 
+   * @param params array - 
    */
   public function query_params($query = "", $params = array()) {
     if (($this->result = @pg_query_params($this->connection, $query, $params)) === FALSE) {
@@ -209,25 +211,25 @@ class Pg_database extends Fet_database {
     $this->transaction = FALSE;
   }
 
-  /** \brief
+  /** \brief -
    */
   public function num_rows() {
     return pg_num_rows($this->result);
   }
 
-  /** \brief
+  /** \brief -
    */
   public function get_row() {
     return pg_fetch_assoc($this->result);
   }
 
-  /** \brief
+  /** \brief -
    */
   public function get_all_rows() {
     return pg_fetch_all($this->result);
   }
 
-  /** \brief
+  /** \brief -
    */
   public function commit() {
     self::set_transaction_mode('COMMIT');
@@ -235,13 +237,13 @@ class Pg_database extends Fet_database {
     // use only if TRANSACTIONS are used
   }
 
-  /** \brief
+  /** \brief -
    */
   public function rollback() {
     self::set_transaction_mode('ROLLBACK');
   }
 
-  /** \brief
+  /** \brief -
    */
   public function close() {
     @pg_query($this->connection, 'DEALLOCATE ' . $this->query_name);
@@ -249,10 +251,10 @@ class Pg_database extends Fet_database {
       pg_close($this->connection);
   }
 
-  /** \brief
-   * @param sql (string) - 
-   * @param arr (string) - 
-   * @return
+  /** \brief -
+   * @param sql string - 
+   * @param arr string - 
+   * @retval array
    */
   public function fetch($sql, $arr = "") {
     if ($arr)
@@ -264,8 +266,8 @@ class Pg_database extends Fet_database {
     return $data_array;
   }
 
-  /** \brief
-   * @param sql (string) - 
+  /** \brief -
+   * @param sql string - 
    */
   public function exe($sql) {
     if (!$this->result = @pg_query($this->connection, $sql)) {
@@ -276,13 +278,13 @@ class Pg_database extends Fet_database {
 
   /* --------------------------------------------------------------------------------- '/
 
-  /** \brief
+  /** \brief -
    */
   private function set_large_object() {
     // TODO implement
   }
 
-  /** \brief
+  /** \brief -
    */
   private function connectionstring() {
     $ret = "";
@@ -310,8 +312,8 @@ class Pg_database extends Fet_database {
     return str_replace(array(' ', ',', '(', ')'), '_', $this->query);
   }
 
-  /** \brief
-   * @param statement_name (string) - 
+  /** \brief -
+   * @param statement_name string - 
    */
   private function _execute($statement_name = NULL) {
     static $prepared = array();
@@ -344,9 +346,9 @@ class Pg_database extends Fet_database {
     }
   }
 
-  /** \brief
-   * @param use_bind_name (boolean) - 
-   * @return (array) - of bind values
+  /** \brief -
+   * @param use_bind_name boolean - 
+   * @retval array - of bind values
    */
   private function set_bind_and_alter_query($use_bind_name) {
     $bind_array = array();
@@ -361,7 +363,7 @@ class Pg_database extends Fet_database {
   }
 
   /** \brief set transaction mode if transaction is required
-   * @param transaction_parm (string) - 
+   * @param transaction_parm string - 
    */
   private function set_transaction_mode($transaction_mode) {
     if ($this->transaction)
