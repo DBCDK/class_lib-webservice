@@ -490,7 +490,8 @@ class SolrQuery {
    */
   private function make_term_interval($term, $relation, $quot) {
     if (($interval = $this->interval[$relation])) {
-      return sprintf($interval, $quot . $term . $quot);
+      return sprintf($interval, $term);
+      //return sprintf($interval, $quot . $term . $quot);
     }
     return NULL;
   }

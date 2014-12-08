@@ -148,7 +148,8 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'dkcclterm.cclterm < en ' => 'dkcclterm.cclterm:[* TO en}',
                    'dkcclterm.cclterm > en' => 'dkcclterm.cclterm:{en TO *]',
                    'dkcclterm.cclterm <= en' => 'dkcclterm.cclterm:[* TO en]',
-                   'dkcclterm.cclterm >= en' => 'dkcclterm.cclterm:[en TO *]');
+                   'dkcclterm.cclterm >= en' => 'dkcclterm.cclterm:[en TO *]',
+                   'dkcclterm.cclterm >= "en"' => 'dkcclterm.cclterm:["en" TO *]');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
