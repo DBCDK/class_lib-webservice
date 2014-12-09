@@ -54,10 +54,9 @@ class materialId {
         
     }
 
-    /**
-     * \brief 
-     * @param $isbn the ISBN number to normalize
-     * @return the normalized ISBN number
+    /** \brief 
+     * @param $isbn string The ISBN number to normalize
+     * @retval string The normalized ISBN number
      * */
     function normalizeISBN($isbn) {
         $res = array();
@@ -81,10 +80,9 @@ class materialId {
         return implode($res);
     }
 
-    /**
-     * \brief 
-     * @param $isbn the isbn to validate
-     * @return the validated ISBN number if valid, otherwise 0 is returned
+    /** \brief 
+     * @param $isbn string The isbn to validate
+     * @retval string The validated ISBN number if valid, otherwise 0 is returned
      * */
     function validateISBN($isbn) {
         $arr = array();
@@ -110,10 +108,9 @@ class materialId {
         return $isbn;
     }
 
-    /**
-     * \brief 
-     * @param $ean the EAN number to normalize
-     * @return the normalized EAN number
+    /** \brief 
+     * @param $ean string The EAN number to normalize
+     * @retval string The normalized EAN number
      * */
     function normalizeEAN($ean) {
         $res = array();
@@ -132,10 +129,9 @@ class materialId {
         return implode($res);
     }
 
-    /**
-     * \brief 
-     * @param $ean the EAN number to validate
-     * @return the validated EAN number if valid, otherwise 0 is returned
+    /** \brief 
+     * @param $ean string The EAN number to validate
+     * @retval string The validated EAN number if valid, otherwise 0 is returned
      * */
     function validateEAN($ean) {
         if (strlen($ean) != 13)
@@ -151,10 +147,9 @@ class materialId {
         return $ean;
     }
 
-    /**
-     * \brief 
-     * @param $issn the ISSN number to normalize
-     * @return the normalized ISSN number
+    /** \brief 
+     * @param $issn string The ISSN number to normalize
+     * @retval string The normalized ISSN number
      * */
     function normalizeISSN($issn) {
         $res = array();
@@ -178,10 +173,9 @@ class materialId {
         return implode($res);
     }
 
-    /**
-     * \brief 
-     * @param $issn the ISSN number to validate
-     * @return the validated ISSN number if valid, otherwise 0 is returned
+    /** \brief 
+     * @param $issn string The ISSN number to validate
+     * @retval string The validated ISSN number if valid, otherwise 0 is returned
      * */
     function validateISSN($issn) {
         if (strlen($issn) != 8)
@@ -202,10 +196,10 @@ class materialId {
         return $issn;
     }
 
-    /**
-     * \brief 
-     * @param $faust the Faust number to normalize
-     * @return the normalized Faust number
+    /** \brief 
+     * @param $faust string The Faust number to normalize
+     * @param $withSpaces boolean
+     * @retval string The normalized Faust number
      * */
     function normalizeFaust($faust, $withSpaces = false) {
         $res = array();
@@ -236,10 +230,9 @@ class materialId {
         }
     }
 
-    /**
-     * \brief 
-     * @param $faust the Faust number to validate
-     * @return the validated Faust number if valid, otherwise 0 is returned
+    /** \brief 
+     * @param $faust string The Faust number to validate
+     * @retval mixed The validated Faust number if valid, otherwise 0 is returned
      * */
     function validateFaust($faust) {
         if (strlen($faust) != 8)
@@ -258,10 +251,9 @@ class materialId {
         }
     }
 
-    /**
-     * \brief 
-     * @param $isbn the isbn to convert
-     * @return the ISBN as an EAN (ISBN13) number
+    /** \brief 
+     * @param $isbn string The isbn to convert
+     * @retval mixed The ISBN as an EAN (ISBN13) number
      * */
     function convertISBNToEAN($isbn) {
         if (strlen($isbn) != 10)
@@ -283,10 +275,9 @@ class materialId {
         return $ean;
     }
 
-    /**
-     * \brief convert a ean (ISBN13) to a isbn (ISBN10)
-     * @param  $ean to isbn 
-     * @return int 
+    /** \brief convert a ean (ISBN13) to a isbn (ISBN10)
+     * @param $ean string To isbn 
+     * @retval mixed - integer or boolean
      */
     function convertEANToISBN($ean) {
         if (strlen($ean) != 13)
