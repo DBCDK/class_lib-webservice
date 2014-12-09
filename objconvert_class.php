@@ -67,6 +67,8 @@ class objconvert {
   private $used_namespaces=array();
   private $default_namespace;
 
+  /** \brief -
+  */
   public function __construct($xmlns='', $tag_seq='') {
     if ($xmlns) {
       foreach ($xmlns as $prefix => $ns) {
@@ -78,6 +80,8 @@ class objconvert {
     $this->tag_sequence = $tag_seq;
   }
 
+  /** \brief -
+  */
   public function set_default_namespace($ns) {
     $this->default_namespace = $ns;
     if ($this->namespaces[$ns] == '') {
@@ -86,7 +90,7 @@ class objconvert {
   }
 
   /** \brief Convert ols-object to json
-  	*/
+  */
   public function obj2json($obj) {
     foreach ($this->namespaces as $ns => $prefix) {
       if ($prefix)
@@ -100,7 +104,7 @@ class objconvert {
   }
 
   /** \brief compress ols object to badgerfish-inspired object
-  	*/
+  */
   private function obj2badgerfish_obj($obj) {
     if ($obj) {
       foreach ($obj as $key => $o) {
@@ -117,7 +121,7 @@ class objconvert {
   }
 
   /** \brief convert one object
-  	*/
+  */
   private function build_json_obj($obj) {
     if (is_scalar($obj->_value))
       $ret->{'$'} = html_entity_decode($obj->_value);
@@ -134,13 +138,13 @@ class objconvert {
   }
 
   /** \brief experimental php serialized
-  	*/
+  */
   public function obj2phps($obj) {
     return serialize($obj);
   }
 
   /** \brief Convert ols-object to xml with namespaces
-  	*/
+  */
   public function obj2xmlNs($obj) {
     $this->used_namespaces = array();
     $xml = $this->obj2xml($obj);
@@ -151,7 +155,7 @@ class objconvert {
   }
 
   /** \brief Convert ols-object to soap
-  	*/
+  */
   public function obj2soap($obj, $soap_ns = 'http://schemas.xmlsoap.org/soap/envelope/') {
     $this->used_namespaces = array();
     $xml = $this->obj2xml($obj);
@@ -175,17 +179,17 @@ class objconvert {
   }
 
   /** \brief UTF-8 header
-  	*/
+  */
   private function xml_header() {
     return '<?xml version="1.0" encoding="UTF-8"?>';
   }
 
   /** \brief Convert ols-object to xml
    *
-  	* used namespaces are returned in this->namespaces
-  	* namespaces can be preset with add_namespace()
-  	*
-  	*/
+  * used namespaces are returned in this->namespaces
+  * namespaces can be preset with add_namespace()
+  *
+  */
   public function obj2xml($obj) {
     $this->check_tag_sequence();
     $ret = '';
@@ -204,7 +208,7 @@ class objconvert {
   }
 
   /** \brief handles one node
-  	*/
+  */
   private function build_xml($tag, $obj) {
     $ret = '';
     if ($obj->_attributes) {
@@ -230,7 +234,7 @@ class objconvert {
   }
 
   /** \brief Updates used_namespaces from prefix in $val
-  	*/
+  */
   private function set_used_prefix($val) {
     if ($p = strpos($val, ':')) {
       foreach ($this->namespaces as $ns => $prefix) {
@@ -243,7 +247,7 @@ class objconvert {
   }
 
   /** \brief returns prefixes and store namespaces
-  	*/
+  */
   private function get_namespace_prefix($ns) {
     if (empty($this->namespaces[$ns])) {
       $i = 1;
@@ -255,14 +259,14 @@ class objconvert {
   }
 
   /** \brief Separator between prefix and tag-name in xml
-  	*/
+  */
   private function set_prefix_separator($prefix) {
     if ($prefix) return $prefix . ':';
     else return $prefix;
   }
 
   /** \brief get or use tag_sequence
-  	*/
+  */
   private function check_tag_sequence() {
     if ($this->tag_sequence && is_scalar($this->tag_sequence)) {
       require_once('OLS_class_lib/schema_class.php');
@@ -272,20 +276,20 @@ class objconvert {
   }
 
   /** \brief Adds known namespaces
-  	*/
+  */
   public function add_namespace($namespace,$prefix) {
     $this->namespaces[$namespace]=$prefix;
     asort($this->namespaces);
   }
 
   /** \brief Returns used namespaces
-  	*/
+  */
   public function get_namespaces() {
     return $this->namespaces;
   }
 
   /** \brief Set namespace on all object nodes
-  	*/
+  */
   public function set_obj_namespace($obj, $ns) {
     if (empty($obj) || is_scalar($obj))
       return $obj;
@@ -305,7 +309,7 @@ class objconvert {
   }
 
   /** \brief produce balanced xml
-  	*/
+  */
   public function tag_me($tag, $attr, $val) {
     if ($tag == '#text') {
       return $val;
