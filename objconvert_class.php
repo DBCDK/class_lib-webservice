@@ -68,7 +68,9 @@ class objconvert {
   private $default_namespace;
 
   /** \brief -
-  */
+   * @param $xmlns array -
+   * @param $tag_seq string -
+   */
   public function __construct($xmlns='', $tag_seq='') {
     if ($xmlns) {
       foreach ($xmlns as $prefix => $ns) {
@@ -81,7 +83,8 @@ class objconvert {
   }
 
   /** \brief -
-  */
+   * @param $ns string -
+   */
   public function set_default_namespace($ns) {
     $this->default_namespace = $ns;
     if ($this->namespaces[$ns] == '') {
@@ -90,7 +93,9 @@ class objconvert {
   }
 
   /** \brief Convert ols-object to json
-  */
+   * @param $obj object -
+   * @retval string
+   */
   public function obj2json($obj) {
     foreach ($this->namespaces as $ns => $prefix) {
       if ($prefix)
@@ -104,7 +109,9 @@ class objconvert {
   }
 
   /** \brief compress ols object to badgerfish-inspired object
-  */
+   * @param $obj object -
+   * @retval object
+   */
   private function obj2badgerfish_obj($obj) {
     if ($obj) {
       foreach ($obj as $key => $o) {
@@ -121,7 +128,9 @@ class objconvert {
   }
 
   /** \brief convert one object
-  */
+   * @param $obj object -
+   * @retval object
+   */
   private function build_json_obj($obj) {
     if (is_scalar($obj->_value))
       $ret->{'$'} = html_entity_decode($obj->_value);
@@ -138,12 +147,16 @@ class objconvert {
   }
 
   /** \brief experimental php serialized
-  */
+   * @param $obj object -
+   * @retval string
+   */
   public function obj2phps($obj) {
     return serialize($obj);
   }
 
   /** \brief Convert ols-object to xml with namespaces
+  * @param $obj object -
+  * @retval string
   */
   public function obj2xmlNs($obj) {
     $this->used_namespaces = array();
@@ -155,7 +168,10 @@ class objconvert {
   }
 
   /** \brief Convert ols-object to soap
-  */
+   * @param $obj object -
+   * @param $soap_ns string
+   * @retval string
+   */
   public function obj2soap($obj, $soap_ns = 'http://schemas.xmlsoap.org/soap/envelope/') {
     $this->used_namespaces = array();
     $xml = $this->obj2xml($obj);
@@ -166,6 +182,7 @@ class objconvert {
   }
 
   /** \brief
+   * @retval string
    */
   private function get_used_namespaces_as_header() {
     foreach ($this->namespaces as $ns => $prefix) {
@@ -179,17 +196,20 @@ class objconvert {
   }
 
   /** \brief UTF-8 header
-  */
+   * @retval string
+   */
   private function xml_header() {
     return '<?xml version="1.0" encoding="UTF-8"?>';
   }
 
   /** \brief Convert ols-object to xml
    *
-  * used namespaces are returned in this->namespaces
-  * namespaces can be preset with add_namespace()
-  *
-  */
+   * used namespaces are returned in this->namespaces
+   * namespaces can be preset with add_namespace()
+   *
+   * @param $obj object -
+   * @retval string
+   */
   public function obj2xml($obj) {
     $this->check_tag_sequence();
     $ret = '';
@@ -208,7 +228,10 @@ class objconvert {
   }
 
   /** \brief handles one node
-  */
+   * @param $tag string -
+   * @param $obj object -
+   * @retval string
+   */
   private function build_xml($tag, $obj) {
     $ret = '';
     if ($obj->_attributes) {
@@ -234,7 +257,8 @@ class objconvert {
   }
 
   /** \brief Updates used_namespaces from prefix in $val
-  */
+   * @param $val string -
+   */
   private function set_used_prefix($val) {
     if ($p = strpos($val, ':')) {
       foreach ($this->namespaces as $ns => $prefix) {
@@ -247,7 +271,8 @@ class objconvert {
   }
 
   /** \brief returns prefixes and store namespaces
-  */
+   * @param $ns string -
+   */
   private function get_namespace_prefix($ns) {
     if (empty($this->namespaces[$ns])) {
       $i = 1;
@@ -259,14 +284,16 @@ class objconvert {
   }
 
   /** \brief Separator between prefix and tag-name in xml
-  */
+   * @param $prefix string -
+   * @retval string
+   */
   private function set_prefix_separator($prefix) {
     if ($prefix) return $prefix . ':';
     else return $prefix;
   }
 
   /** \brief get or use tag_sequence
-  */
+   */
   private function check_tag_sequence() {
     if ($this->tag_sequence && is_scalar($this->tag_sequence)) {
       require_once('OLS_class_lib/schema_class.php');
@@ -276,20 +303,26 @@ class objconvert {
   }
 
   /** \brief Adds known namespaces
-  */
+   * @param $namespace string -
+   * @param $prefix string -
+   */
   public function add_namespace($namespace,$prefix) {
     $this->namespaces[$namespace]=$prefix;
     asort($this->namespaces);
   }
 
   /** \brief Returns used namespaces
-  */
+   * @retval array
+   */
   public function get_namespaces() {
     return $this->namespaces;
   }
 
   /** \brief Set namespace on all object nodes
-  */
+   * @param $obj mixed -
+   * @param $ns string -
+   * @retval mixed
+   */
   public function set_obj_namespace($obj, $ns) {
     if (empty($obj) || is_scalar($obj))
       return $obj;
@@ -309,7 +342,11 @@ class objconvert {
   }
 
   /** \brief produce balanced xml
-  */
+   * @param $tag string -
+   * @param $attr string -
+   * @param $val string -
+   * @retval string
+   */
   public function tag_me($tag, $attr, $val) {
     if ($tag == '#text') {
       return $val;
@@ -321,6 +358,4 @@ class objconvert {
   }
 
 }
-
-
 
