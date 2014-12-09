@@ -5,6 +5,10 @@ class cache_server {
   private $stock=array();
   private $cleanup_interval;
   
+ /** \brief Constructor
+  * @param $domain string 
+  * @param $port integer
+  */
   public function __construct($domain='127.0.0.1', $port=5000) {
     // process's memory-usage must not exceed this
     define(MAXMEM,500000); //500 Kb
@@ -28,6 +32,8 @@ class cache_server {
     $this->listen();
   }
 
+ /** \brief -
+  */
   private function listen() {
     $count=0;
     $time = time();
@@ -101,6 +107,10 @@ class cache_server {
     socket_close($this->socket);
   }
 
+ /** \brief 
+  * @param $client_sock socket
+  * @param $message mixed
+  */
   function send($client_sock, &$message) {
     $len = strlen($message);
     $offset = 0;
@@ -124,6 +134,10 @@ class cache_server {
   }
 
 
+ /** \brief 
+  * @param $client_sock socket
+  * @retval mixed
+  */
   function read($client_sock) {
     while ($buf = trim(socket_read($client_sock, 1024, PHP_BINARY_READ))) {
       if (substr($buf, -3) == ENDCODE) {
@@ -137,6 +151,8 @@ class cache_server {
     return $ret;
   }
 
+ /** \brief destructor
+  */
   public function __destruct() {
     if (!empty($this->socket))
       socket_close($this->socket);
@@ -146,6 +162,9 @@ class cache_server {
 class garbage_collector {
   private function __construct(){}
 
+ /** \brief 
+  * @param $stock array
+  */
   public static function cleanup(&$stock) {
     foreach ($stock as $key=>$val) {
       if (time() > $val->timestamp + $val->time_to_live)
@@ -153,7 +172,9 @@ class garbage_collector {
     }
   }
 
-  // unset oldest half of stock
+ /** \brief unset oldest half of stock
+  * @param $stock array
+  */
   public static function make_space(&$stock) {
     //  print_r($stock);
     foreach ($stock as $key=>$val)
@@ -176,6 +197,11 @@ class garbage_collector {
     
   }
 
+ /** \brief 
+  * @param $a object
+  * @param $b object
+  * @retval integer
+  */
   public static function compare($a,$b) {
     $a1 = $a->timestamp;
     $b1 = $b->timestamp;
@@ -187,5 +213,3 @@ class garbage_collector {
 
 }
 
-
-?>
