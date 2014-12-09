@@ -1,18 +1,18 @@
 <?php
 interface IException {
   /* Protected (final) methods from Exception class */
-  public function getMessage();                   // Exception message
-  public function getCode();                      // User-defined Exception code
-  public function getFile();                      // Source filename
-  public function getLine();                      // Source line
-  public function getTrace();                     // An array of the backtrace()
-  public function getTraceAsString();             // Formated string of tracei
+  public function getMessage();                   ///< Exception message
+  public function getCode();                      ///< User-defined Exception code
+  public function getFile();                      ///< Source filename
+  public function getLine();                      ///< Source line
+  public function getTrace();                     ///< An array of the backtrace()
+  public function getTraceAsString();             ///< Formated string of tracei
 
   /* Overrideable (public) methods from Exception class */
-  public function __toString();                   // formated string for display
-  public function __construct($message = NULL, $code = 0);
+  public function __toString();                   ///< formated string for display
+  public function __construct($message = NULL, $code = 0);  ///< constructor
 
-  /* Custom methods */
+  /** Custom methods */
   public function log($filename);
 }
 
@@ -47,21 +47,21 @@ class FetException extends Exception implements IException {
  */
 interface IDatabase {
   /* methods to be implemented in extending classes (database-specific methods)*/
-  Public function execute();
-  public function get_row();
-  public function commit(); 
-  public function rollback();
-  public function open();
-  public function close();
+  Public function execute();      ///< -
+  public function get_row();      ///< -
+  public function commit();       ///< -
+  public function rollback();     ///< -
+  public function open();         ///< -
+  public function close();        ///< -
 
   /*methods implemented in base class (general methods)*/
-  public function deprecated_insert($table, $record);
-  public function deprecated_update($table, $assign, $clause = NULL);
-  public function deprecated_delete($table, $clause = NULL);
-  public function set_query($query);
-  public function set_pagination($offset, $limit);
-  public function set_transaction($bool);
-  public function bind($name, $value, $maxlength = -1, $type = SQLT_CHR);
+  public function deprecated_insert($table, $record);                        ///< -
+  public function deprecated_update($table, $assign, $clause = NULL);        ///< -
+  public function deprecated_delete($table, $clause = NULL);                 ///< -
+  public function set_query($query);                                         ///< -
+  public function set_pagination($offset, $limit);                           ///< -
+  public function set_transaction($bool);                                    ///< -
+  public function bind($name, $value, $maxlength = -1, $type = SQLT_CHR);    ///< -
 }
 
 /** \brief
