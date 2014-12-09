@@ -118,8 +118,8 @@ class ncip extends http_wrapper {
 * Request/Response typen lægges i $parameters["Ncip"]
 * Typen skal defineres, og være understøttet
 * 
-* @param array  $parameters Associativt array indeholdene parametre for requesten/responsen
-* @return string Den opbyggede ncip request/response som ren tekst
+* @param $parameters array  Associativt array indeholdene parametre for requesten/responsen
+* @retval string Den opbyggede ncip request/response som ren tekst
 */
   public function build($parameters) {
     $this->parameters = $parameters;
@@ -159,7 +159,7 @@ class ncip extends http_wrapper {
 * Læser og fortolker input teksten som en ncip request eller response, og opbygger et php array, med de læste data.
 *
 * @param string $ncip_str Ncip responsen som xml tekst
-* @return array Fortolkede værdier, udtrukket fra ncip responsen
+* @retval array Fortolkede værdier, udtrukket fra ncip responsen
 *
 */
   public function parse(&$ncip_str) {
@@ -190,8 +190,8 @@ class ncip extends http_wrapper {
 *
 * Læser og fortolker indholdet af input filen som en ncip response, og opbygger et php array, med de læste data.
 *
-* @param string $ncip_file Fil navnet på den fil, der indeholder ncip responsen
-* @return array Fortolkede værdier, udtrukket fra ncip responsen
+* @param $ncip_file string Fil navnet på den fil, der indeholder ncip responsen
+* @retval array Fortolkede værdier, udtrukket fra ncip responsen
 *
 */
   public function parse_file($ncip_file) {
@@ -213,14 +213,14 @@ class ncip extends http_wrapper {
 *
 * Hent et navngivet element, og put det ned i et array - men kun hvis det findes
 *
-* @param array $result            Det array, hvori resultatet lægges
-* @param DOMElement $dom_element  DOM Elementet, hvori der ledes
-* @param $tag_name                Navnet på tagget, der ledes efter. Hvis dette
+* @param $result array            Det array, hvori resultatet lægges
+* @param $dom_element DOMElement  DOM Elementet, hvori der ledes
+* @param $tag_name string         Navnet på tagget, der ledes efter. Hvis dette
 *                                 er et array af tag navne, ledes efter serien af tag navne
-* @param string $result_name      Det resulterende tag navn i $result arrayet.
+* @param $result_name string      Det resulterende tag navn i $result arrayet.
 *                                 Hvis ikke dette angives, findes navnet som $tag_name -
 *                                 og hvis $tag_name er et array, bruges det sidste element som navn
-* @return                         Indholdet af det fundne element - hvis ikke det findes, returneres null
+* @retval string                  Indholdet af det fundne element - hvis ikke det findes, returneres null
 *                                 
 */
   private function _get_element(&$result, $dom_element, $tag_name, $result_name="") {
@@ -246,7 +246,7 @@ class ncip extends http_wrapper {
 *
 * Opbyg en fuldstændig "NCIPVersionMessage" besked
 * 
-* @return string Den opbyggede "NCIPVersionMessage" som ren tekst
+* @retval string Den opbyggede "NCIPVersionMessage" som ren tekst
 *
 */
   private function _create_version_message() {
@@ -275,7 +275,7 @@ class ncip extends http_wrapper {
 * 
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_user_request($xml) {
@@ -298,7 +298,7 @@ class ncip extends http_wrapper {
 * 
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_user_response($xml) {
@@ -384,7 +384,7 @@ class ncip extends http_wrapper {
 * 
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_item_request($xml) {
@@ -400,7 +400,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_item_response($xml) {
@@ -424,7 +424,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_request_request($xml) {
@@ -440,7 +440,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_lookup_request_response($xml) {
@@ -463,7 +463,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_cancel_request_item_request($xml) {
@@ -479,7 +479,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_cancel_request_item_response($xml) {
@@ -499,7 +499,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_renew_item_request($xml) {
@@ -514,7 +514,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_renew_item_response($xml) {
@@ -543,7 +543,7 @@ class ncip extends http_wrapper {
 * NB: Denne version kan udelukkende opdatere afhentningsstedet
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_update_request_item_request($xml) {
@@ -557,7 +557,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_update_request_item_response($xml) {
@@ -585,10 +585,10 @@ class ncip extends http_wrapper {
 *
 * Opbygger et <scheme> / <value> par
 *
-* @param string $tag Tag navnet på det scheme/value par, der skal opbygges
-* @param string $scheme Skema navnet
-* @param string $scheme Væredien
-* @return DOMElement Elementet, indeholdende scheme/value parret
+* @param $tag string Tag navnet på det scheme/value par, der skal opbygges
+* @param $scheme string Skema navnet
+* @param $scheme string Væredien
+* @retval DOMElement Elementet, indeholdende scheme/value parret
 *
 */
   private function _create_scheme_value_pair($tag, $scheme, $value) {
@@ -602,9 +602,9 @@ class ncip extends http_wrapper {
 *
 * Opbygger et element indeholdende et Unique Agency ID
 *
-* @param string $what Hvilket XXXAgencyId element, der skal opbygges, hvor XXX erstattes af $what
-* @param string $agencyId Værdien for UniqueAgencyId, der puttes ned i det resulterende element
-* @return DOMElement Elementet, indeholdende UniqueAgencyId
+* @param $what string Hvilket XXXAgencyId element, der skal opbygges, hvor XXX erstattes af $what
+* @param $agencyId string Værdien for UniqueAgencyId, der puttes ned i det resulterende element
+* @retval DOMElement Elementet, indeholdende UniqueAgencyId
 *
 */
   private function _create_agency_id($what, $agencyId) {
@@ -618,8 +618,8 @@ class ncip extends http_wrapper {
 * Opbygger et header element med tagget: <$header_tag>
 * Napper parametrene "FromAgencyId", "FromAgencyAuthentication" og "ToAgencyId" fra $this->parameters
 *
-* @param Tag navnet for headeren
-* @return DOMElement Det resulterende Initiation Header element
+* @param $header_tag string Tag navnet for headeren
+* @retval DOMElement Det resulterende Initiation Header element
 *
 */
   private function _create_header($header_tag) {
@@ -638,7 +638,7 @@ class ncip extends http_wrapper {
 *
 * Parametrene til ncip beskeden hentes fra $this->parameters. 
 * 
-* @param DOMElement $xml Det element, hvortil den aktuelle xml info skal tilføjes
+* @param $xml DOMElement Det element, hvortil den aktuelle xml info skal tilføjes
 *
 */
   private function _create_item_optional_fields($xml) {
@@ -718,7 +718,7 @@ class ncip extends http_wrapper {
 *     [Scheme] => "http://www.niso.org/ncip/v1_0/schemes/processingerrortype/lookupuserprocessingerror.scm"
 *     [Value] => Value
 *
-* @return DOMElement Det resulterende Problem element
+* @retval DOMElement Det resulterende Problem element
 *
 */
   private function _create_problem() {
@@ -749,13 +749,13 @@ class ncip extends http_wrapper {
 *     [Scheme] => "http://www.niso.org/ncip/v1_0/schemes/processingerrortype/lookupuserprocessingerror.scm"
 *     [Value] => Value
 *
-* @param string $error Error: Enten "ProcessingError" eller "MessagingError"
-* @param string $type Typen på fejlen - 'fejl beskrivelsen'
-* @param string $element Elementet, der fejler
-* @param string $scheme Scheme't på fejlen
-* @param string $value Hvis der er en værdi, angives den her
+* @param $error string Error: Enten "ProcessingError" eller "MessagingError"
+* @param $type string Typen på fejlen - 'fejl beskrivelsen'
+* @param $element string Elementet, der fejler
+* @param $scheme string Scheme't på fejlen
+* @param $value string Hvis der er en værdi, angives den her
 * 
-* @return array Det resulterende Problem array
+* @retval array Det resulterende Problem array
 *
 */
   private function _problem($error, $type, $element, $scheme, $value="") {
@@ -771,10 +771,10 @@ class ncip extends http_wrapper {
 *
 * Opbygger et <AuthenticationInput> element
 *
-* @param string $inputData Authentication Input string
-* @param string dataFormatType Data Format Typen for Authentication inputtet
-* @param string $inputType Input Typen for Authentication inputtet
-* @return DOMElement Det resulterende AuthenticationInput element
+* @param $inputData string Authentication Input string
+* @param dataFormatType string Data Format Typen for Authentication inputtet
+* @param $inputType string Input Typen for Authentication inputtet
+* @retval DOMElement Det resulterende AuthenticationInput element
 *
 */
   private function _create_authentication_input($inputData, $dataFormatType, $inputType) {
@@ -789,12 +789,12 @@ class ncip extends http_wrapper {
 *
 * Opbygger et <UniqueXXXId> element
 *
-* @param string $what Hvilket UniqueXXXId element, der skal opbygges, hvor XXX erstattes af $what
-* @param array $uniqueXxxId hvorfra parametrene hentes på formen:
+* @param $what string Hvilket UniqueXXXId element, der skal opbygges, hvor XXX erstattes af $what
+* @param $uniqueXxxId array hvorfra parametrene hentes på formen:
 *                $uniqueXxxId["UniqueXXXId"]["XXXIdentifierValue"] og
 *                $uniqueXxxId["UniqueXXXId"]["UniqueAgencyId"]
 *         
-* @return DOMElement Det resulterende UniqueXXXId element
+* @retval DOMElement Det resulterende UniqueXXXId element
 *
 */
   private function _create_unique_id($what, $uniqueXxxId) {
@@ -812,8 +812,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupUser request, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupRequest DOM Elementet med indholdet af LookupUserRequest
-* @return array De fortolkede værdier
+* @param $lookupRequest DOMElement DOM Elementet med indholdet af LookupUserRequest
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_user_request($lookupRequest) {
@@ -837,8 +837,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupUser response, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupResponse DOM Elementet med indholdet af LookupUserResponse
-* @return array De fortolkede værdier
+* @param $lookupResponse DOMElement DOM Elementet med indholdet af LookupUserResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_user_response($lookupResponse) {
@@ -922,8 +922,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupItem request, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupRequest DOM Elementet med indholdet af LookupItemRequest
-* @return array De fortolkede værdier
+* @param $lookupRequest DOMElement DOM Elementet med indholdet af LookupItemRequest
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_item_request($lookupRequest) {
@@ -941,8 +941,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupItem response, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupResponse DOM Elementet med indholdet af LookupItemResponse
-* @return array De fortolkede værdier
+* @param $lookupResponse DOMElement DOM Elementet med indholdet af LookupItemResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_item_response($lookupResponse) {
@@ -965,8 +965,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupRequest request, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupRequest DOM Elementet med indholdet af LookupRequestRequest
-* @return array De fortolkede værdier
+* @param $lookupRequest DOMElement DOM Elementet med indholdet af LookupRequestRequest
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_request_request($lookupRequest) {
@@ -983,8 +983,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker LookupRequest response, og returnerer et array med resultatet
 *
-* @param DOMElement $lookupResponse DOM Elementet med indholdet af LookupRequestResponse
-* @return array De fortolkede værdier
+* @param $lookupResponse DOMElement DOM Elementet med indholdet af LookupRequestResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_lookup_request_response($lookupResponse) {
@@ -1023,8 +1023,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker CancelRequestItem request, og returnerer et array med resultatet
 *
-* @param DOMElement $cancelRequest DOM Elementet med indholdet af CancelRequestItemRequest
-* @return array De fortolkede værdier
+* @param $cancelRequest DOMElement DOM Elementet med indholdet af CancelRequestItemRequest
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_cancel_request_item_request($cancelRequest) {
@@ -1042,8 +1042,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker CancelRequestItem response, og returnerer et array med resultatet
 *
-* @param DOMElement $cancelResponse DOM Elementet med indholdet af CancelRequestItemResponse
-* @return array De fortolkede værdier
+* @param $cancelResponse DOMElement DOM Elementet med indholdet af CancelRequestItemResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_cancel_request_item_response($cancelResponse) {
@@ -1060,8 +1060,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker RenewItem request, og returnerer et array med resultatet
 *
-* @param DOMElement $renewRequest DOM Elementet med indholdet af RenewItemRequest
-* @return array De fortolkede værdier
+* @param $renewRequest DOMElement DOM Elementet med indholdet af RenewItemRequest
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_renew_item_request($renewRequest) {
@@ -1078,8 +1078,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker RenewItem response, og returnerer et array med resultatet
 *
-* @param DOMElement $renewResponse DOM Elementet med indholdet af RenewItemResponse
-* @return array De fortolkede værdier
+* @param $renewResponse DOMElement DOM Elementet med indholdet af RenewItemResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_renew_item_response($renewResponse) {
@@ -1103,8 +1103,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker UpdateRequestItem request, og returnerer et array med resultatet
 *
-* @param DOMElement $updateRequestItem DOM Elementet med indholdet af UpdateRequestItem
-* @return array De fortolkede værdier
+* @param $updateRequestItem DOMElement DOM Elementet med indholdet af UpdateRequestItem
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_update_request_item_request($updateRequestItem) {
@@ -1119,8 +1119,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker UpdateRequestItem response, og returnerer et array med resultatet
 *
-* @param DOMElement $updateRequestItemResponse DOM Elementet med indholdet af RenewItemResponse
-* @return array De fortolkede værdier
+* @param $updateRequestItemResponse DOMElement DOM Elementet med indholdet af RenewItemResponse
+* @retval array De fortolkede værdier
 *
 */
   private function _parse_update_request_item_response($updateRequestItemResponse) {
@@ -1140,8 +1140,8 @@ class ncip extends http_wrapper {
 *
 * Ren XML forespørgsels metode, der henter listen af child - DOMElements
 *
-* @param DOMNode $node Parent node, hvor alle børne elementer ønskes
-* @return DOMNode array af DOMElement's
+* @param $node DOMNode Parent node, hvor alle børne elementer ønskes
+* @retval DOMNode array af DOMElement's
 *
 */
   private function _get_child_elements($node) {
@@ -1159,9 +1159,9 @@ class ncip extends http_wrapper {
 * Fortolker et DOMElement, og henter response header info ud af den
 * Tjekker osse om der findes et Problem tag i elementet, og returnerer dette sammen med header info
 *
-* @param string $header_tag Navnet på header tag elementet
-* @param DOMElement $xml Det element, hvorfra header info ønskes læst
-* @return array Header info
+* @param $header_tag string Navnet på header tag elementet
+* @param $xml DOMElement Det element, hvorfra header info ønskes læst
+* @retval array Header info
 *
 */
   private function _parse_header($header_tag, $xml) {
@@ -1185,9 +1185,9 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Unique ID Headeren info ud af det
 *
-* @param DOMElement $response Det element, hvorfra response header info ønskes læst
-* @param string $par Navnet på den Unique ID, der ønskes info om ("UniqueXXXID")
-* @return array Unique ID info
+* @param $response DOMElement Det element, hvorfra response header info ønskes læst
+* @param $par string Navnet på den Unique ID, der ønskes info om ("UniqueXXXID")
+* @retval array Unique ID info
 *
 */
   private function _parse_unique_id_header($response, $par) {
@@ -1208,8 +1208,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Shipping Information info ud af det
 *
-* @param DOMElement $lookupResponse Det element, hvorfra Item Optional Fields info ønskes læst 
-* @return array Item Optional Fields info
+* @param $lookupResponse DOMElement Det element, hvorfra Item Optional Fields info ønskes læst 
+* @retval array Item Optional Fields info
 *
 */
   private function _parse_shipping_information($lookupResponse) {
@@ -1242,8 +1242,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Item Transaction info ud af det
 *
-* @param DOMElement $lookupResponse Det element, hvorfra Item Transaction info ønskes læst 
-* @return array Item Transaction info
+* @param $lookupResponse DOMElement Det element, hvorfra Item Transaction info ønskes læst 
+* @retval array Item Transaction info
 *
 */
   private function _parse_item_transaction($lookupResponse) {
@@ -1272,8 +1272,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Item Optional Fields info ud af det
 *
-* @param DOMElement $lookupResponse Det element, hvorfra Item Optional Fields info ønskes læst 
-* @return array Item Optional Fields info
+* @param $lookupResponse DOMElement Det element, hvorfra Item Optional Fields info ønskes læst 
+* @retval array Item Optional Fields info
 *
 */
   private function _parse_item_optional_fields($lookupResponse) {
@@ -1317,8 +1317,8 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Item Optional Fields info ud af det
 *
-* @param DOMElement $lookupResponse Det element, hvorfra Item Optional Fields info ønskes læst 
-* @return array Item Optional Fields info
+* @param $lookupResponse DOMElement Det element, hvorfra Item Optional Fields info ønskes læst 
+* @retvlrn array Item Optional Fields info
 *
 */
   private function _parse_user_optional_fields($lookupResponse) {
@@ -1333,9 +1333,9 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter Authentication Input ud af det
 *
-* @param $authentication_input_type_name Typen på det Authentication Input elementet, der ønskes udvalgt
-* @param DOMElement $lookupResponse Det element, hvorfra Authentication Input ønskes læst 
-* @return string Værdien af AuthenticationInputData tagget i det givne elementet
+* @param $authentication_input_type_name string Typen på det Authentication Input elementet, der ønskes udvalgt
+* @param $lookupResponse DOMElement Det element, hvorfra Authentication Input ønskes læst 
+* @retval string Værdien af AuthenticationInputData tagget i det givne elementet
 *
 */
   private function _parse_authentication_input($authentication_input_type_name, $xml) {
@@ -1356,9 +1356,9 @@ class ncip extends http_wrapper {
 *
 * Fortolker et DOMElement, og henter amount ud af det
 *
-* @param DOMElement $dom Det element, hvorfra amount ønskes læst 
-* @param string $tag Navnet på det tag, der ønskes læst
-* @return array Det resulterende array
+* @param $dom DOMElement Det element, hvorfra amount ønskes læst 
+* @param $tag string Navnet på det tag, der ønskes læst
+* @retval array Det resulterende array
 *
 */
   private function _parse_amount($dom, $tag) {
@@ -1383,8 +1383,8 @@ class ncip extends http_wrapper {
 *     [Scheme] => "http://www.niso.org/ncip/v1_0/schemes/processingerrortype/lookupuserprocessingerror.scm"
 *     [Value] => Value
 *     
-* @param DOMElement $xml Det element, hvorfra Problem info ønskes læst 
-* @return array Problem info 
+* @param $xml DOMElement Det element, hvorfra Problem info ønskes læst 
+* @retval array Problem info 
 *
 */
   private function _parse_problem($xml) {
