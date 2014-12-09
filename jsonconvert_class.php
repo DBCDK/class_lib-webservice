@@ -38,6 +38,10 @@ class Jsonconvert {
   private $soap_footer;
   private $default_namespace = '';
 
+  /** \brief constructor
+   *
+   * @param $namespace string 
+   */
   public function __construct($namespace='') {
     $this->soap_header='<?xml version="1.0" encoding="%s"?' . '><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
     $this->soap_footer='</SOAP-ENV:Body></SOAP-ENV:Envelope>';
@@ -48,7 +52,7 @@ class Jsonconvert {
   /** \brief Transform JSON parameters to SOAP-request
    *
    * @param $config (object) the config object from the ini-file
-   * @return (string) Soap wrapped xml
+   * @retval string Soap wrapped xml
    */
   public function json2soap($config) {
     $soap_actions = $config->get_value('soapAction', 'setup');
@@ -70,7 +74,7 @@ class Jsonconvert {
   /** \brief Build xml with data from query
    *
    * @param $obj (object) list of parameters 
-   * @return (string) xml
+   * @retval string xml
    */
   private function to_xml($obj) {
     foreach ($obj as $tag => $val) {
@@ -91,8 +95,8 @@ class Jsonconvert {
 
   /** \brief Helper function to get a parameter from _GET or _POST
    *
-   * @param $par (string) 
-   * @return (string) the associated value of $par
+   * @param $par string 
+   * @retval string the associated value of $par
    */
   private function get_post($par) {
     return ($_GET[$par] ? $_GET[$par] : $_POST[$par]);
@@ -100,9 +104,9 @@ class Jsonconvert {
 
   /** \brief Helper function to produce balanced xml
    *
-   * @param $tag (string) 
-   * @param $val (string) 
-   * @return (string) balanced xml string
+   * @param $tag string 
+   * @param $val string 
+   * @retval string balanced xml string
    */
   private function tag_me($tag, $val) {
     return '<' . $tag . ">" . $val . '</' . $tag. ">";
