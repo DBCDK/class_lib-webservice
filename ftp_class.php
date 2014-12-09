@@ -51,10 +51,10 @@ class ftp {
 
   /**
    * Constructor
-   * @param string $host Hostname
-   * @param string $credentials Credential information in the form username/password
-   * @param integer $timeout Timeout value in seconds (default value=90)
-   * @param integer $port Port number (default value=21)
+   * @param $host string Hostname
+   * @param $credentials string Credential information in the form username/password
+   * @param $timeout integer Timeout value in seconds (default value=90)
+   * @param $port integer Port number (default value=21)
    * @throws ftpException
    */  
   public function __construct($host, $credentials, $timeout = 90, $port = 21) {
@@ -81,7 +81,7 @@ class ftp {
 
   /**
    * Deletes a file on the remote FTP server
-   * @param string $remote Remote file name
+   * @param $remote string Remote file name
    */
   public function delete($remote) {
     if (! @ftp_delete($this->connection, $remote)) {
@@ -91,8 +91,8 @@ class ftp {
 
   /**
    * Puts an ASCII file to the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
+   * @param $local string Local file name
+   * @param $remote string Remote file name
    */
   public function put_ascii($local, $remote) {
     $this->_put($local, $remote, FTP_ASCII);
@@ -100,8 +100,8 @@ class ftp {
 
   /**
    * Puts a binary file to the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
+   * @param $local string Local file name
+   * @param $remote string Remote file name
    */
   public function put_binary($local, $remote) {
     $this->_put($local, $remote, FTP_BINARY);
@@ -109,9 +109,9 @@ class ftp {
 
   /**
    * Puts a file to the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
-   * @param int $mode FTP_ASCII or FTP_BINARY
+   * @param $local string Local file name
+   * @param $remote string Remote file name
+   * @param $mode integer FTP_ASCII or FTP_BINARY
    */
   private function _put($local, $remote, $mode) {
     if (!is_resource($this->connection)) {
@@ -124,8 +124,8 @@ class ftp {
 
   /**
    * Gets an ASCII file from the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
+   * @param $local string Local file name
+   * @param $remote string Remote file name
    */
   public function get_ascii($local, $remote) {
     $this->_get($local, $remote, FTP_ASCII);
@@ -133,8 +133,8 @@ class ftp {
 
   /**
    * Gets a binary file from the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
+   * @param $local string Local file name
+   * @param $remote string Remote file name
    */
   public function get_binary($local, $remote) {
     $this->_get($local, $remote, FTP_BINARY);
@@ -142,9 +142,9 @@ class ftp {
 
   /**
    * Gets a file from the remote FTP server
-   * @param string $local Local file name
-   * @param string $remote Remote file name
-   * @param int $mode FTP_ASCII or FTP_BINARY
+   * @param $local string Local file name
+   * @param $remote string Remote file name
+   * @param $mode integer FTP_ASCII or FTP_BINARY
    */
   private function _get($local, $remote, $mode) {
     if (!is_resource($this->connection)) {
