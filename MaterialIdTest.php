@@ -7,10 +7,9 @@ require_once("material_id_class.php");
 class MaterialIdTest extends PHPUnit_Framework_TestCase
 {
 
-  // ---------------------------------------------------------------------------
-  // Test normalizeISBN
-  // ---------------------------------------------------------------------------
-
+/** ---------------------------------------------------------------------------
+  * Test normalizeISBN
+  * --------------------------------------------------------------------------- */
   public static function normalizeISBNProvider() {
     return array(
       array('', ''),                             // Normalize empty ISBN number
@@ -42,16 +41,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider normalizeISBNProvider
+  * dataProvider normalizeISBNProvider
   */
   public function testNormalizeISBN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::normalizeISBN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test validateISBN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test validateISBN
+  * --------------------------------------------------------------------------- */
 
   public static function validateISBNProvider() {
     return array(
@@ -91,16 +90,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider validateISBNProvider
+  * dataProvider validateISBNProvider
   */
   public function testValidateISBN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::validateISBN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test normalizeEAN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test normalizeEAN
+  * --------------------------------------------------------------------------- */
 
   public static function normalizeEANProvider() {
     return array(
@@ -113,16 +112,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider normalizeEANProvider
+  * dataProvider normalizeEANProvider
   */
   public function testNormalizeEAN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::normalizeEAN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test validateEAN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test validateEAN
+  * --------------------------------------------------------------------------- */
 
   public static function validateEANProvider() {
     return array(
@@ -138,16 +137,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider validateEANProvider
+  * dataProvider validateEANProvider
   */
   public function testValidateEAN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::validateEAN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test normalizeISSN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test normalizeISSN
+  * --------------------------------------------------------------------------- */
 
   public static function normalizeISSNProvider() {
     return array(
@@ -178,16 +177,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider normalizeISSNProvider
+  * dataProvider normalizeISSNProvider
   */
   public function testNormalizeISSN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::normalizeISSN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test validateISSN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test validateISSN
+  * --------------------------------------------------------------------------- */
 
   public static function validateISSNProvider() {
     return array(
@@ -207,16 +206,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider validateISSNProvider
+  * dataProvider validateISSNProvider
   */
   public function testValidateISSN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::validateISSN($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test normalizeFaust
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test normalizeFaust
+  * --------------------------------------------------------------------------- */
 
   public static function normalizeFaustProvider() {
     return array(
@@ -229,16 +228,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider normalizeFaustProvider
+  * dataProvider normalizeFaustProvider
   */
   public function testNormalizeFaust($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::normalizeFaust($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test validateFaust
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test validateFaust
+  * --------------------------------------------------------------------------- */
 
   public static function validateFaustProvider() {
     return array(
@@ -252,16 +251,16 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider validateFaustProvider
+  * dataProvider validateFaustProvider
   */
   public function testValidateFaust($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::validateFaust($input));
   }
 
 
-  // ---------------------------------------------------------------------------
-  // Test convertISBNToEAN
-  // ---------------------------------------------------------------------------
+/** ---------------------------------------------------------------------------
+  *  Test convertISBNToEAN
+  * --------------------------------------------------------------------------- */
 
   public static function convertISBNToEANProvider() {
     return array(
@@ -276,7 +275,7 @@ class MaterialIdTest extends PHPUnit_Framework_TestCase
   }
 
   /**
-  * @dataProvider convertISBNToEANProvider
+  * dataProvider convertISBNToEANProvider
   */
   public function testConvertISBNToEAN($input, $expected_result) {
     $this->assertEquals($expected_result, materialId::convertISBNToEAN($input));
