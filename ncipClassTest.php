@@ -14,6 +14,9 @@ class ncipClassTest extends PHPUnit_Framework_TestCase
   // Test parse requests
   // ---------------------------------------------------------------------------
 
+  /**
+  * Test parseRequests
+  */
   public static function parseRequests() {
     return array(
 
@@ -1421,7 +1424,7 @@ array(
   }
 
   /**
-  * @dataProvider parseRequests
+  * dataProvider parseRequests
   */
   public function testParseRequests($input, $expected_result) {
     $ncip = new ncip();
@@ -1445,6 +1448,9 @@ array(
   // Test parse Responses
   // ---------------------------------------------------------------------------
 
+  /**
+  * Test parseResponses
+  */
   public static function parseResponses() {
     return array(
 
@@ -5695,7 +5701,7 @@ array(
   }
 
   /**
-  * @dataProvider parseResponses
+  * dataProvider parseResponses
   */
   public function testParseResponses($input, $expected_result) {
     $ncip = new ncip();
@@ -5711,6 +5717,9 @@ array(
   // Test build requests
   // ---------------------------------------------------------------------------
 
+  /**
+  * Test buildRequest
+  */
   public static function buildRequests() {
     return array(
 
@@ -5854,7 +5863,7 @@ array(
   }
 
   /**
-  * @dataProvider buildRequests
+  * dataProvider buildRequests
   */
   public function testBuildRequests($input, $expected_result) {
     $ncip = new ncip();
@@ -5870,6 +5879,9 @@ array(
   // Test build responses
   // ---------------------------------------------------------------------------
 
+  /**
+  * Test buildResponses
+  */
   public static function buildResponses() {
     return array(
 
@@ -5878,7 +5890,7 @@ array(
   }
 
   /**
-  * @dataProvider buildResponses
+  * dataProvider buildResponses
   */
   public function testBuildResponses($input, $expected_result) {
     $ncip = new ncip();
