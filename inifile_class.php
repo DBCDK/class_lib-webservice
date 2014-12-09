@@ -87,14 +87,14 @@ class inifile {
 
   private $inifile_hash = NULL;
 
-  public $error = "";
+  public $error = "";     ///< -
 
 
   /**
   *  provides a multidimensional array from the INI file
   *
-  * @param $filename   The .ini file to be processed. (string)
-  * @returns boolean
+  * @param $filename string  The .ini file to be processed. string
+  * @retval boolean
   **/
   public function inifile($filename) {
     $this->ini_filename = $filename;
@@ -110,8 +110,8 @@ class inifile {
   /**
   * returns the complete section
   *
-  * @param $section   Section key (string)
-  * @returns array
+  * @param $section string  Section key string
+  * @retval array
   **/
   public function get_section($section=NULL) {
     if (is_null($section)) {
@@ -126,6 +126,9 @@ class inifile {
     return null;
   }
 
+  /**
+  * @retval string
+  **/
   public function error() {
     return $this->error();
   }
@@ -134,9 +137,9 @@ class inifile {
   * returns a value from a section
   * if $section is omitted, returns the value of first $key found
   *
-  * @param $section  Section key (string)
-  * @param $key      Value for key in section (string)
-  * @returns mixed
+  * @param $key string     Value for key in section string
+  * @param $section string Section key string
+  * @retval mixed
   **/
   public function get_value($key, $section=NULL) {
     if ($section) {
@@ -159,9 +162,9 @@ class inifile {
   /**
   * returns the value of a section or the whole section
   *
-  * @param $section  Section key (string)
-  * @param $key      Value for key in section (string)
-  * @returns mixed
+  * @param $key string     Value for key in section string
+  * @param $section string Section key string
+  * @retval mixed
   **/
   public function get($key=NULL, $section=NULL) {
     if (is_null($key)) {
@@ -173,7 +176,7 @@ class inifile {
   /**
   * returns the hash value of the inifile
   *
-  * @returns md5 sum of the inifile
+  * @retval integer - md5 sum of the inifile
   **/
   public function get_inifile_hash() {
     return $this->inifile_hash;
@@ -182,9 +185,9 @@ class inifile {
   /**
   * set a section in accordance with the specified key
   *
-  * @param $section  Section key (string)
-  * @param $array    Array of keys/values (array)
-  * @returns mixed
+  * @param $section string Section key string
+  * @param $array array    Array of keys/values (array)
+  * @retval mixed
   **/
   public function set_section($section, $array) {
     if (!is_array($array)) {
@@ -196,10 +199,10 @@ class inifile {
   /**
   * sets a new value in a section
   *
-  * @param $section  Section key (string)
-  * @param $key      Key (string)
-  * @param $value    Array of keys/values (mixed)
-  * @returns mixed
+  * @param $section string Section key
+  * @param $key string     Key
+  * @param $value mixed    Array of keys/values
+  * @retval mixed
   **/
   public function set_value($key, $section, $value) {
     if ($this->ini_file_array[$section][$key] = $value) {
@@ -210,10 +213,10 @@ class inifile {
   /**
   * sets a new value in a section or an entire, new section
   *
-  * @param $section  Section key (string)
-  * @param $key      Key (string)
-  * @param $value    Array of keys/values (mixed)
-  * @returns bool
+  * @param $section string Section key
+  * @param $key string     Key
+  * @param $value mixed    Array of keys/values
+  * @retval boolean
   **/
   public function set($key, $section, $value=NULL) {
     if (is_array($key) && is_null($value)) {
@@ -225,8 +228,8 @@ class inifile {
   /**
   * saves the entire array into the INI file
   *
-  * @param $filename (string)
-  * @returns bool
+  * @param $filename string
+  * @retval boolean
   **/
   public function save($filename = null) {
     if ($filename == null) {
@@ -254,10 +257,10 @@ class inifile {
   /**
   * write line in .ini file
   *
-  * @param $file_handle (resource)
-  * @param $key (string)
-  * @param $value (mixed)
-  * @param $prefix (string)
+  * @param $file_handle resource
+  * @param $key string
+  * @param $value mixed
+  * @param $prefix string
   **/
   private function write_value($file_handle, $key, $value, $prefix = '') {
     if (is_array($value)) {
@@ -283,8 +286,8 @@ class inifile {
   /**
   * parse .ini file, and return array
   *
-  * @param $filepath (string)
-  * @returns array
+  * @param $filepath string
+  * @retval array
   **/
   private function parse_ini ($filepath) {
     $ini = @ file($filepath);
@@ -335,10 +338,10 @@ class inifile {
   /**
   * parse .ini line values for array structures and return array, if any.
   *
-  * @param $res_array (array)
-  * @param $key (string)
-  * @param $value (string)
-  * @returns array
+  * @param $res_array array
+  * @param $key string
+  * @param $value string
+  * @retval array
   **/
   private function parse_ini_array($res_array, $key, $value) {
 
@@ -375,8 +378,8 @@ class inifile {
   * Integers are typecast to (int), if less than, or equal to PHP_INT_MAX
   * Floats are typecast to (float)
   *
-  * @param $val (string)
-  * @returns mixed
+  * @param $val string
+  * @retval mixed
   **/
   private function parse_reserved_words($val) {
     if (substr($val,0,1) == '"' && substr($val,-1,1) == '"')
@@ -399,8 +402,8 @@ class inifile {
   * Constants can be concatenated with strings, but the string segments must be enclosed
   * in quotes (note: no joining symbol is used)
   *
-  * @param $val (string)
-  * @returns string
+  * @param $val string
+  * @retval string
   **/
   private function parse_constants($val) {
 
@@ -426,8 +429,3 @@ class inifile {
 
 }
 
-
-
-
-
-?>
