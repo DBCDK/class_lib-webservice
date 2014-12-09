@@ -158,7 +158,7 @@ class ncip extends http_wrapper {
 *
 * Læser og fortolker input teksten som en ncip request eller response, og opbygger et php array, med de læste data.
 *
-* @param string $ncip_str Ncip responsen som xml tekst
+* @param $ncip_str string Ncip responsen som xml tekst
 * @retval array Fortolkede værdier, udtrukket fra ncip responsen
 *
 */
