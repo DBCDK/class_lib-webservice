@@ -36,8 +36,12 @@ class ini_extend extends inifile {
   private $mother;
   public $error;    ///< -
 
-  const ws_file="http://metode.dbc.dk/~pjo/OpenLibrary/OpenFile/trunk/server.php/?";
+  const ws_file="http://metode.dbc.dk/~pjo/OpenLibrary/OpenFile/trunk/server.php/?";  ///< -
 
+ /** \brief  constructor
+  * @param $inifile string - 
+  * @param $use_cache boolean - 
+  */
   public function __construct($inifile, $use_cache=false) {
     parent::__construct($inifile);
     
@@ -60,16 +64,24 @@ class ini_extend extends inifile {
     $this->import(); 
   }
 
-  //mini wrappers for memcache_class. 
+ /** \brief  mini wrappers for memcache_class. 
+  * @retval mixed
+  */
   private function cache_get() {
     return $this->cache->get($this->cache_key());
   }
 
+ /** \brief 
+  * @param $value mixed - 
+  * @retval mixed
+  */
   private function cache_set($value) {
     return $this->cache->set($this->cache_key(),$value);
   }
 
-   // cache key for this class
+ /** \brief  cache key for this class
+  * @retval string
+  */
   private function cache_key() {
     $key = "ini_";
     $key .= "_";
@@ -82,6 +94,11 @@ class ini_extend extends inifile {
 
   // TODO error-check
 
+ /** \brief 
+  * @param $section string - 
+  * @param $inifile string - 
+  * @retval mixed
+  */
   public function get_section($section, $inifile=NULL) {
     // TODO fixme. This is not a good solution.    
     if (!$inifile) {
@@ -100,6 +117,12 @@ class ini_extend extends inifile {
     return $ret;
   }
 
+ /** \brief 
+  * @param $value string - 
+  * @param $section string - 
+  * @param $inifile string - 
+  * @retval mixed
+  */
   public function get_value($value, $section, $inifile=NULL) {
     // TODO fixme. This is not a good solution.
     if (!$inifile) {
@@ -122,6 +145,9 @@ class ini_extend extends inifile {
   /*********** end overwritten methods **********/
 
 
+ /** \brief 
+  * @param $inifile string - 
+  */
   public function dump($inifile=NULL) {
     if (!$inifile) {    
       //look in first ini-file 
@@ -140,6 +166,9 @@ class ini_extend extends inifile {
   }
 
   
+ /** \brief
+  * -
+  */
   private function import() {
     $import =  $this->get_section("import");
 
@@ -170,9 +199,12 @@ class ini_extend extends inifile {
     }
   }
 
-  /**
-   * get file via cache or openfile webservice
-   **/
+ /** \brief  get file via cache or openfile webservice
+  * @param $filename string - 
+  * @param $version string - 
+  * @param $filpath string - 
+  * @retval string
+  */
   private function get_xml($filename, $version, $filepath = null) {
     $url = self::ws_file."action=getFile&fileName=$filename&version=$version&fileType=ini&filePath=files/";
 
@@ -190,6 +222,10 @@ class ini_extend extends inifile {
     return $ret;       
   }
 
+ /** \brief  get file via cache or openfile webservice
+  * @param $xml string - 
+  * @retval DOMelement
+  */
   private function file_contents($xml) {
     $dom = new DOMDocument();
     $dom->loadXML($xml);
@@ -214,6 +250,8 @@ class ini_extend extends inifile {
     return $nodelist->item(0)->nodeValue;
   }
 
+ /** \brief  -
+  */
   private function check_lib_xml() {
     // error check
     if ($errors = libxml_get_errors()) {
@@ -225,6 +263,9 @@ class ini_extend extends inifile {
     }    
   }
 
+ /** \brief 
+  * @param $curl object - 
+  */
   private function check_curl($curl) {
     $status = $curl->get_status();
     if ($status['http_code'] != 200) {
@@ -232,6 +273,9 @@ class ini_extend extends inifile {
     }
   }
 
+ /** \brief 
+  * @param $xpath DOMXPath object - 
+  */
   private function check_file_response($xpath) {
     $query = "//error";
     $nodes = $xpath->query($query);
