@@ -63,10 +63,9 @@ abstract class http_wrapper {
 *
 * Abstrakt metode til at opbygge en request meddelelse
 *
-* @param string $message Request type 
-* @param array  $parameters Associativt array indeholdene parametre for requesten
+* @param $parameters array  Associativt array indeholdene parametre for requesten
 * 
-* @return string Den opbyggede ncip request som ren tekst
+* @retval string Den opbyggede ncip request som ren tekst
 * 
 */
   abstract protected function build($parameters);
@@ -76,9 +75,9 @@ abstract class http_wrapper {
 *
 * Abstrakt metode til at parse en response
 *
-* @param string $response Responsen som ren tekst
+* @param $response string Responsen som ren tekst
 * 
-* @return array Fortolkede værdier, udtrukket fra responsen
+* @retval array Fortolkede værdier, udtrukket fra responsen
 *
 */
   abstract protected function parse(&$response);
@@ -92,10 +91,11 @@ abstract class http_wrapper {
 * Requesten opbygges af den abstrakte metode $this->build, mens
 * Responsen parses af den abstrakte metode $this->parse
 *
-* @param string $url Url adressen på lokalsystemet
-* @param array $data Parametrene til den abstrakte $this->build metode
+* @param $url string Url adressen på lokalsystemet
+* @param $data array Parametrene til den abstrakte $this->build metode
+* @param $debug boolean
 * 
-* @return array http responsen efter parsing af den abstrakte metode $this->parse
+* @retval array http responsen efter parsing af den abstrakte metode $this->parse
 * 
 */
   public function request($url, $data, $debug = FALSE) {
