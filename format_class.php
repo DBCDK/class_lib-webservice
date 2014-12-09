@@ -38,23 +38,23 @@ require_once 'OLS_class_lib/memcache_class.php';
  */
 
 class FormatRecords {
-  protected $cache;                     // for caching formatted records
-  protected $curl;                      // the curl connection
-  protected $namespace;                 // the namespace for openformat
-  protected $objconvert;                // OLS object to xml convert
-  protected $xmlconvert;                // xml to OLS object convert
-  protected $watch;                     // timer object
-  protected $record_blocking = 1;       // block factor: number of records in each request to js_server
-  protected $js_server_url = array();   // if more than one, the formatting requests will be split amongst them
-  protected $rec_status = array();      // curl_status for each record formattet
-  protected $timeout = 5;
+  protected $cache;                     ///< for caching formatted records
+  protected $curl;                      ///< the curl connection
+  protected $namespace;                 ///< the namespace for openformat
+  protected $objconvert;                ///< OLS object to xml convert
+  protected $xmlconvert;                ///< xml to OLS object convert
+  protected $watch;                     ///< timer object
+  protected $record_blocking = 1;       ///< block factor: number of records in each request to js_server
+  protected $js_server_url = array();   ///< if more than one, the formatting requests will be split amongst them
+  protected $rec_status = array();      ///< curl_status for each record formattet
+  protected $timeout = 5;               ///< -
 
   /** \brief
-  *  @param setup <object>
-  *  @param objconvert <class> 
-  *  @param xmlconvert <class> 
-  *  @param watch <class> optional
-  *  
+  *  @param $setup object
+  *  @param $namespace string
+  *  @param $objconvert class 
+  *  @param $xmlconvert class 
+  *  @param $watch class optional
   */
   public function __construct($setup, $namespace, &$objconvert, &$xmlconvert, &$watch = NULL) {
     $this->curl = new curl();
@@ -78,9 +78,9 @@ class FormatRecords {
   }
 
   /** \brief
-  *  @param records <array> Records to format
-  *  @param param <object> User given parameters
-  *  return formatted records
+  *  @param $records array Records to format
+  *  @param $param object User given parameters
+  *  @retval array - of formatted records
   */
   public function format($records, $param) {
     static $dom;
@@ -160,18 +160,21 @@ class FormatRecords {
   }
 
   /** \brief setters
-  *  
+  * $param $count integer
   */
   public function set_record_blocking($count) {
     $this->record_blocking = (integer) $count;
   }
 
+  /** \brief setters
+  * $param $seconds integer
+  */
   public function set_timeout($seconds) {
     $this->timeout = (integer) $seconds;
   }
 
   /** \brief getters
-  *  return an array of status
+  *  @retval array of status
   *  
   */
   public function get_status() {
@@ -179,9 +182,9 @@ class FormatRecords {
   }
 
   /** \brief generate hash key from the record and the user params
-  *  @param object <object> the records to format
-  *  @param param <object> the usergiven parameters
-  *  return cache key for the object
+  *  @param $record object the records to format
+  *  @param $param object the usergiven parameters
+  *  @retval string cache key for the object
   */
   private function make_cache_key(&$record, &$param) {
     if (is_array($record)) {
