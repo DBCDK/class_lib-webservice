@@ -526,6 +526,16 @@ class marc implements Iterator {
             $this->marc_array[$key]['subfield'][] = $subfield . $data;
         }
     }
+    
+    function insert_field($data, $field, $subfield, $indicators = '00') {
+      	$newfield = array();
+      	$newfield['field'] = $field;
+      	$newfield['indicator'] = $indicators;
+      	$subfields = array();
+      	$subfields[] = $subfield . $data;
+      	$newfield['subfield'] = $subfields;
+      	$this->insert($newfield);
+  	}
 
     /**
      *
