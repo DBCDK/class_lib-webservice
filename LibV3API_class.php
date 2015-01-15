@@ -72,6 +72,21 @@ class LibV3API {
 
     /**
      *
+     * @param type $lastupdate
+     */
+    function getUpdatedRecs($lastupdated) {
+        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
+                . "where ajourdato > to_date('$lastupdated','DDMMYYYY HH24MISS') "
+                . "and bibliotek = '870970'  "
+                . "order by ajourdato ";
+
+//        echo "sql:$sql\n";
+        $updates = $this->oci->fetch_all_into_assoc($sql);
+        return $updates;
+    }
+
+    /**
+     *
      * @param string with iso2709 record $data
      * @return iso2709 type
      *
@@ -183,7 +198,6 @@ class LibV3API {
     }
 
     function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'basis') {
-
         if ($wh) {
             $where = $wh;
         } else {
