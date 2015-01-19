@@ -59,7 +59,7 @@ class ShowPriority {
   public function get_priority($agency) {
     $agency_list = array();
     if ($this->agency_cache) {
-      $cache_key = 'PRIORITY_' . $agency;
+      $cache_key = md5('PRIORITY_' . $agency . $this->agency_uri);
       $agency_list = $this->agency_cache->get($cache_key);
     }
 
