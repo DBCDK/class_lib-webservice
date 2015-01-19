@@ -82,12 +82,11 @@ class agency_type {
   private function fetch_agency_type_tab() {
     $this->agency_status = 'ready';
     if ($this->agency_cache) {
-      $cache_key = 'branch_types';
+      $cache_key = md5('BRANCH_TYPES_' . $this->agency_uri);
       $this->agency_type_tab = $this->agency_cache->get($cache_key);
     }
 
     if (!$this->agency_type_tab) {
-      $this->agency_type_tab = $this->agency_cache->get($cache_key);
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, 10);
       $res_json = $curl->get(sprintf($this->agency_uri));
