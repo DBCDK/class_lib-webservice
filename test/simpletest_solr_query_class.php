@@ -40,7 +40,11 @@ class TestOfSolrQueryClass extends UnitTestCase {
   }
 
   function test_bool() {
-    $tests = array('et AND to' => 'et AND to',
+    $tests = array('et and to' => 'et AND to',
+                   'et AND to' => 'et AND to',
+                   'and AND and' => 'and AND and',
+                   'et or to' => '(et OR to)',
+                   'et OR to' => '(et OR to)',
                    'et AND to OR tre' => '((et AND to) OR tre)',
                    'et AND to OR tre AND fire' => '((et AND to) OR tre) AND fire',
                    'et to OR tre fire' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 5)),
@@ -48,6 +52,15 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'et AND (to OR tre)' => 'et AND (to OR tre)',
                    '(et AND to' => array(array('no' => 13, 'description' => 'Invalid or unsupported use of parentheses', 'details' => '', 'pos' => 10)),
                    'et AND to)' => array(array('no' => 10, 'description' => 'Query syntax error', 'details' => '', 'pos' => 10)));
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
+  function test_string() {
+    $tests = array('"karen blixen"' => '"karen blixen"~9999',
+                   '"karen AND blixen"' => '"karen AND blixen"~9999',
+                   '"karen and blixen"' => '"karen and blixen"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
