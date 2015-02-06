@@ -78,6 +78,7 @@ class LibV3API {
         $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
                 . "where ajourdato > to_date('$lastupdated','DDMMYYYY HH24MISS') "
                 . "and bibliotek = '870970'  "
+                . "and (lokalid like '2%' or lokalid like '5%')"
                 . "order by ajourdato ";
 
 //        echo "sql:$sql\n";
