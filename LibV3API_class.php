@@ -70,9 +70,19 @@ class LibV3API {
         }
     }
 
+    function getDBtime() {
+        $sql = "select to_char(current_timestamp,'DDMMYYYY HH24MISS') tid "
+                . "from dual";
+        $rows = $this->oci->fetch_all_into_assoc($sql);
+        $tid = $rows[0]['TID'];
+        return $tid;
+    }
+
     /**
      *
      * @param type $lastupdate
+     *
+     * en forbedret udgave:
      */
     function getUpdatedRecs($lastupdated) {
         $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
@@ -80,6 +90,11 @@ class LibV3API {
                 . "and bibliotek = '870970'  "
                 . "and (lokalid like '2%' or lokalid like '5%')"
                 . "order by ajourdato ";
+        $sql = " select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster
+      where ajourdato > to_timestamp('$lastupdated','DDMMYYYY HH24MISS')
+      and bibliotek = '870970'
+      and ( lokalid like '2 %' or lokalid like '5 %')
+      and (data like '%xNLY%' or data like '%xERE%' or data like '%xERL%')";
 
 //        echo "sql:$sql\n";
         $updates = $this->oci->fetch_all_into_assoc($sql);
