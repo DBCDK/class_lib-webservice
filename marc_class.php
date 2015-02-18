@@ -321,6 +321,18 @@ class marc implements Iterator {
     }
 
     /** \brief
+     *
+     * @param type $field
+     * @return boolean
+     */
+    function updateField($field) {
+        if ($this->marc_arrayIndex < 0) {
+            return false;
+        }
+        $this->marc_array[$this->marc_arrayIndex] = $field;
+    }
+
+    /**
      * function update subfield
      * @param $txt string
      */
