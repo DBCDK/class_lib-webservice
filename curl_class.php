@@ -229,14 +229,14 @@ class Curl {
   /**
    * Execute the curl request and return the result.
    *
-   * @link http://www.php.net/curl_multi_close @endlink
-   * @link http://www.php.net/curl_multi_init @endlink
-   * @link http://www.php.net/curl_multi_add_handle @endlink
-   * @link http://www.php.net/curl_multi_exec @endlink
-   * @link http://www.php.net/curl_multi_getcontent @endlink
-   * @link http://www.php.net/curl_getinfo @endlink
-   * @link http://www.php.net/curl_errno @endlink
-   * @link http://www.php.net/curl_error @endlink
+   * @link http://www.php.net/curl_multi_close @endlink \n
+   * @link http://www.php.net/curl_multi_init @endlink \n
+   * @link http://www.php.net/curl_multi_add_handle @endlink \n
+   * @link http://www.php.net/curl_multi_exec @endlink \n
+   * @link http://www.php.net/curl_multi_getcontent @endlink \n
+   * @link http://www.php.net/curl_getinfo @endlink \n
+   * @link http://www.php.net/curl_errno @endlink \n
+   * @link http://www.php.net/curl_error @endlink \n
    * @return string The contents of the page (or other interaction as defined by the
    *                settings of the various curl options).
    */
