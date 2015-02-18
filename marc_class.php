@@ -21,9 +21,11 @@ class marc implements Iterator {
     private $subfield;
     private $subfieldIndex;
     private $subfieldText;
-    var $fp;
-    var $marcLength;
+    var $fp;                   ///< -
+    var $marcLength;           ///< -
 
+    /** \brief constructor
+     */
     public function __construct() {
         $this->position = 0;
         $this->substitute = chr(26);
@@ -34,30 +36,40 @@ class marc implements Iterator {
         return;
     }
 
+    /** \brief -
+     */
     function rewind() {
         $this->position = 0;
     }
 
+    /** \brief -
+     */
     function current() {
         return $this->marc_array[$this->position];
     }
 
+    /** \brief -
+     */
     function key() {
         return $this->position;
     }
 
+    /** \brief -
+     */
     function next() {
         ++$this->position;
     }
 
+    /** \brief -
+     */
     function valid() {
         return isset($this->marc_array[$this->position]);
     }
 
-    /**
-     *
-     * @param type $txt
-     * @return type string
+    /** \brief
+     * -
+     * @param $txt string
+     * @retval string
      */
     private function striptxt($txt) {
         $newtxt = "";
@@ -68,11 +80,12 @@ class marc implements Iterator {
         return strtoupper($newtxt);
     }
 
-    /**
-     *
-     * @param type $txt1
-     * @param type $txt2
-     * @return boolean
+    /** \brief
+     * -
+     * @param $txt1 string
+     * @param $txt2 string
+     * @param $loose boolean
+     * @retval boolean
      */
     function FuzzyCompare($txt1, $txt2, $loose = false) {
         $txt1 = $this->striptxt($txt1);
@@ -102,11 +115,10 @@ class marc implements Iterator {
         }
     }
 
-    /**
-     *
-     * @param type $fieldName
-     * @return type array's of fields
+    /** \brief 
      * Returns all fields matching $fieldName
+     * @param $fieldName string
+     * @retval array - of fields
      */
     function findFields($fieldName) {
         $fields = array();
@@ -117,12 +129,11 @@ class marc implements Iterator {
         return $fields;
     }
 
-    /**
-     *
-     * @param type $fieldName
-     * @return type array of strings
+    /** \brief 
      * Returnin all fields $fieldName convertet into strings
      * ex.  260 00*aGyldendel*bKbh 1984
+     * @param $fieldName string
+     * @retval array of strings
      */
     function getLineFields($fieldName) {
         $fields = $this->findFields($fieldName);
@@ -137,12 +148,11 @@ class marc implements Iterator {
         return $strings;
     }
 
-    /**
-     *
-     * @param type $newField
-     * @return boolean
+    /** \brief
      * If a field is already present nothing happens (return false)
      * otherwise the field is inserted ( return true)
+     * @param $newField string
+     * @retval boolean
      */
     function insertWithoutDublets($newField) {
         $string = $newField['field'] . ' ' . $newField['indicator'];
@@ -164,10 +174,9 @@ class marc implements Iterator {
         }
     }
 
-    /**
-     *
-     * @param type $string
-     * @return type Field
+    /** \brief -
+     * @param $string string
+     * @retval array
      */
     function stringToField($string) {
         if (strlen($string) < 10)
@@ -179,7 +188,7 @@ class marc implements Iterator {
         return $field;
     }
 
-    /**
+    /** \brief
      * Jeg har fejlagtigt lagt poster i phuset med et tomt delfelt.  Disse skal cleares for at kunne blive
      * fjernet.
      */
@@ -215,13 +224,13 @@ class marc implements Iterator {
 //    }
     }
 
-    /**
-     *
-     * @param type $fieldName the name of the field (marc field ex. '245')
-     * @param type $subFields the subfield(s) code (marc 'a' or 'ea')
-     * @param type $maxres Maxresult, if you for instance only one the first subfield. If more
+    /** \brief
+     * -
+     * @param $fieldName string The name of the field (marc field ex. '245')
+     * @param $subFields string The subfield(s) code (marc 'a' or 'ea')
+     * @param $maxres integer- Maxresult, if you for instance only one the first subfield. If more
      * an exception is thrown
-     * @return array The subfields. The first character is the subfield code: 'aDet lille hus på...'
+     * @retval array The subfields. The first character is the subfield code: 'aDet lille hus på...'
      * @throws marcException to many results
      */
     function findSubFields($fieldName, $subFields, $maxres = 99999) {
@@ -253,10 +262,10 @@ class marc implements Iterator {
             return($subreturn);
     }
 
-    /**
-     *
-     * @param type $field
-     * @return boolean
+    /** \brief
+     * -
+     * @param $field string
+     * @retval boolean
      */
     function thisField($field) {
         if (!$field)
@@ -277,19 +286,18 @@ class marc implements Iterator {
         return false;
     }
 
-    /**
-     *
-     * @return type
+    /** \brief
+     * -
+     * @retval integer
      */
     function getMarc_arryIndex() {
         return $this->marc_arrayIndex;
     }
 
-    /**
-     *
-     * @param type $subfield
-     *
-     * @return boolean
+    /** \brief
+     * -
+     * @param $subfield string
+     * @retval boolean
      */
     function thisSubfield($subfield) {
         if (!$subfield)
@@ -312,9 +320,9 @@ class marc implements Iterator {
         return false;
     }
 
-    /**
+    /** \brief
      * function update subfield
-     *
+     * @param $txt string
      */
     function updateSubfield($txt) {
         if ($this->subfieldIndex < 0) {
@@ -327,17 +335,17 @@ class marc implements Iterator {
         $this->marc_array[$this->marc_arrayIndex]['subfield'][$this->subfieldIndex] = $txt;
     }
 
-    /**
-     *
-     * @return type
+    /** \brief
+     * -
+     * @retval string
      */
     function subfield() {
         return $this->subfieldText;
     }
 
-    /**
-     *
-     * @return boolean
+    /** \brief
+     * -
+     * @retval boolean
      */
     function remSubfield() {
         if (!$this->marc_arrayIndex)
@@ -357,9 +365,10 @@ class marc implements Iterator {
         return true;
     }
 
-    /**
-     * @param type string  field
-     * @param type int index of field
+    /** \brief
+     * -
+     * @param $field string  Field
+     * @param $index integer Index of field
      */
     function remField($field = '', $index = 0) {
         if ($field) {
@@ -385,11 +394,12 @@ class marc implements Iterator {
         $this->marc_array = $newMarcArray;
     }
 
-    /**
-     *
-     * @param type $field
-     * @param type $subfieldcode
-     * @param type $txt
+    /** \brief
+     * -
+     * @param $searchfield string
+     * @param $subfieldcode char
+     * @param $txt string
+     * @retval string
      */
     function remFieldText($searchfield, $subfieldcode, $txt) {
         $remove = true;
@@ -414,13 +424,13 @@ class marc implements Iterator {
         return $ret;
     }
 
-    /**
+    /** \brief
+     * -
+     * @param $fieldName string
+     * @param $subfieldArray array
+     * @param $indexToSubfieldArray array
      *
-     * @param type $field
-     * @param type $subfieldArray
-     * @param type $indexToSubfieldArray
-     *
-     * @return boolean true: subfield removed, false: no such subfield
+     * @retval boolean true: subfield removed, false: no such subfield
      */
     function removeSubfield($fieldName, $subfieldArray, $indexToSubfieldArray) {
         $returnValue = false;
@@ -441,6 +451,11 @@ class marc implements Iterator {
         return $returnValue;
     }
 
+    /** \brief
+     * -
+     * @retval boolean
+     * @throws marcException to many results
+     */
     function readNextMarc() {
 // read next 5 chars:
         if (!$marcLength = @fread($this->fp, 5)) {
@@ -480,6 +495,12 @@ class marc implements Iterator {
         return true;
     }
 
+    /** \brief
+     * -
+     * @param $isofile resource
+     * @retval boolean 
+     * @throws marcException to many results
+     */
     function openMarcFile($isofile) {
         if (is_resource($isofile)) {
             if (get_resource_type($isofile) == 'stream') {
@@ -494,16 +515,15 @@ class marc implements Iterator {
 //$this->readNextMarc();
     }
 
-    /**
-     * \brief insert a subfield.
+    /** \brief insert a subfield.
      * If no field exist, make one.
      * If one exist add the subfield to the field.
      * Default '00' to indicators.
      *
-     * @param type $data (the data going into the marc-field)
-     * @param type $field (the field. ex. '032')
-     * @param type $subfield ( the subfield ex. 'a')
-     * @param type $indicators (the indicators ex. '01' )
+     * @param $data string - (the data going into the marc-field)
+     * @param $field string - (the field. ex. '032')
+     * @param $subfield char - ( the subfield ex. 'a')
+     * @param $indicators string - (the indicators ex. '01' )
      */
     function insert_subfield($data, $field, $subfield, $indicators = '00') {
         $found = false;
@@ -537,9 +557,9 @@ class marc implements Iterator {
       	$this->insert($newfield);
   	}
 
-    /**
-     *
-     * @param type $field_array
+    /** \brief
+     * -
+     * @param $field_array array
      */
     function insert($field_arrays) {
 // find where to insert
@@ -570,6 +590,10 @@ class marc implements Iterator {
         }
     }
 
+    /** \brief
+     * -
+     * @param $marcln string
+     */
     function fromString($marcln) {
 
         if (is_string($marcln))
@@ -586,6 +610,11 @@ class marc implements Iterator {
         }
     }
 
+    /** \brief
+     * -
+     * @param $isomarc string
+     * @retval array
+     */
     function fromIso($isomarc) {
         $this->marc_array = array();
 
@@ -613,22 +642,26 @@ class marc implements Iterator {
         return($this->marc_array);
     }
 
-    /**
-     *
-     * @return an array of with all the fields
+    /** \brief
+     * -
+     * @retval array - with all the fields
      */
     function getArray() {
         return $this->marc_array;
     }
 
+    /** \brief
+     * -
+     * @param $marcar array
+     */
     function fromArray($marcar) {
         $this->marc_array = $marcar;
         return;
     }
 
-    /**
-     *
-     * @return string the marc record as lineformat
+    /** \brief
+     * -
+     * @retval string The marc record as lineformat
      */
     function toLineFormat() {
         $strng = "";
@@ -644,6 +677,10 @@ class marc implements Iterator {
         return $strng;
     }
 
+    /** \brief
+     * -
+     * @retval integer
+     */
     function isoSize() {
         $total = 0;
         foreach ($this->marc_array as $field) {
@@ -663,6 +700,9 @@ class marc implements Iterator {
         return $total;
     }
 
+    /** \brief
+     * -
+     */
     function to88591() {
 //        print_r($this->marc_array);
         foreach ($this->marc_array as $fieldkey => $field) {
@@ -673,6 +713,10 @@ class marc implements Iterator {
         }
     }
 
+    /** \brief
+     * -
+     * @retval string
+     */
     function toIso() {
         $headinfo = "name 22";
 
