@@ -100,7 +100,7 @@ abstract class webServiceServer {
     if ($this->config->get_value('dump_timer_ip', 'setup'))
       $this->dump_timer_ip = ' ip:' . $_SERVER['REMOTE_ADDR'];
     if (!$this->url_override = $this->config->get_value('url_override', 'setup'))
-      $this->url_override = array('HowRU' => 'HowRU', 'ShowInfo' => 'ShowInfo', 'Version' => 'Version');
+      $this->url_override = array('HowRU' => 'HowRU', 'ShowInfo' => 'ShowInfo', 'Version' => 'Version', 'wsdl' => 'Wsdl');
 
     $test_section = $this->config->get_section('test');
     if (is_array($test_section['curl_record_urls'])) {
@@ -254,6 +254,28 @@ abstract class webServiceServer {
   */
   private function version() {
     die($this->version);
+  }
+
+  /** \brief Show wsdl file for the service replacing __LOCATION__ with the current location
+  *
+  */
+  private function Wsdl() {
+    if ($wsdl = $this->config->get_value('wsdl', 'setup')) {
+      if (!$location = $this->config->get_value('service_location', 'setup')) {
+        $location = $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+      }
+      $protocol = 'http' . (empty($_SERVER['HTTPS'])? '' : 's') . '://';
+      if (($text = file_get_contents($wsdl)) !== FALSE) {
+        header('Content-Type: text/xml; charset="utf-8"');
+        die(str_replace('__LOCATION__', $protocol . $location, $text));
+      }
+      else {
+        die('ERROR: Cannot open the wsdl file - error in ini-file?');
+      }
+    }
+    else {
+      die('ERROR: wsdl not defined in the ini-file for the service');
+    }
   }
 
   /** \brief Show selected parts of the ini-file 
