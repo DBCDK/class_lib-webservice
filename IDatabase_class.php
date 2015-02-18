@@ -21,22 +21,24 @@ interface IException {
  */
 class FetException extends Exception implements IException {
   private $addMessage;
-  /* constructor can be used to initialize custom objects(like logging)*/
+  /** constructor can be used to initialize custom objects(like logging)*/
   public function __construct($message = NULL, $code = 0) {
     parent::__construct($message, $code);
     $this->addMessage = '';
   }
 
-  /* __toString-method can be used for custom messages */
+  /** __toString-method can be used for custom messages */
   public function __toString() {
     return $this->getMessage() . (isset($this->addMessage) ? ' ' . $this->addMessage : '');
     //return parent::__toString()."\n";
   }
 
+  /** - */
   public function __addToMessage($message) { 
     $this->addMessage = $message;
   }
 
+  /** - */
   public function log($filename) {
   }
 }
@@ -69,19 +71,20 @@ interface IDatabase {
   DEPRECATED function for insert, update and delete. Use sql-statement and execute() instead
  */
 abstract class Fet_database implements IDatabase {
-  protected $username;
-  protected $password;
-  protected $database;
-  protected $host;
-  protected $port;
-  protected $connect_timeout;
-  protected $query;
-  protected $connection;
-  protected $offset;
-  protected $limit;
-  protected $bind_list;
-  protected $transaction = FALSE; //bool
+  protected $username;              ///< -
+  protected $password;              ///< -
+  protected $database;              ///< -
+  protected $host;                  ///< -
+  protected $port;                  ///< -
+  protected $connect_timeout;       ///< -
+  protected $query;                 ///< -
+  protected $connection;            ///< -
+  protected $offset;                ///< -
+  protected $limit;                 ///< -
+  protected $bind_list;             ///< -
+  protected $transaction = FALSE;   ///< bool
 
+  /** constructor */
   public function __construct($username, $password, $database, $host = NULL, $port = NULL, $connect_timeout = NULL) {
     if ($host == '') $host = NULL;
     if ($port == '') $port = NULL;
@@ -102,6 +105,9 @@ abstract class Fet_database implements IDatabase {
     $this->query = $query;
   }
 
+  /** \brief
+    get the query.
+   */
   public function get_query() {
     return $this->query;
   }
@@ -223,6 +229,9 @@ abstract class Fet_database implements IDatabase {
     $this->limit = $limit;
   }
 
+  /** \brief
+    clear pagination.
+   */
   public function clear_pagination() {
     $this->offset = NULL;
     $this->limit = NULL;
