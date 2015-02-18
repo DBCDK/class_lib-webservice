@@ -256,7 +256,7 @@ abstract class webServiceServer {
     die($this->version);
   }
 
-  /** \brief Show wsdl file for the service replacing __LOCATION__ with the current location
+  /** \brief Show wsdl file for the service replacing __LOCATION__ with ini-file setting or current location
   *
   */
   private function Wsdl() {
@@ -274,7 +274,7 @@ abstract class webServiceServer {
       }
     }
     else {
-      die('ERROR: wsdl not defined in the ini-file for the service');
+      die('ERROR: wsdl not defined in the ini-file');
     }
   }
 
