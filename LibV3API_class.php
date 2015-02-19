@@ -116,6 +116,7 @@ class LibV3API {
         $ln = $marc->toLineFormat();
         $fields = array('100', '700');
         foreach ($fields as $field) {
+            $bib = $lokalid = "";
             while ($marc->thisField($field)) {
                 while ($marc->thisSubfield('5')) {
                     $bib = $marc->subfield();
