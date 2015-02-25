@@ -113,7 +113,7 @@ class LibV3API {
     function insertAuthors($data) {
         $marc = new marc();
         $marc->fromIso($data);
-        $ln = $marc->toLineFormat();
+//        $ln = $marc->toLineFormat();
         $fields = array('100', '700');
         foreach ($fields as $field) {
             $bib = $lokalid = "";
@@ -128,7 +128,7 @@ class LibV3API {
                     $autMarcs = $this->getMarcByLB($lokalid, $bib);
                     $autmarc = new marc();
                     $autmarc->fromIso($autMarcs[0]['DATA']);
-                    $lns = $autmarc->toLineFormat();
+//                    $lns = $autmarc->toLineFormat();
                     $afields = array('100', '400');
                     $res = null;
 
@@ -138,12 +138,12 @@ class LibV3API {
                         }
                         $res = $autmarc->findFields($afield);
                         if ($res) {
-                            $ln = $marc->toLineFormat();
+//                            $ln = $marc->toLineFormat();
                             foreach ($res as $rec) {
                                 $rec['field'] = $field;
                                 $marc->updateField($rec);
                             }
-                            $ln = $marc->toLineFormat();
+//                            $ln = $marc->toLineFormat();
                         }
                     }
                 }
