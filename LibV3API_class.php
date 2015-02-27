@@ -124,6 +124,7 @@ class LibV3API {
                 while ($marc->thisSubfield('6')) {
                     $lokalid = $marc->subfield();
                 }
+
                 if ($bib && $lokalid) {
                     $autMarcs = $this->getMarcByLB($lokalid, $bib);
                     $autmarc = new marc();
@@ -144,6 +145,12 @@ class LibV3API {
                                 $marc->updateField($rec);
                             }
 //                            $ln = $marc->toLineFormat();
+                        }
+                    }
+                    $f400s = $autmarc->findFields($afield);
+                    if ($f400s) {
+                        foreach ($f400s as $f400) {
+                            $marc->insert($f400);
                         }
                     }
                 }
