@@ -115,8 +115,10 @@ class LibV3API {
         $marc->fromIso($data);
 //        $ln = $marc->toLineFormat();
         $fields = array('100', '700');
+        $newf400s = array();
         foreach ($fields as $field) {
             $bib = $lokalid = "";
+
             while ($marc->thisField($field)) {
                 while ($marc->thisSubfield('5')) {
                     $bib = $marc->subfield();
@@ -129,7 +131,7 @@ class LibV3API {
                     $autMarcs = $this->getMarcByLB($lokalid, $bib);
                     $autmarc = new marc();
                     $autmarc->fromIso($autMarcs[0]['DATA']);
-//                    $lns = $autmarc->toLineFormat();
+                    $lns = $autmarc->toLineFormat();
                     $afields = array('100', '400');
                     $res = null;
 
@@ -147,16 +149,22 @@ class LibV3API {
 //                            $ln = $marc->toLineFormat();
                         }
                     }
-                    $f400s = $autmarc->findFields($afield);
+                    $f400s = $autmarc->findFields('400');
                     if ($f400s) {
                         foreach ($f400s as $f400) {
-                            $marc->insert($f400);
+                            $newf400s[] = $f400;
                         }
                     }
                 }
             }
         }
+        foreach ($newf400s as $f400) {
+            $f400['field'] = '900';
+            $marc->insert($f400);
+        }
+
         $data = $marc->toIso();
+        $ln = $marc->toLineFormat();
         return $data;
     }
 
