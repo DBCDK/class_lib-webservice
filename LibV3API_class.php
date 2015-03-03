@@ -85,17 +85,17 @@ class LibV3API {
      * en forbedret udgave:
      */
     function getUpdatedRecs($lastupdated) {
-        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
-                . "where ajourdato > to_date('$lastupdated','DDMMYYYY HH24MISS') "
-                . "and bibliotek = '870970'  "
-                . "and (lokalid like '2%' or lokalid like '5%')"
-                . "order by ajourdato ";
+//        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
+//                . "where ajourdato > to_date('$lastupdated','DDMMYYYY HH24MISS') "
+//                . "and bibliotek = '870970'  "
+//                . "and (lokalid like '2%' or lokalid like '5%')"
+//                . "order by ajourdato ";
+
         $sql = " select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster
       where ajourdato > to_timestamp('$lastupdated','DDMMYYYY HH24MISS')
       and bibliotek = '870970'
-      and ( lokalid like '2 %' or lokalid like '5 %')
-      and (data like '%xNLY%' or data like '%xERE%' or data like '%xERL%')";
-
+      and ( lokalid like '2 %' or lokalid like '5 %') ";
+//      and (data like '%xNLY%' or data like '%xERE%' or data like '%xERL%')"
 //        echo "sql:$sql\n";
         $updates = $this->oci->fetch_all_into_assoc($sql);
         return $updates;
@@ -113,12 +113,10 @@ class LibV3API {
     function insertAuthors($data) {
         $marc = new marc();
         $marc->fromIso($data);
-//        $ln = $marc->toLineFormat();
+        $ln = $marc->toLineFormat();
         $fields = array('100', '700');
-        $newf400s = array();
         foreach ($fields as $field) {
             $bib = $lokalid = "";
-
             while ($marc->thisField($field)) {
                 while ($marc->thisSubfield('5')) {
                     $bib = $marc->subfield();
@@ -126,7 +124,6 @@ class LibV3API {
                 while ($marc->thisSubfield('6')) {
                     $lokalid = $marc->subfield();
                 }
-
                 if ($bib && $lokalid) {
                     $autMarcs = $this->getMarcByLB($lokalid, $bib);
                     $autmarc = new marc();
@@ -141,30 +138,18 @@ class LibV3API {
                         }
                         $res = $autmarc->findFields($afield);
                         if ($res) {
-//                            $ln = $marc->toLineFormat();
+                            $ln = $marc->toLineFormat();
                             foreach ($res as $rec) {
                                 $rec['field'] = $field;
                                 $marc->updateField($rec);
                             }
-//                            $ln = $marc->toLineFormat();
-                        }
-                    }
-                    $f400s = $autmarc->findFields('400');
-                    if ($f400s) {
-                        foreach ($f400s as $f400) {
-                            $newf400s[] = $f400;
+                            $ln = $marc->toLineFormat();
                         }
                     }
                 }
             }
         }
-        foreach ($newf400s as $f400) {
-            $f400['field'] = '900';
-            $marc->insert($f400);
-        }
-
         $data = $marc->toIso();
-        $ln = $marc->toLineFormat();
         return $data;
     }
 
