@@ -95,7 +95,8 @@ class LibV3API {
       where ajourdato > to_timestamp('$lastupdated','DDMMYYYY HH24MISS')
       and bibliotek = '870970'
       and ( lokalid like '2 %' or lokalid like '5 %') ";
-//      and (data like '%xNLY%' or data like '%xERE%' or data like '%xERL%')"
+//      and ( data like '%xERL%')";
+//         and (data like '%xNLY%' or data like '%xERE%' or data like '%xERL%')"
 //        echo "sql:$sql\n";
         $updates = $this->oci->fetch_all_into_assoc($sql);
         return $updates;
