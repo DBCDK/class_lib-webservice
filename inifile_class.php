@@ -294,7 +294,7 @@ class inifile {
     if (!$ini) {
       return false;
     }
-    $this->inifile_hash = md5(implode('', $ini));
+    $this->inifile_hash = md5(dirname($_SERVER['SCRIPT_FILENAME']) . $filepath . implode('', $ini));
     $sections = array();
     $values = array();
     $globals = array();
