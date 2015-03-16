@@ -120,7 +120,11 @@ class search_profiles {
       if ($this->profile_cache) {
         $this->profile_cache->set($cache_key, $this->profiles);
       }
+      if (method_exists('verbose','log')) {
+        verbose::log(TRACE, __CLASS__ . ':: Cache miss, agency: ' . $agency);
+      }
     }
+
 
     if ($p = &$this->profiles[strtolower($profile_name)]) {
       return $p;

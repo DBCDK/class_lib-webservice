@@ -90,6 +90,9 @@ class ShowPriority {
       if ($this->agency_cache) {
         $this->agency_cache->set($cache_key, $agency_list);
       }
+      if (method_exists('verbose','log')) {
+        verbose::log(TRACE, __CLASS__ . ':: Cache miss, agency: ' . $agency);
+      }
     }
 
     return $agency_list;
