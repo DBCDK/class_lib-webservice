@@ -100,6 +100,7 @@ class SolrQuery {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
       $this->search_term_format = $repository['handler_format'];
     }
+    ini_set('xdebug.max_nesting_level', 1000);  // each operator can cause a recursive call 
   }
 
 
