@@ -243,6 +243,25 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_many_operands() {
+    for ($i = 0; $i < 101; $i++) {
+      if ($i) {
+        $prn .= '(';
+        $opr[] = 'opr' . $i;
+        $res[] = 'opr' . $i . ')';
+      }
+      else {
+        $opr[] = 'opr' . $i;
+        $res[] = 'opr' . $i;
+      }
+    }
+    $tests = array(implode(' or ', $opr) => $prn . implode(' OR ', $res),
+                  implode(' and ', $opr) => implode(' AND ', $opr));
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function get_edismax($cql, $bestmatch = FALSE) {
     $help = $this->c2s->parse($cql);
     if (isset($help['error'])) {
