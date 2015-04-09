@@ -34,6 +34,7 @@ class SolrQuery {
   var $solr_ignores = array();         ///< this should be kept empty
   var $phrase_index = array();  ///< -
   var $search_term_format = array();  ///< -
+  var $holdings_include = '';   ///< -
   var $best_match = FALSE;  ///< -
   var $operator_translate = array();  ///< -
   var $indexes = array();  ///< -
@@ -77,7 +78,7 @@ class SolrQuery {
    * @param $config string
    * @param $language string
    */
-  public function __construct($repository, $config='', $language='') {
+  public function __construct($repository, $config='', $language='', $holdings_include='') {
     $this->cql_dom = new DomDocument();
     $this->cql_dom->Load($repository['cql_file']);
 
@@ -99,6 +100,9 @@ class SolrQuery {
     if ($config) {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
       $this->search_term_format = $repository['handler_format'];
+    }
+    if ($holdings_include) {
+      $this->holdings_include = ' OR ' . $holdings_include;
     }
     ini_set('xdebug.max_nesting_level', 1000);  // each operator can cause a recursive call 
   }
@@ -210,7 +214,8 @@ class SolrQuery {
           $last_idx = $idx;
         }
       }
-      $solr_nodes[$type][$last_idx] = sprintf($format, implode(' AND ', $q));
+      $handler_q = '(' . implode(' AND ', $q) . ')';
+      $solr_nodes[$type][$last_idx] = str_replace('__COLLECTION_INCLUDE__', $this->holdings_include, sprintf($format, $handler_q));
     }
   }
 
