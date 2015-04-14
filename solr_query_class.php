@@ -80,7 +80,7 @@ class SolrQuery {
    */
   public function __construct($repository, $config='', $language='', $holdings_include='') {
     $this->cql_dom = new DomDocument();
-    $this->cql_dom->Load($repository['cql_file']);
+    @ $this->cql_dom->loadXML($repository['cql_settings']);
 
     $this->best_match = ($language == 'bestMatch');
     // No boolean translate in strict cql

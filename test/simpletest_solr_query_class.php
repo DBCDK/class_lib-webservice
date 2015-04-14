@@ -5,27 +5,17 @@ set_include_path(get_include_path() . PATH_SEPARATOR .
 require_once('simpletest/autorun.php');
 require_once('solr_query_class.php');
 
-define('cql_file', '/tmp/simple_test_cql.xml');
-
 class TestOfSolrQueryClass extends UnitTestCase {
   private $c2s;
 
   function __construct() {
     parent::__construct();
-    if (@ $fp = fopen(cql_file, 'w')) {
-      fwrite($fp, $this->cql_def());
-      fclose($fp);
-    }
-    else {
-      throw new Exception('Cannot write tmp-file: ' . cql_file);
-    }
-    $this->c2s = new SolrQuery(array('cql_file' => cql_file));
+    $this->c2s = new SolrQuery(array('cql_settings' => $this->cql_def()));
     $this->c2s->phrase_index = array('dkcclphrase', 'phrase', 'facet');
     //$this->c2s->best_match = TRUE;
   }
 
   function __destruct() { 
-    unlink(cql_file);
   }
 
   function test_instantiation() {
