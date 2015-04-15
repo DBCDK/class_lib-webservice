@@ -26,6 +26,7 @@ class marc implements Iterator {
 
     /** \brief constructor
      */
+
     public function __construct() {
         $this->position = 0;
         $this->substitute = chr(26);
@@ -115,7 +116,7 @@ class marc implements Iterator {
         }
     }
 
-    /** \brief 
+    /** \brief
      * Returns all fields matching $fieldName
      * @param $fieldName string
      * @retval array - of fields
@@ -129,7 +130,7 @@ class marc implements Iterator {
         return $fields;
     }
 
-    /** \brief 
+    /** \brief
      * Returnin all fields $fieldName convertet into strings
      * ex.  260 00*aGyldendel*bKbh 1984
      * @param $fieldName string
@@ -385,6 +386,7 @@ class marc implements Iterator {
     function remField($field = '', $index = 0) {
         if ($field) {
             $indx = 0;
+            $this->marc_arrayIndex = 0;
             foreach ($this->marc_array as $key => $m) {
                 if ($m['field'] == $field) {
                     if ($indx == $index) {
@@ -510,7 +512,7 @@ class marc implements Iterator {
     /** \brief
      * -
      * @param $isofile resource
-     * @retval boolean 
+     * @retval boolean
      * @throws marcException to many results
      */
     function openMarcFile($isofile) {
@@ -558,16 +560,16 @@ class marc implements Iterator {
             $this->marc_array[$key]['subfield'][] = $subfield . $data;
         }
     }
-    
+
     function insert_field($data, $field, $subfield, $indicators = '00') {
-      	$newfield = array();
-      	$newfield['field'] = $field;
-      	$newfield['indicator'] = $indicators;
-      	$subfields = array();
-      	$subfields[] = $subfield . $data;
-      	$newfield['subfield'] = $subfields;
-      	$this->insert($newfield);
-  	}
+        $newfield = array();
+        $newfield['field'] = $field;
+        $newfield['indicator'] = $indicators;
+        $subfields = array();
+        $subfields[] = $subfield . $data;
+        $newfield['subfield'] = $subfields;
+        $this->insert($newfield);
+    }
 
     /** \brief
      * -
