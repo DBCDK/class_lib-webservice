@@ -97,7 +97,13 @@ class agency_type {
       else {
         $libs = json_decode($res_json);
         if (is_object($libs)) {
-          foreach ($libs->findLibraryResponse->pickupAgency as $agency) {
+          if (isset($libs->libraryTypeListResponse)) {   // if libraryTypeList operation is used
+            $struct = @$libs->libraryTypeListResponse->libraryTypeInfo;
+          }
+          else {          // if findLibrary operation is used
+            $struct = @$libs->findLibraryResponse->pickupAgency;
+          }
+          foreach ($struct as $agency) {
             $this->agency_type_tab[$agency->branchId->{'$'}] =
               array('agencyType' => $agency->agencyType->{'$'},
                     'branchType' => $agency->branchType->{'$'});
@@ -112,6 +118,7 @@ class agency_type {
         $this->agency_cache->set($cache_key, $this->agency_type_tab);
       }
     }
+var_dump($this->agency_uri); var_dump($this->agency_type_tab); die();
     if (method_exists('verbose','log')) {
       verbose::log(TRACE, __CLASS__ . ':: Cache miss');
     }
