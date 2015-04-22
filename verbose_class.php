@@ -67,6 +67,7 @@ class verbose {
 
   static $verbose_file_name;      ///< -
   static $syslog_facility = NULL; ///< -
+  static $syslog_id = '';         ///< -
   static $verbose_mask;           ///< -
   static $date_format;            ///< -
   static $my_pid = '';            ///< -
@@ -83,13 +84,14 @@ class verbose {
    * @param date_format (string) - format-string for date()
    **/
 
-  public function open($verbose_file_name, $verbose_mask, $date_format='') {
+  public function open($verbose_file_name, $verbose_mask, $syslog_id, $date_format='') {
     self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
     if (!self::$date_format = $date_format)
       self::$date_format = 'H:i:s-d/m/y';
     if (strtolower(substr($verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
       $facility = substr($verbose_file_name, strlen(SYSLOG_PREFIX));     //  syslog://[facility]
       self::$syslog_facility = defined($facility) ? constant($facility) : LOG_LOCAL0;
+      self::$syslog_id = $syslog_id;
     }
     self::$verbose_file_name = $verbose_file_name;
     if (!is_string($verbose_mask)) {
@@ -114,49 +116,39 @@ class verbose {
       switch ($verbose_level) {
         case WARNING :
           $vtext = 'WARNING';
-          $syslog_priority = LOG_WARNING;
           break;
         case ERROR :
           $vtext = 'ERROR';
-          $syslog_priority = LOG_ERR;
           break;
         case FATAL :
           $vtext = 'FATAL';
-          $syslog_priority = LOG_ALERT;
           break;
         case STAT :
           $vtext = 'STAT';
-          $syslog_priority = LOG_INFO;
           break;
         case TIMER :
           $vtext = 'TIMER';
-          $syslog_priority = LOG_INFO;
           break;
         case DEBUG :
           $vtext = 'DEBUG';
-          $syslog_priority = LOG_DEBUG;
           break;
         case TRACE :
           $vtext = 'TRACE';
-          $syslog_priority = LOG_INFO;
           break;
         case Z3950 :
           $vtext = 'Z3950';
-          $syslog_priority = LOG_INFO;
           break;
         case OCI :
           $vtext = 'OCI';
-          $syslog_priority = LOG_INFO;
           break;
         default :
           $vtext = 'UNKNOWN';
-          $syslog_priority = LOG_NOTICE;
           break;
       }
 
       if (self::$syslog_facility) {
-       openlog($vtext, LOG_ODELAY, self::$syslog_facility);
-       syslog($syslog_priority, self::$tracking_id . ' ' . $str);
+       openlog(self::$syslog_id, LOG_ODELAY, self::$syslog_facility);
+       syslog(LOG_INFO, $vtext . ': ' . $str . ' tId:' . self::$tracking_id);
        closelog();
       }
       elseif ($fp = @ fopen(self::$verbose_file_name,'a')) {

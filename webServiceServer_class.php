@@ -85,8 +85,10 @@ abstract class webServiceServer {
 
     if (self::in_house())
       $this->debug = $_REQUEST['debug'];
+    $this->version = $this->config->get_value('version', 'setup');
     verbose::open($this->config->get_value('logfile', 'setup'),
-                  $this->config->get_value('verbose', 'setup'));
+                  $this->config->get_value('verbose', 'setup'),
+                  str_replace('_VERSION_', $this->version , $this->config->get_value('syslog_id', 'setup')));
     $this->watch = new stopwatch('', ' ', '', '%s:%01.3f');
 
     if ($this->config->get_value('xmldir'))
@@ -94,7 +96,6 @@ abstract class webServiceServer {
     $this->xmlns = $this->config->get_value('xmlns', 'setup');
     $this->default_namespace = $this->xmlns[$this->config->get_value('default_namespace_prefix', 'setup')];
     $this->tag_sequence = $this->config->get_value('tag_sequence', 'setup');
-    $this->version = $this->config->get_value('version', 'setup');
     $this->output_type = $this->config->get_value('default_output_type', 'setup');
     $this->dump_timer = str_replace('_VERSION_', $this->version, $this->config->get_value('dump_timer', 'setup'));
     if ($this->config->get_value('dump_timer_ip', 'setup'))
