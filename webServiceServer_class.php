@@ -83,7 +83,7 @@ abstract class webServiceServer {
 
     libxml_use_internal_errors(TRUE);
 
-    if ($this->in_house())
+    if (self::in_house())
       $this->debug = $_REQUEST['debug'];
     verbose::open($this->config->get_value('logfile', 'setup'),
                   $this->config->get_value('verbose', 'setup'));
@@ -124,24 +124,24 @@ abstract class webServiceServer {
     }
     if (isset($_POST['xml'])) {
       $xml=trim(stripslashes($_POST['xml']));
-      $this->soap_request($xml);
+      self::soap_request($xml);
     }
     elseif (!empty($GLOBALS['HTTP_RAW_POST_DATA'])) {
-      $this->soap_request($GLOBALS['HTTP_RAW_POST_DATA']);
+      self::soap_request($GLOBALS['HTTP_RAW_POST_DATA']);
     }
     elseif (!empty($_SERVER['QUERY_STRING']) && ($_REQUEST['action'] || $_REQUEST['json'])) {
-      $this->rest_request();
+      self::rest_request();
     }
     elseif (!empty($_POST)) {
       foreach ($_POST as $k => $v) {
         $_SERVER['QUERY_STRING'] .= ($_SERVER['QUERY_STRING'] ? '&' : '') . $k . '=' . $v;
       }
-      $this->rest_request();
+      self::rest_request();
     }
-    elseif ($this->in_house()
+    elseif (self::in_house()
             || $this->config->get_value('show_samples', 'setup')
             || ip_func::ip_in_interval($_SERVER['REMOTE_ADDR'], $this->config->get_value('show_samples_ip_list', 'setup'))) {
-      $this->create_sample_forms();
+      self::create_sample_forms();
     }
     else {
       header('HTTP/1.0 404 Not Found');
@@ -159,7 +159,7 @@ abstract class webServiceServer {
     $this->validate = $this->config->get_value('validate');
 
     if ($this->validate['soap_request'] || $this->validate['request'])
-      $error = ! $this->validate_soap($xml, $this->validate, 'request');
+      $error = ! self::validate_soap($xml, $this->validate, 'request');
 
     if (empty($error)) {
       // parse to object
@@ -181,11 +181,11 @@ abstract class webServiceServer {
       $this->objconvert->set_default_namespace($this->default_namespace);
 
       // handle request
-      if ($response_xmlobj=$this->call_xmlobj_function($request_xmlobj)) {
+      if ($response_xmlobj = self::call_xmlobj_function($request_xmlobj)) {
         // validate response
         if ($this->validate['soap_response'] || $this->validate['response']) {
-          $response_xml=$this->objconvert->obj2soap($response_xmlobj, $soap_namespace);
-          $error = ! $this->validate_soap($response_xml, $this->validate, 'response');
+          $response_xml = $this->objconvert->obj2soap($response_xmlobj, $soap_namespace);
+          $error = ! self::validate_soap($response_xml, $this->validate, 'response');
         }
 
         if (empty($error)) {
@@ -224,13 +224,13 @@ abstract class webServiceServer {
             verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) .  ':: ' . $this->dump_timer_ip . $this->watch->dump());
         }
         else
-          $this->soap_error('Error in response validation.');
+          self::soap_error('Error in response validation.');
       }
       else
-        $this->soap_error('Incorrect SOAP envelope or wrong/unsupported request');
+        self::soap_error('Incorrect SOAP envelope or wrong/unsupported request');
     }
     else
-      $this->soap_error('Error in request validation.');
+      self::soap_error('Error in request validation.');
   }
 
   /** \brief Handles rest request, converts it to xml and calls soap_request()
@@ -246,7 +246,7 @@ abstract class webServiceServer {
       $rest = new restconvert($this->default_namespace);
       $xml = $rest->rest2soap($this->config);
     }
-    $this->soap_request($xml);
+    self::soap_request($xml);
   }
 
   /** \brief Show the service version
@@ -282,9 +282,9 @@ abstract class webServiceServer {
   *
   */
   private function ShowInfo() {
-    if (($showinfo = $this->config->get_value('showinfo', 'showinfo')) && $this->in_house()) {
+    if (($showinfo = $this->config->get_value('showinfo', 'showinfo')) && self::in_house()) {
       foreach ($showinfo as $line) {
-        echo $this->showinfo_line($line) . "\n";
+        echo self::showinfo_line($line) . "\n";
       }
     die();
     }
@@ -302,7 +302,7 @@ abstract class webServiceServer {
         list($key, $section) = explode('.', $var, 2);
         $val = $this->config->get_value($key, $section);
         if (is_array($val)) {
-          $val = $this->implode_ini_array($val);
+          $val = self::implode_ini_array($val);
         }
         $line = str_replace($var . '__', $val, $line);
       }
@@ -319,7 +319,7 @@ abstract class webServiceServer {
     $ret = "\n";
     foreach ($arr as $key => $val) {
       if (is_array($val)) {
-        $val = $this->implode_ini_array($val, ' - ' . $prefix);
+        $val = self::implode_ini_array($val, ' - ' . $prefix);
       }
       $ret .= $prefix . ' - [' . $key . '] ' . $val . "\n";
     }
@@ -569,7 +569,7 @@ abstract class webServiceServer {
         }
         closedir($dh);
 
-        $html = strpos($info, '__REQS__') ? $info : str_replace('__INFO__', $info, $this->sample_form());
+        $html = strpos($info, '__REQS__') ? $info : str_replace('__INFO__', $info, self::sample_form());
 
         if ($info || count($fnames)) {
           asort($fnames);
@@ -582,7 +582,7 @@ abstract class webServiceServer {
 
           foreach ($reqs as $key => $req)
             $options .= '<option value="' . $key . '">'.$names[$key].'</option>' . "\n";
-          if ($_GET['debug'] && $this->in_house())
+          if ($_GET['debug'] && self::in_house())
             $debug = '<input type="hidden" name="debug" value="' . $_GET['debug'] . '">';
 
           $html = str_replace('__REQS__', implode("\",\n\"", $reqs), $html); 
