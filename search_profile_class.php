@@ -53,6 +53,9 @@ class search_profiles {
     if (class_exists('verbose')) {
       $this->tracking_id = verbose::$tracking_id;
     }
+    if (!defined('AGENCY_TIMEOUT')) {
+      define('AGENCY_TIMEOUT', 10);
+    }
   }
 
   /**
@@ -72,7 +75,7 @@ class search_profiles {
 
     if (!$this->profiles) {
       $curl = new curl();
-      $curl->set_option(CURLOPT_TIMEOUT, 10);
+      $curl->set_option(CURLOPT_TIMEOUT, constant('AGENCY_TIMEOUT'));
       $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $profile_version, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {

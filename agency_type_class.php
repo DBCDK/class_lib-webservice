@@ -49,6 +49,9 @@ class agency_type {
     if (class_exists('verbose')) {
       $this->tracking_id = verbose::$tracking_id;
     }
+    if (!defined('AGENCY_TIMEOUT')) {
+      define('AGENCY_TIMEOUT', 10);
+    }
   }
 
   /**
@@ -92,7 +95,7 @@ class agency_type {
 
     if (!$this->agency_type_tab) {
       $curl = new curl();
-      $curl->set_option(CURLOPT_TIMEOUT, 10);
+      $curl->set_option(CURLOPT_TIMEOUT, constant('AGENCY_TIMEOUT'));
       $res_json = $curl->get(sprintf($this->agency_uri, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
