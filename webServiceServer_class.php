@@ -535,7 +535,7 @@ abstract class webServiceServer {
                                     $auth->$passwordAut->_value,
                                     $_SERVER['REMOTE_ADDR']);
           }
-          verbose::set_tracking_id($this->config->get_value('default_namespace_prefx', 'setup'), $params->trackingId->_value);
+          verbose::set_tracking_id($this->config->get_value('default_namespace_prefix', 'setup'), $params->trackingId->_value);
           return $this-> {$this->soap_action}($params);
         }
       }
