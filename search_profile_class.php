@@ -35,6 +35,7 @@ class search_profiles {
   private $profile_cache;		    // cache object
   private $profiles;		        // profiles for $agency
   private $agency_uri;	        // uri of openagency service
+  private $tracking_id;           // 
 
   /**
   * \brief constructor
@@ -49,6 +50,9 @@ class search_profiles {
       $this->profile_cache = new cache($cache_host, $cache_port, $cache_seconds);
     }
     $this->agency_uri = $open_agency;
+    if (class_exists('verbose')) {
+      $this->tracking_id = verbose::$tracking_id;
+    }
   }
 
   /**
@@ -69,7 +73,7 @@ class search_profiles {
     if (!$this->profiles) {
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, 10);
-      $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $profile_version));
+      $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $profile_version, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
         $this->profiles[strtolower($p_name)] = FALSE;

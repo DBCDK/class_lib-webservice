@@ -38,6 +38,7 @@ class agency_type {
   private $agency_type_tab;
   private $agency_cache;		  // cache object
   private $agency_uri;	          // uri of openagency service
+  private $tracking_id;	          // 
 
   public function __construct($open_agency, $cache_host, $cache_port='', $cache_seconds = 0) {
     if ($cache_host) {
@@ -45,6 +46,9 @@ class agency_type {
     }
     $this->agency_uri = $open_agency;
     $this->agency_status = 'init';
+    if (class_exists('verbose')) {
+      $this->tracking_id = verbose::$tracking_id;
+    }
   }
 
   /**
@@ -89,7 +93,7 @@ class agency_type {
     if (!$this->agency_type_tab) {
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, 10);
-      $res_json = $curl->get(sprintf($this->agency_uri));
+      $res_json = $curl->get(sprintf($this->agency_uri, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
         self::report_fatal_error(__FUNCTION__ . '():: Cannot fetch agencies from ' . sprintf($this->agency_uri));
@@ -118,7 +122,6 @@ class agency_type {
         $this->agency_cache->set($cache_key, $this->agency_type_tab);
       }
     }
-var_dump($this->agency_uri); var_dump($this->agency_type_tab); die();
     if (method_exists('verbose','log')) {
       verbose::log(TRACE, __CLASS__ . ':: Cache miss');
     }

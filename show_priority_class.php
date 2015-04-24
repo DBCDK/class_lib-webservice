@@ -34,6 +34,7 @@ class ShowPriority {
 
   private $agency_cache;		    // cache object
   private $agency_uri;	        // uri of openagency service
+  private $tracking_id;           // 
 
   /**
   * \brief constructor
@@ -48,6 +49,9 @@ class ShowPriority {
       $this->agency_cache = new cache($cache_host, $cache_port, $cache_seconds);
     }
     $this->agency_uri = $open_agency;
+    if (class_exists('verbose')) {
+      $this->tracking_id = verbose::$tracking_id;
+    }
   }
 
   /**
@@ -67,7 +71,7 @@ class ShowPriority {
     if (empty($agency_list)) {
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, 10);
-      $res_xml = $curl->get(sprintf($this->agency_uri, $agency));
+      $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
         $agency_list = FALSE;
