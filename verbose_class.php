@@ -172,7 +172,7 @@ class verbose {
      * @param t_id Current tracking_id
      */
     public function set_tracking_id($t_service_prefix, $t_id = '') {
-        self::$tracking_id = $t_service_prefix . ':' . self::$tracking_id . ($t_id ? '<' . $t_id : '');
+        self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') .  self::$tracking_id .  ($t_id ? '<' . $t_id : '');
         return self::$tracking_id;
     }
 
