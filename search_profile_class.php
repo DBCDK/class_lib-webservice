@@ -79,9 +79,9 @@ class search_profiles {
       $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $profile_version, $this->tracking_id));
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
-        $this->profiles[strtolower($p_name)] = FALSE;
+        $this->profiles[strtolower($profile__name)] = FALSE;
         if (method_exists('verbose','log')) {
-          verbose::log(FATAL, __FUNCTION__ . '():: Cannot fetch profile ' . $profile_name .
+          @ verbose::log(FATAL, __FUNCTION__ . '():: Cannot fetch profile ' . $profile_name .
                        ' from ' . sprintf($this->agency_uri, $agency, 3));
         }
       }
