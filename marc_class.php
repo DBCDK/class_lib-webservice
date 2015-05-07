@@ -348,6 +348,16 @@ class marc implements Iterator {
         $this->marc_array[$this->marc_arrayIndex]['subfield'][$this->subfieldIndex] = $txt;
     }
 
+    /**
+     *
+     * @return type returning the field (array) from the latest
+     * call to thisField
+     *
+     */
+    function field() {
+        return $this->marc_array[$this->marc_arrayIndex];
+    }
+
     /** \brief
      * -
      * @retval string
