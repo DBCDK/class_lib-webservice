@@ -73,6 +73,7 @@ class marc implements Iterator {
      * @retval string
      */
     private function striptxt($txt) {
+        $txt = str_replace('&', 'og', $txt);
         $newtxt = "";
         for ($i = 0; $i < strlen($txt); $i++) {
             if (ctype_alnum($txt[$i]))
