@@ -417,6 +417,7 @@ class marc implements Iterator {
             $newMarcArray[] = $this->marc_array[$i];
         }
         $this->marc_array = $newMarcArray;
+        return true;
     }
 
     /** \brief
