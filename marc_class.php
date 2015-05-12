@@ -425,7 +425,7 @@ class marc implements Iterator {
      * @param $searchfield string
      * @param $subfieldcode char
      * @param $txt string
-     * @retval string
+     * @retval boolean
      */
     function remFieldText($searchfield, $subfieldcode, $txt) {
         $remove = true;
