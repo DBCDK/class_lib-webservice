@@ -493,14 +493,39 @@ class Curl {
 
 
   /**
-   * Set POST value(s).
+   * Set POST value(s) with Content-Type: text/xml.
    * @param $value      - The value(s) to post
    * @param $handle_no  - Handle number. Default all handle numbers. (integer)
    */
 
   public function set_post_xml($value, $handle_no=null) {
+    return self::set_post_with_header($value, 'Content-Type: text/xml', $handle_no);
+  }
+
+
+
+  /**
+   * Set POST value(s) with Content-Type: application/xml.
+   * @param $value      - The value(s) to post
+   * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+   */
+
+  public function set_post_application_xml($value, $handle_no=null) {
+    return self::set_post_with_header($value, 'Content-Type: application/xml', $handle_no);
+  }
+
+
+
+  /**
+   * Set POST value(s).
+   * @param $hander_line - Like 'Content-Type: ...'
+   * @param $value      - The value(s) to post
+   * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+   */
+
+  public function set_post_with_header($value, $header_line, $handle_no=null) {
     $headers = $this->get_option(CURLOPT_HTTPHEADER, $handle_no);
-    $headers[] = "Content-Type: text/xml";
+    $headers[] = $header_line;
     if ($ret = self::set_option(CURLOPT_HTTPHEADER, $headers, $handle_no))
       $ret = self::set_post($value, $handle_no);
     return $ret;
