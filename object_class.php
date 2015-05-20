@@ -60,6 +60,16 @@ class Object {
     self::set_object_element($obj, $name, '_namespace', $value);
   }
 
+  /** \brief Sets an object
+   * @param obj (object) - the object to set
+   * @param name (string)
+   * @param value (mixed)
+   **/
+  static public function set_object(&$obj, $name, $value) {
+    self::check_object_set($obj);
+    $obj->$name = $value;
+  }
+
   /** \brief Sets element on object
    * @param obj (object) - the object to set
    * @param name (string)
@@ -67,7 +77,7 @@ class Object {
    * @param value (mixed)
    **/
   static public function set_object_element(&$obj, $name, $element, $value) {
-    self::check_object_set($obj, $name);
+    self::check_object_and_name_set($obj, $name);
     $obj->$name->$element = $value;
   }
 
@@ -75,9 +85,16 @@ class Object {
    * @param obj (object) - the object to set
    * @param name (string)
    **/
-  static private function check_object_set(&$obj, $name) {
+  static private function check_object_and_name_set(&$obj, $name) {
+    self::check_object_set($obj);
+    self::check_object_set($obj->$name);
+  }
+
+  /** \brief makes surre the object is defined
+   * @param obj (object) - the object to set
+   **/
+  static private function check_object_set(&$obj) {
     if (!isset($obj)) $obj = new stdClass();
-    if (!isset($obj->$name)) $obj->$name = new stdClass();
   }
 
 }
