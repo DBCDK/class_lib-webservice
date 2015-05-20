@@ -420,8 +420,30 @@ class marc implements Iterator {
         return true;
     }
 
+    function remSubfieldText($searchfield, $subfieldcode, $txt) {
+        $remove = true;
+        $ret = false;
+        while ($remove) {
+            $remove = false;
+            while ($this->thisField($searchfield)) {
+                while ($this->thisSubfield($subfieldcode)) {
+                    $t = $this->subfield();
+                    if (substr($t, 0, strlen($txt)) == $txt) {
+                        $this->remSubfield();
+                        $remove = $ret = true;
+                        break;
+                    }
+                }
+                if ($remove) {
+                    break;
+                }
+            }
+        }
+        return $ret;
+    }
+
     /** \brief
-     * -
+     * - Removes the entire field if a subfield starts with $txt
      * @param $searchfield string
      * @param $subfieldcode char
      * @param $txt string
@@ -463,7 +485,7 @@ class marc implements Iterator {
         foreach ($this->marc_array as $value) {
             if ($value['field'] != $fieldName)
                 continue;
-            print_r($value);
+//            print_r($value);
             $newSubfields = array();
             foreach ($value['subfield'] as $key => $subF) {
                 if ($key == $indexToSubfieldArray) {
