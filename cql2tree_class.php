@@ -57,6 +57,7 @@ class CQL_parser {
   private $tree = array();
   private $std_prefixes = array();
   private $indexes = array();
+  private $l_indexes = array();
   private $diags = ''; // diagnostics array to be passed to SRW-response
   private $booleans = array('and', 'or', 'not', 'prox');
   private $unsupported_booleans = array('prox');
@@ -120,6 +121,11 @@ class CQL_parser {
    **/
   public function set_indexes($indexes) {
     $this->indexes = $indexes;
+    foreach ($indexes as $field => $prefixes) {
+      foreach ($prefixes as $prefix => $info) {
+        $this->l_indexes[strtolower($field)][strtolower($prefix)] = array('field' => $field, 'prefix' => $prefix);
+      }
+    }
   }
 
   /** \brief Parse a query
@@ -334,6 +340,10 @@ class CQL_parser {
         else {
           $pre = substr($field, 0, $pos);
           $field = substr($field, $pos + 1, 100);
+        }
+        if ($l_idx = $this->l_indexes[strtolower($field)][strtolower($pre)]) {
+          $field = $l_idx['field'];
+          $pre = $l_idx['prefix'];
         }
         if ($alias = $this->indexes[$field][$pre]['alias']) {
           $slop = $alias['slop'];
