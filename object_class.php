@@ -29,9 +29,26 @@
  * Object::set_object_element(object, tag-to-set, element, value); \n
  *
  * Example:
- * Object::set_object_value($test, 'tag', 19);
- * Object::set_object_namespace($test, 'tag', 'string');
- * Object::set_object_element($test, 'tag', 'sub-tag', $var);
+ *   instead of:
+ *     $test = new stdClass();
+ *     $test->tag = new stdClass()
+ *     $test->tag->_value = 19;
+ *   use:
+ *     Object::set_object_value($test, 'tag', 19);
+ *
+ *   instead of:
+ *     $test = new stdClass();
+ *     $test->tag = new stdClass()
+ *     $test->tag->_namespace = 'string';
+ *   use:
+ *     Object::set_object_namespace($test, 'tag', 'string');
+ *
+ *   instead of:
+ *     $test = new stdClass();
+ *     $test->tag = new stdClass()
+ *     $test->tag->$sub_tag = 19;
+ *   use:
+ *     Object::set_object_element($test, 'tag', 'sub_tag', $var);
  *
  * @author Finn Stausgaard - DBC
 **/
@@ -58,6 +75,16 @@ class Object {
    **/
   static public function set_object_namespace(&$obj, $name, $value) {
     self::set_object_element($obj, $name, '_namespace', $value);
+  }
+
+  /** \brief Sets an object
+   * @param obj (object) - the object to set
+   * @param name (string)
+   * @param value (mixed)
+   **/
+  static public function set_object_array(&$obj, $name, $value) {
+    self::check_object_set($obj);
+    $obj->{$name}[] = $value;
   }
 
   /** \brief Sets an object
