@@ -217,7 +217,8 @@ class LibV3API {
         return $this->return;
     }
 
-    function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'basis') {
+    function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'Basis') {
+        $this->set($base);
         if ($wh) {
             $where = $wh;
         } else {
