@@ -40,7 +40,7 @@ class weekcode {
     function updateparameters($days, $numbers) {
         $update = "update " . $this->parametertable . " "
                 . "set days = $days, numbers = $numbers ";
-        $db->exe($update);
+        $this->db->exe($update);
     }
 
     function getparameters() {
@@ -54,9 +54,18 @@ class weekcode {
         }
     }
 
+    /**
+     * Insert or update the weekcode in the date specified.
+     *
+     * @param type $date
+     * @param type $weekcode
+     */
     function insertweekcode($date, $weekcode) {
-        $weekc = $this->getweekcode($date);
-        if (!$weekc) {
+//        $weekc = $this->getweekcode($date);
+        $sql = "select weekcode from " . $this->tablename . " "
+                . "where to_char(date,'YYYYMMDD') = '$date' ";
+        $rows = $this->db->fetch($sql);
+        if (!$rows) {
             $insert = "insert into " . $this->tablename . " "
                     . "(date,weekcode) values "
                     . "( to_timestamp('$date','YYYYMMDD'), "
@@ -84,12 +93,35 @@ class weekcode {
         for ($day = 1; $day < 8; $day++) {
             $week_start->setISODate($year, $week_no, $day);
             $date = $week_start->format('Ymd');
-            echo "date:$date\n";
+//            echo "date:$date\n";
             $weekcodes[$date] = $this->getweekcode($date);
         }
         return $weekcodes;
     }
 
+    function calculateWeekCode($today) {
+        $year = substr($today, 0, 4);
+        $month = substr($today, 4, 2);
+        $day = substr($today, 6, 2);
+        $ts = mktime(0, 0, 0, $month, $day, $year);
+        $tsd = time();
+        $par = $this->getparameters();
+
+        $days = $par['days'] * 24 * 60 * 60;
+        $numbers = $par['numbers'];
+
+        $sec = (60 * 60 * 24 * 7) * $numbers;
+        $weekcode = date('YW', $ts + $days + $sec);
+
+        return $weekcode;
+    }
+
+    /**
+     * get the week code for a date. If no date is set, take the current date
+     *
+     * @param type $date
+     * @return type
+     */
     function getweekcode($date = '') {
 
         if ($date) {
@@ -105,20 +137,61 @@ class weekcode {
         if ($rows) {
             return $rows[0]['weekcode'];
         }
-        $year = substr($today, 0, 4);
-        $month = substr($today, 4, 2);
-        $day = substr($today, 6, 2);
-        $ts = mktime(0, 0, 0, $month, $day, $year);
-        $tsd = time();
-        $par = $this->getparameters();
-
-        $days = $par['days'] * 24 * 60 * 60;
-        $numbers = $par['numbers'];
-
-        $sec = (60 * 60 * 24 * 7) * $numbers;
-        $weekcode = date('YW', $ts + $days + $sec);
+        $weekcode = $this->calculateWeekCode($today);
 
         return $weekcode;
+    }
+
+    function checkWeekcode($weekcode) {
+        if (strlen($weekcode) != 6) {
+            return false;
+        }
+        $year = substr($weekcode, 0, 4);
+        if ($year > 2050 or $year < 2015) {
+            return false;
+        }
+        $week = substr($weekcode, 4, 2);
+        if ($week < 1 or $week > 53) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * remove the date from the table.
+     * @param type $date
+     */
+    function deleteWeekCode($date) {
+        $sql = "select weekcode from " . $this->tablename . " "
+                . "where to_char(date,'YYYYMMDD') = '$date' ";
+        $rows = $this->db->fetch($sql);
+        if ($rows) {
+            $del = "delete from " . $this->tablename . " "
+                    . "where to_char(date,'YYYYMMDD') = '$date' ";
+            $this->db->exe($del);
+        }
+    }
+
+    /**
+     * updateWeekCodes updates the database if any changes.
+     *
+     *  $wcodes is an array with index "date" and value "weekcode". The
+     * date is in 'yyyymmdd' format.
+     *
+     * @param type $wcodes
+     */
+    function updateWeekCodes($wcodes) {
+        foreach ($wcodes as $date => $newcode) {
+            $valid = $this->checkWeekcode($newcode);
+            if (!$valid) {
+                $newcode = $this->calculateWeekCode($date);
+                $this->deleteWeekCode($date);
+            }
+            $currentcode = $this->getweekcode($date);
+            if ($currentcode != $newcode) {
+                $this->insertweekcode($date, $newcode);
+            }
+        }
     }
 
 }
