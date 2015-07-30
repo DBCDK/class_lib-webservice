@@ -202,8 +202,10 @@ class CQL_parser {
       $this->val = '';
       $this->val = $mark;
       while ($this->qi < $this->ql && $this->qs[$this->qi] != $mark) {
-        if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) 
-          $this->qi++;
+// FVS - 20150622
+// do not remove \ from query string. * means masking/truncation while \* means search for the character *
+//        if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) 
+//          $this->qi++;
         $this->val .= $this->qs[$this->qi];
         $this->qi++;
       }
@@ -215,8 +217,11 @@ class CQL_parser {
     else {
       $this->look = 's';
       $start_q = $this->qi;
-      while ($this->qi < $this->ql && !strchr("()/<>= \t\r\n", $this->qs[$this->qi])) 
+      while ($this->qi < $this->ql && !strchr("()/<>= \t\r\n", $this->qs[$this->qi])) {
+        if ($this->qs[$this->qi] == '\\') 
+          $this->qi++;
         $this->qi++;
+      }
       $this->val = substr($this->qs, $start_q, $this->qi - $start_q);
       $this->lval = strtolower($this->val);
     }
