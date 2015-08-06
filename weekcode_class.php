@@ -99,19 +99,46 @@ class weekcode {
         return $weekcodes;
     }
 
-    function calculateWeekCode($today) {
+    function calculateWeekCode($today, $straight) {
         $year = substr($today, 0, 4);
         $month = substr($today, 4, 2);
         $day = substr($today, 6, 2);
         $ts = mktime(0, 0, 0, $month, $day, $year);
-        $tsd = time();
-        $par = $this->getparameters();
+//        $tsd = time();
 
-        $days = $par['days'] * 24 * 60 * 60;
-        $numbers = $par['numbers'];
+        if (!$straight) {
+            $par = $this->getparameters();
+            $days = $par['days'] * 24 * 60 * 60;
+            $numbers = $par['numbers'];
+        }
 
         $sec = (60 * 60 * 24 * 7) * $numbers;
         $weekcode = date('YW', $ts + $days + $sec);
+
+        return $weekcode;
+    }
+
+    /**
+     * get the week code for a date. If no date is set, take the current date
+     *
+     * @param type $date
+     * @return type
+     */
+    function getDatWeekcode($date = '') {
+        if ($date) {
+            $today = $date;
+        } else {
+            $today = date('Ymd');
+        }
+
+        // is there an exception in the table?
+        $sql = "select weekcode from " . $this->tablename . " "
+                . "where to_char(date,'YYYYMMDD') = '$today' ";
+        $rows = $this->db->fetch($sql);
+        if ($rows) {
+            return $rows[0]['weekcode'];
+        }
+        $weekcode = $this->calculateWeekCode($today, $straight = false);
 
         return $weekcode;
     }
@@ -131,13 +158,13 @@ class weekcode {
         }
 
         // is there an exception in the table?
-        $sql = "select weekcode from " . $this->tablename . " "
-                . "where to_char(date,'YYYYMMDD') = '$today' ";
-        $rows = $this->db->fetch($sql);
-        if ($rows) {
-            return $rows[0]['weekcode'];
-        }
-        $weekcode = $this->calculateWeekCode($today);
+//        $sql = "select weekcode from " . $this->tablename . " "
+//                . "where to_char(date,'YYYYMMDD') = '$today' ";
+//        $rows = $this->db->fetch($sql);
+//        if ($rows) {
+//            return $rows[0]['weekcode'];
+//        }
+        $weekcode = $this->calculateWeekCode($today, $straight = true);
 
         return $weekcode;
     }
