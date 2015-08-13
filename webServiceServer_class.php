@@ -265,7 +265,13 @@ abstract class webServiceServer {
       if (!$location = $this->config->get_value('service_location', 'setup')) {
         $location = $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
       }
-      $protocol = 'http' . (empty($_SERVER['HTTPS'])? '' : 's') . '://';
+      if (strpos($location, '://') < 1) {
+        if (!empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) {
+          $protocol = 'https://';
+        } else {
+          $protocol = 'http://';
+        }
+      }
       if (($text = file_get_contents($wsdl)) !== FALSE) {
         header('Content-Type: text/xml; charset="utf-8"');
         die(str_replace('__LOCATION__', $protocol . $location, $text));
