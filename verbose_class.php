@@ -154,7 +154,7 @@ class verbose {
 
             if (self::$syslog_facility) {
                 openlog(self::$syslog_id, LOG_ODELAY, self::$syslog_facility);
-                syslog(LOG_INFO, $vtext . ': ' . $str . ' tId:' . self::$tracking_id);
+                syslog(LOG_INFO, $vtext . ' ' . self::$tracking_id . ' ' . str_replace(PHP_EOL, '', $str));
                 closelog();
             } elseif ($fp = @ fopen(self::$verbose_file_name, 'a')) {
                 if (substr($str, strlen($str) - 1, 1) <> "\n")
