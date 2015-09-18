@@ -136,7 +136,7 @@ class SolrQuery {
         $ret['error'] = $this->error;;
       }
     }
-    //var_dump($trees); var_dump($ret); die();
+    //var_dump($query); var_dump($trees); var_dump($ret); die();
     return $ret;
   }
 
@@ -257,7 +257,10 @@ class SolrQuery {
    * @retval string
    */
   private function set_slop($node) {
-    return ($node['modifiers']['word'] ? 9999 : ($node['modifiers']['string'] ? 0 : $node['slop']));
+    if ($node['relation'] == 'adj') return '0';
+    elseif ($node['modifiers']['word']) return '9999';
+    elseif ($node['modifiers']['string']) return '0';
+    else return $node['slop'];
   }
 
   /** \brief if relation modifier "relevant" is used, creates ranking info
@@ -392,8 +395,9 @@ class SolrQuery {
    * @param $slop integer
    * @retval string - 
    */
-  private function make_solr_term($term, $relation, $prefix, $field, $slop) {
+  private function old_make_solr_term($term, $relation, $prefix, $field, $slop) {
     $quote = self::is_quoted($term);
+    $wildcard = self::has_wildcard($term);
     $term = self::normalize_term($term, $quote);
     $term = self::convert_old_recid($term, $prefix, $field);
     $space = strpos($term, ' ') !== FALSE;
@@ -420,12 +424,73 @@ class SolrQuery {
     return  $m_field . $m_term;
   }
 
+  private function make_solr_term($term, $relation, $prefix, $field, $slop) {
+    $quote = self::is_quoted($term);
+    $wildcard = self::has_wildcard($term);
+    $term = self::normalize_term($term, $quote);
+    $term = self::convert_old_recid($term, $prefix, $field);
+    $space = strpos($term, ' ') !== FALSE;
+    if ($field && ($field <> 'serverChoice')) {
+      $m_field = self::join_prefix_and_field($prefix, $field, ':');
+    }
+    if (in_array($prefix, $this->phrase_index)) { 
+      if ($quote) { 
+        $term = str_replace($quote, '', $term);
+      } 
+      if ($space) { 
+        $term = str_replace(' ', '\\ ', $term);
+      } 
+      if (!$m_term = self::make_term_interval($term, $relation, $quote)) { 
+        $m_term = $term;
+      } 
+    } 
+    else { 
+      if (!$m_term = self::make_term_interval($term, $relation, $quote)) { 
+        if ($space) { 
+          if ($relation == 'any') { 
+            $term = '(' . preg_replace('/\s+/', ' OR ', str_replace($quote, '', $term)) . ')';
+          } 
+          elseif ($relation == 'all') { 
+            $term = '(' . preg_replace('/\s+/', ' AND ', str_replace($quote, '', $term)) . ')';
+          } 
+          elseif ($wildcard && $quote) { 
+            $term = '(' . str_replace($quote, '', $term) . ')';
+          } 
+          else { 
+            $m_slop = '~' . $slop;
+          } 
+        } 
+        elseif ($quote) { 
+          $term = str_replace($quote, '', $term);
+        } 
+        $m_term = self::escape_solr_term($term) . $m_slop;
+      } 
+    } 
+    return  $m_field . $m_term;
+  }
+
   /** \brief Return the quote used or FALSE
    * @param $str string
    * @retval mixed - the quote or FALSE
    */
   private function is_quoted($str) {
     return (strpos($str, '"') !== FALSE ? '"' : (strpos($str, "'") !== FALSE ? "'" : ''));
+  }
+
+  /** \brief Return TRUE if * or ? is used as wildcard
+   * @param $str string
+   * @retval boolean 
+   */
+  private function has_wildcard($str) {
+    for ($i = 0; $i < strlen($str); $i++) {
+      if ($str[$i] == '?' || $str[$i] == '*') {
+        return TRUE;
+      }
+      if ($str[$i] == '\\') {
+        $i++;
+      }
+    }
+    return FALSE;
   }
 
   /** \brief Normalize spaces in term. Remove multiple spaces and space next to $quote
