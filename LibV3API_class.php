@@ -117,8 +117,9 @@ class LibV3API {
         $ln = $marc->toLineFormat();
         $fields = array('100', '700');
         foreach ($fields as $field) {
-            $bib = $lokalid = "";
+            $bib = $lokalid = $fcode = "";
             while ($marc->thisField($field)) {
+
                 while ($marc->thisSubfield('5')) {
                     $bib = $marc->subfield();
                 }
@@ -139,12 +140,15 @@ class LibV3API {
                         }
                         $res = $autmarc->findFields($afield);
                         if ($res) {
-                            $ln = $marc->toLineFormat();
+//                            $ln = $marc->toLineFormat();
                             foreach ($res as $rec) {
                                 $rec['field'] = $field;
+                                while ($marc->thisSubfield('4')) {
+                                    $rec['subfield'][] = '4' . $marc->subfield();
+                                }
                                 $marc->updateField($rec);
                             }
-                            $ln = $marc->toLineFormat();
+//                            $ln = $marc->toLineFormat();
                         }
                     }
                 }
