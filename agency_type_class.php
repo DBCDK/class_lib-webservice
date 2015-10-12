@@ -124,9 +124,9 @@ class agency_type {
       if ($this->agency_cache) {
         $this->agency_cache->set($cache_key, $this->agency_type_tab);
       }
-    }
-    if (method_exists('verbose','log')) {
-      verbose::log(TRACE, __CLASS__ . ':: Cache miss');
+      if (method_exists('verbose','log')) {
+        verbose::log(TRACE, __CLASS__ . ':: Cache miss');
+      }
     }
   }
 
