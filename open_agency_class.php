@@ -35,8 +35,8 @@ require_once('OLS_class_lib/curl_class.php');
 class OpenAgency {
 
   private $agency_cache;		  // cache object
-  private $agency_uri;	          // uri of openagency service
-  private $tracking_id;	          // 
+  private $agency_uri;	      // uri of openagency service
+  private $tracking_id;	      // 
 
   public function __construct($open_agency, $cache_host, $cache_port='', $cache_seconds = 0) {
     if ($cache_host) {
@@ -52,7 +52,7 @@ class OpenAgency {
   }
 
   /**
-  * \brief Fetch agencyType and branchType using openAgency::findLibrary
+  * \brief Fetch agency rules using openAgency::libraryRules
   *
   **/
   public function get_agency_rules($agency) {
@@ -71,14 +71,14 @@ class OpenAgency {
       $xml_rules = $curl->get($url);
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
-        self::report_fatal_error(__FUNCTION__ . '():: Cannot fetch agencies from ' . $url);
+        self::fatal(__FUNCTION__ . '():: Cannot fetch agencies from ' . $url);
       }
       else {
         $dom = new DomDocument();
         $dom->preserveWhiteSpace = false;
         if (@ $dom->loadXML($xml_rules)) {
           foreach ($dom->getElementsByTagName('libraryRule') as $rule) {
-            $agency_rules[$rule->getElementsByTagName('name')->item(0)->nodeValue] = self::xs_bool($rule->getElementsByTagName('bool')->item(0)->nodeValue);
+            $agency_rules[$rule->getElementsByTagName('name')->item(0)->nodeValue] = self::xs_boolean($rule->getElementsByTagName('bool')->item(0)->nodeValue);
           }
         }
       }
@@ -90,19 +90,25 @@ class OpenAgency {
     return $agency_rules;
   }
 
-  private function xs_bool($val) {
-    return ($val == 1) || ($val == 'true');
+  /** \brief - xs:boolean to php bolean
+   * @param string $str
+   * @retval boolean - return true if xs:boolean is so
+   */
+  private function xs_boolean($str) {
+    return (strtolower($str) == 'true' || $str == 1);
   }
 
   private function trace($msg) {
-    if (method_exists('verbose','log')) {
-      verbose::log(TRACE, $msg);
-    }
+    self::local_verbose(TRACE, $msg);
   }
 
-  private function report_fatal_error($msg) {
+  private function fatal($msg) {
+    self::local_verbose(FATAL, $msg);
+  }
+
+  private function local_verbose($level, $msg) {
     if (method_exists('verbose','log')) {
-      verbose::log(FATAL, $msg);
+      verbose::log($level, $msg);
     }
   }
 
