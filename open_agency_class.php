@@ -64,7 +64,7 @@ class OpenAgency {
 
     if ($agency_rules === FALSE) {
       $agency_rules = array();
-      self::trace(__FUNCTION__ . ':: Cache miss');
+      self::trace(__FUNCTION__ . ':: Cache miss (' . $agency . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, constant('AGENCY_TIMEOUT'));
       $url = sprintf($this->agency_uri, $agency, $this->tracking_id);
