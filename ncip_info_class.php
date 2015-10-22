@@ -87,26 +87,26 @@ class NcipInfo {
       $this->oci->bind('bind_ncipk', 'ncipk');
       $this->oci->bind('bind_bibno', $bibno);
       $this->oci->set_query(
-        'SELECT laanertjek.address, laanertjek.password,
-                vip_kat.ncip_renew, vip_kat.ncip_cancel, vip_kat.ncip_update_request, vip_kat.ncip_lookup_user
-           FROM fjernadgang_andre, fjernadgang, laanertjek, vip_kat
+          'SELECT laanertjek.address, laanertjek.password,
+          vip_kat.ncip_renew, vip_kat.ncip_cancel, vip_kat.ncip_update_request, vip_kat.ncip_lookup_user
+          FROM fjernadgang_andre, fjernadgang, laanertjek, vip_kat
           WHERE fjernadgang_andre.navn = :bind_bib_dk 
-            AND fjernadgang_andre.faust = fjernadgang.faust 
-            AND fjernadgang.bib_nr = :bind_bibno
-            AND (laanertjek.type = :bind_ncip OR laanertjek.type = :bind_ncipk)
-            AND vip_kat.bib_nr = :bind_bibno
-            AND fjernadgang.laanertjekmetode_id = laanertjek.id_nr');
+          AND fjernadgang_andre.faust = fjernadgang.faust 
+          AND fjernadgang.bib_nr = :bind_bibno
+          AND (laanertjek.type = :bind_ncip OR laanertjek.type = :bind_ncipk)
+          AND vip_kat.bib_nr = :bind_bibno
+          AND fjernadgang.laanertjekmetode_id = laanertjek.id_nr');
       if ($buf = $this->oci->fetch_into_assoc()) {
         $ret = array_change_key_case($buf, CASE_LOWER);
         if (isset($this->memcache)) {
           $this->memcache->set($cachekey, $ret);
         }
       }
-      catch (ociException $e) {
-        $this->error = $this->oci->get_error_string();
-        verbose::log(FATAL, __CLASS__ . '(' . __LINE__.'):: OCI select error: ' . $this->error);
-        return NULL;
-      }
+    }
+    catch (ociException $e) {
+      $this->error = $this->oci->get_error_string();
+      verbose::log(FATAL, __CLASS__ . '(' . __LINE__.'):: OCI select error: ' . $this->error);
+      return NULL;
     }
 
     return $ret;
