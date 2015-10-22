@@ -60,17 +60,17 @@ class bibdk_info {
     $this->oci->connect();
     $this->error = $this->oci->get_error_string();
 
-    if( isset($cache_settings) && !is_object($this->memcache) )
-      {
-	$this->memcache = new cache($cache_settings['host'],$cache_settings['port'],$cache_settings['expire']);
-	if( !$this->memcache->check() )
-	  $this->memcache=null;	
+    if (isset($cache_settings) && !is_object($this->memcache)) {
+      $this->memcache = new cache($cache_settings['host'], $cache_settings['port'], $cache_settings['expire']);
+      if (!$this->memcache->check()) {
+        $this->memcache = null;    
       }
+    }
   }
 
 
-/** \brief get_bib_info
-*
+  /** \brief get_bib_info
+   *
 * Henter info om et givet bibliotek givet udfra data i Sessions Cookien
 *
 * @param integer $bib Bibliotekskode
@@ -82,12 +82,11 @@ class bibdk_info {
     if ($this->error) return null;
     if (empty($bibno)) return null;
 
-    if( isset($this->memcache) )
-      {
-	$cachekey = "bibdk_info_".$bibno;
-	if( $ret = $this->memcache->get($cachekey) )
-	  return $ret;
-      }
+    if (isset($this->memcache)) {
+      $cachekey = "bibdk_info_" . $bibno;
+      if ($ret = $this->memcache->get($cachekey))
+        return $ret;
+    }
 
     $this->oci->bind("bind_bibno", $bibno);
     $this->oci->set_query(
@@ -102,8 +101,8 @@ class bibdk_info {
     if (empty($buf)) return null;
     $ret = array_change_key_case($buf, CASE_LOWER);
     
-    if( isset($this->memcache) )
-      $this->memcache->set($cachekey,$ret);
+    if (isset($this->memcache)) 
+      $this->memcache->set($cachekey, $ret);
 
     return $ret;
   }
@@ -116,10 +115,10 @@ class bibdk_info {
    **/
   public function get_oui_info($favourites){
     $ret = array();
-    foreach($favourites as $key => $info){
-      $ret["favorit"][$key] = $this->_map_oui_user(unserialize($info['oui:userData']));
+    foreach ($favourites as $key => $info){
+      $ret['favorit'][$key] = $this->_map_oui_user(unserialize($info['oui:userData']));
       $bib_info = self::get_bib_info($key);
-      $ret["favorit"][$key] += $bib_info;
+      $ret['favorit'][$key] += $bib_info;
     }
     return $ret;
   }
@@ -132,21 +131,21 @@ class bibdk_info {
    **/
   private function _map_oui_user($userData){
     $oui_map = array('cpr' => 'client_cpr',
-		     'userId' => 'client_id',
-		     'barcode' => 'client_barcode',
-		     'cardno' => 'client_cardno',
-		     'customId' => 'client_text',
-		     'pincode' => 'client_pincode',
-		     'userName' => 'client_name',
-		     'userMail' => 'client_email',
-		     'userAddress' => 'client_address',
-		     'userTelephone' => 'client_phone');
+             'userId' => 'client_id',
+             'barcode' => 'client_barcode',
+             'cardno' => 'client_cardno',
+             'customId' => 'client_text',
+             'pincode' => 'client_pincode',
+             'userName' => 'client_name',
+             'userMail' => 'client_email',
+             'userAddress' => 'client_address',
+             'userTelephone' => 'client_phone');
 
     $info = array();
     $id_value = NULL;
     foreach ($oui_map as $key => $val) {
       if (isset($userData[$key])) {
-	$info[$val] = $userData[$key];
+        $info[$val] = $userData[$key];
       }
     }
     return $info;
@@ -168,26 +167,30 @@ class bibdk_info {
     $info = array();
     if ($this->error) return $info;
     $settings = unserialize($session_data);
-    $info = $this->_map_info(explode(ascii_US, $settings[COOKIE_NAME]), explode(" ", COOKIE_VAR));
+    $info = $this->_map_info(explode(ascii_US, $settings[COOKIE_NAME]), explode(' ', COOKIE_VAR));
     $favs = explode(ascii_US, $settings[COOKIE_FAVORIT]);
-    if (is_array($favs))
+    if (is_array($favs)) {
       foreach ($favs as $bibno) {
         if (empty($bibno)) continue;
-        $info["favorit"][$bibno] = $this->_map_info(explode(ascii_US, $settings[COOKIE_NAME."_".$bibno]), explode(" ", COOKIE_BIB_VAR));
+        $info['favorit'][$bibno] = $this->_map_info(explode(ascii_US, $settings[COOKIE_NAME.'_'.$bibno]), explode(' ', COOKIE_BIB_VAR));
         $bib_info = self::get_bib_info($bibno);
         if (!empty($bib_info)) {
-          $info["favorit"][$bibno] = array_merge($info["favorit"][$bibno], $bib_info);
+          $info['favorit'][$bibno] = array_merge($info['favorit'][$bibno], $bib_info);
         }
       }
+    }
     return $info;
   }
 
   private function _map_info($from, $list) {
     $ret = array();
-    if (is_array($list))
-      foreach ($list as $key => $name)
-        if ($from[$key])
+    if (is_array($list)) {
+      foreach ($list as $key => $name) {
+        if ($from[$key]) {
           $ret[$name] = $from[$key];
+        }
+      }
+    }
     return $ret;
   }
 }
