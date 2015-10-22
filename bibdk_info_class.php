@@ -23,17 +23,17 @@
 
 
 
-require_once("verbose_class.php");
-require_once("oci_class.php");
-require_once("memcache_class.php");
+require_once('verbose_class.php');
+require_once('oci_class.php');
+require_once('memcache_class.php');
 
 
-define("ascii_US", "\037");   // unit seperator
-define("SYSTEM", "bibdk");
-define("COOKIE_NAME", SYSTEM . "_opt");
-define("COOKIE_FAVORIT", SYSTEM . "_fav");
-define("COOKIE_VAR", "start_screen step element bib_nr client_mailing kan_kobes download lingo skip_bestil_4 mail_bestil need_before target lang0 lang1 lang2 lang3 lang4 handicap lang5 lang6 lang7 udfoldet menu_simpel amenu kmenu nmenu mmenu rmenu artikel_alle artikel_avis artikel_tidsskrift bøger_alle bøger_punktskrift bøger_storskrift film_alle film_dvd film_video lydbog_alle lydbog_cd lydbog_baand musik_alle musik_lp musik_kassettebånd noder_alle openurl_prefs lydbog_nota");
-define("COOKIE_BIB_VAR", "client_cpr client_id client_barcode client_cardno client_pincode client_text client_db client_name client_address client_email client_phone bogbus");
+define('ascii_US', "\037");   // unit seperator
+define('SYSTEM', 'bibdk');
+define('COOKIE_NAME', SYSTEM . '_opt');
+define('COOKIE_FAVORIT', SYSTEM . '_fav');
+define('COOKIE_VAR', 'start_screen step element bib_nr client_mailing kan_kobes download lingo skip_bestil_4 mail_bestil need_before target lang0 lang1 lang2 lang3 lang4 handicap lang5 lang6 lang7 udfoldet menu_simpel amenu kmenu nmenu mmenu rmenu artikel_alle artikel_avis artikel_tidsskrift bøger_alle bøger_punktskrift bøger_storskrift film_alle film_dvd film_video lydbog_alle lydbog_cd lydbog_baand musik_alle musik_lp musik_kassettebånd noder_alle openurl_prefs lydbog_nota');
+define('COOKIE_BIB_VAR', 'client_cpr client_id client_barcode client_cardno client_pincode client_text client_db client_name client_address client_email client_phone bogbus');
 
 
 
@@ -56,7 +56,7 @@ class bibdk_info {
 */
   public function __construct($oci_credentials,$cache_settings=null) {
     $this->oci = new Oci($oci_credentials);
-    $this->oci->set_charset("UTF8");
+    $this->oci->set_charset('UTF8');
     $this->oci->connect();
     $this->error = $this->oci->get_error_string();
 
@@ -83,20 +83,20 @@ class bibdk_info {
     if (empty($bibno)) return null;
 
     if (isset($this->memcache)) {
-      $cachekey = "bibdk_info_" . $bibno;
+      $cachekey = 'bibdk_info_' . $bibno;
       if ($ret = $this->memcache->get($cachekey))
         return $ret;
     }
 
-    $this->oci->bind("bind_bibno", $bibno);
+    $this->oci->bind('bind_bibno', $bibno);
     $this->oci->set_query(
-      "SELECT *
+      'SELECT *
          FROM vip, vip_vsn, vip_danbib, vip_kat, vip_txt
          WHERE vip.bib_nr = :bind_bibno
           AND vip.bib_nr = vip_danbib.bib_nr(+)
           AND vip.bib_nr = vip_kat.bib_nr(+)
           AND vip.kmd_nr = vip_vsn.kmd_nr(+)
-          AND vip.bib_nr = vip_txt.bib_nr(+)");
+          AND vip.bib_nr = vip_txt.bib_nr(+)');
     $buf = $this->oci->fetch_into_assoc();
     if (empty($buf)) return null;
     $ret = array_change_key_case($buf, CASE_LOWER);
