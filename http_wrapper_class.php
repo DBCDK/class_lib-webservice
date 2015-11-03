@@ -105,7 +105,12 @@ abstract class http_wrapper {
     $curl = new curl();
     if (defined("HTTP_PROXY")) $curl->set_proxy(HTTP_PROXY);
     if (defined("SSL_VERSION")) $curl->set_option(CURLOPT_SSLVERSION, SSL_VERSION);
-    $curl->set_post_application_xml($this->build($data));
+    if (defined('CONTENT_TYPE')) {
+      $curl->set_post_with_header($this->build($data), 'Content-Type: ' . CONTENT_TYPE);
+    } 
+    else {
+      $curl->set_post_xml($this->build($data));
+    } 
     $res = $curl->get($url);
     $has_error = $curl->has_error();
     if ($debug && $has_error) {
