@@ -165,6 +165,7 @@ class ncip extends http_wrapper {
   public function parse(&$ncip_str) {
     if (strtolower($this->debug) == 'ncip') {
       echo "<h1>NCIP Response:</h1><pre>" . htmlentities($ncip_str) . "</pre><hr>";
+      die();
     }
     
     $this->parameters = array();
