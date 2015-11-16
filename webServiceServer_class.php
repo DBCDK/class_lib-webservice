@@ -31,6 +31,7 @@ require_once('OLS_class_lib/verbose_class.php');
 require_once('OLS_class_lib/inifile_class.php');
 require_once('OLS_class_lib/timer_class.php');
 require_once('OLS_class_lib/aaa_class.php');
+require_once('OLS_class_lib/object_class.php');
 require_once('OLS_class_lib/restconvert_class.php');
 require_once('OLS_class_lib/jsonconvert_class.php');
 require_once('OLS_class_lib/xmlconvert_class.php');
