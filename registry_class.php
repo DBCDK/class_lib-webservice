@@ -44,7 +44,7 @@ class Registry {
    * @param version (string)
    * @param setting (array) 
    * */
-  public function set($service_name, $operation, $version, $settings) {
+  static function set($service_name, $operation, $version, $settings) {
     if ($registry = $settings['registry']) {
       if (empty($settings['ignore_in_url']) || (strpos($_SERVER['QUERY_STRING'], $settings['ignore_in_url']) === FALSE)) {
         if (!$freq = intval($settings['frequency'])) {
@@ -63,7 +63,7 @@ class Registry {
    * @param handle (string)
    * @param answer (string)
    * */
-  public function receiveResponse($handle, $answer) {
+  static function receiveResponse($handle, $answer) {
     self::$response = $answer;
   }
 
@@ -71,7 +71,7 @@ class Registry {
    * \brief to return response set by receiveResponse() above
    * @retval (string)
    * */
-  public function get_response() {
+  static function get_response() {
     return self::$response;
   }
 
