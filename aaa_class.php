@@ -185,7 +185,7 @@ class aaa {
               $right_val = explode(',', $right_list);
               foreach ($right_val as $r) {
                 $r = trim($r);
-                $rights->$ressource->$r = TRUE;
+                Object::set_object_element($rights, $ressource, $r, TRUE);
               }
             }
           }
