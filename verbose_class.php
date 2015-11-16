@@ -90,7 +90,7 @@ class verbose {
      * @param syslog_id (string) - identifier to syslog
      * @param date_format (string) - format-string for date()
      * */
-    public function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
+    static function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
         self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string) microtime(), 2, 6) . ':' . getmypid();
         if (!self::$date_format = $date_format)
             self::$date_format = 'H:i:s-d/m/y';
@@ -117,7 +117,7 @@ class verbose {
      * @param verbose_level Level of verbose output (string)
      * @param str Log string to write (string)
      */
-    public function log($verbose_level, $str) {
+    static function log($verbose_level, $str) {
         if (self::$verbose_file_name && $verbose_level & self::$verbose_mask) {
             switch ($verbose_level) {
                 case WARNING :
@@ -171,7 +171,7 @@ class verbose {
      * @param t_service_prefix Service prefix that identifies the service
      * @param t_id Current tracking_id
      */
-    public function set_tracking_id($t_service_prefix, $t_id = '') {
+    static function set_tracking_id($t_service_prefix, $t_id = '') {
         self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') .  self::$tracking_id .  ($t_id ? '<' . $t_id : '');
         return self::$tracking_id;
     }
