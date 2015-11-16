@@ -51,6 +51,7 @@ class xmlconvert {
 
   public function xml2obj($domobj, $force_NS='') {
     foreach ($domobj->childNodes as $node) {
+      $subnode = new stdClass();
       if ($node->nodeName == '#comment') {
         continue;
       }
