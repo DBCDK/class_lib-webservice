@@ -326,13 +326,14 @@ class objconvert {
   public function set_obj_namespace($obj, $ns) {
     if (empty($obj) || is_scalar($obj))
       return $obj;
-    $ret = new stdClass();
     if (is_array($obj)) {
+      $ret = array();
       foreach ($obj as $key => $val) {
         $ret[$key] = $this->set_obj_namespace($val, $ns);
       }
     }
     else {
+      $ret = new stdClass();
       foreach ($obj as $key => $val) {
         $ret->$key = $this->set_obj_namespace($val, $ns);
         if ($key === '_value')
