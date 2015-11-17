@@ -24,9 +24,9 @@
  * \brief singleton class to handle object creation
  *
  * Usage: \n
- * Object::set_object_value(object, tag-to-set, value); \n
- * Object::set_object_namespace(object, tag-to-set, value); \n
- * Object::set_object_element(object, tag-to-set, element, value); \n
+ * Object::set_value(object, tag-to-set, value); \n
+ * Object::set_namespace(object, tag-to-set, value); \n
+ * Object::set_element(object, tag-to-set, element, value); \n
  *
  * Example:
  *   instead of:
@@ -34,21 +34,21 @@
  *     $test->tag = new stdClass()
  *     $test->tag->_value = 19;
  *   use:
- *     Object::set_object_value($test, 'tag', 19);
+ *     Object::set_value($test, 'tag', 19);
  *
  *   instead of:
  *     $test = new stdClass();
  *     $test->tag = new stdClass()
  *     $test->tag->_namespace = 'string';
  *   use:
- *     Object::set_object_namespace($test, 'tag', 'string');
+ *     Object::set_namespace($test, 'tag', 'string');
  *
  *   instead of:
  *     $test = new stdClass();
  *     $test->tag = new stdClass()
  *     $test->tag->$sub_tag = 19;
  *   use:
- *     Object::set_object_element($test, 'tag', 'sub_tag', $var);
+ *     Object::set_element($test, 'tag', 'sub_tag', $var);
  *
  * @author Finn Stausgaard - DBC
 **/
@@ -64,8 +64,8 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_object_value(&$obj, $name, $value) {
-    self::set_object_element($obj, $name, '_value', $value);
+  static public function set_value(&$obj, $name, $value) {
+    self::set_element($obj, $name, '_value', $value);
   }
 
   /** \brief Sets _namespace on object
@@ -73,8 +73,8 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_object_namespace(&$obj, $name, $value) {
-    self::set_object_element($obj, $name, '_namespace', $value);
+  static public function set_namespace(&$obj, $name, $value) {
+    self::set_element($obj, $name, '_namespace', $value);
   }
 
   /** \brief Sets an object
@@ -82,7 +82,7 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_object_array(&$obj, $name, $value) {
+  static public function set_array(&$obj, $name, $value) {
     self::check_object_set($obj);
     $obj->{$name}[] = $value;
   }
@@ -92,10 +92,10 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_object_array_value(&$obj, $name, $value) {
+  static public function set_array_value(&$obj, $name, $value) {
     $help = new stdClass();
     $help->_value = $value;
-    self::set_object_array($obj, $name, $help);
+    self::set_array($obj, $name, $help);
   }
 
   /** \brief Sets an object
@@ -103,7 +103,7 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_object(&$obj, $name, $value) {
+  static public function set(&$obj, $name, $value) {
     self::check_object_set($obj);
     $obj->$name = $value;
   }
@@ -114,7 +114,7 @@ class Object {
    * @param element (string)
    * @param value (mixed)
    **/
-  static public function set_object_element(&$obj, $name, $element, $value) {
+  static public function set_element(&$obj, $name, $element, $value) {
     self::check_object_and_name_set($obj, $name);
     $obj->$name->$element = $value;
   }
