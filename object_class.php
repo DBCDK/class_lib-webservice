@@ -92,6 +92,17 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
+  static public function set_object_array_value(&$obj, $name, $value) {
+    $help = new stdClass();
+    $help->_value = $value;
+    self::set_object_array($obj, $name, $help);
+  }
+
+  /** \brief Sets an object
+   * @param obj (object) - the object to set
+   * @param name (string)
+   * @param value (mixed)
+   **/
   static public function set_object(&$obj, $name, $value) {
     self::check_object_set($obj);
     $obj->$name = $value;
