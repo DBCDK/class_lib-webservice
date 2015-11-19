@@ -395,35 +395,6 @@ class SolrQuery {
    * @param $slop integer
    * @retval string - 
    */
-  private function old_make_solr_term($term, $relation, $prefix, $field, $slop) {
-    $quote = self::is_quoted($term);
-    $wildcard = self::has_wildcard($term);
-    $term = self::normalize_term($term, $quote);
-    $term = self::convert_old_recid($term, $prefix, $field);
-    $space = strpos($term, ' ') !== FALSE;
-    if ($field && ($field <> 'serverChoice')) {
-      $m_field = self::join_prefix_and_field($prefix, $field, ':');
-      if (!$m_term = self::make_term_interval($term, $relation, $quote)) {
-        if ($space) {
-          if ($relation == 'any') {
-            $term = '(' . preg_replace('/\s+/', ' OR ', str_replace($quote, '', $term)) . ')';
-          }
-          elseif ($relation == 'all') {
-            $term = '(' . preg_replace('/\s+/', ' AND ', str_replace($quote, '', $term)) . ')';
-          }
-          elseif ($space) {
-            $m_slop = !in_array($prefix, $this->phrase_index) ? '~' . $slop : '';
-          }
-        }
-        $m_term = self::escape_solr_term($term) . $m_slop;
-      }
-    }
-    else {
-      $m_term = self::escape_solr_term($term) . ($space ? '~' . $slop : '');
-    }
-    return  $m_field . $m_term;
-  }
-
   private function make_solr_term($term, $relation, $prefix, $field, $slop) {
     $quote = self::is_quoted($term);
     $wildcard = self::has_wildcard($term);
@@ -435,7 +406,7 @@ class SolrQuery {
     }
     if (in_array($prefix, $this->phrase_index)) { 
       if ($quote) { 
-        $term = str_replace($quote, '', $term);
+        $term = str_replace($quote, '', self::escape_solr_quoted_term($term));
       } 
       if ($space) { 
         $term = str_replace(' ', '\\ ', $term);
@@ -539,13 +510,24 @@ class SolrQuery {
     }
   }
 
+  /** \brief Escape character and remove characters to be ignored. And escape ( and )
+   * @param $phrase string
+   * @retval string
+   */
+  private function escape_solr_quoted_term($term) {
+    static $from = array('(', ')');
+    static $to = array('//(', '//)');
+    $str = self::escape_solr_term($term);
+    return str_replace($from, $to, $str);
+  }
+
   /** \brief Escape character and remove characters to be ignored
    * @param $term string
    * @retval string
    */
   private function escape_solr_term($term) {
-  static $solr_escapes_from;
-  static $solr_escapes_to;
+    static $solr_escapes_from;
+    static $solr_escapes_to;
     if (!isset($solr_escapes_from)) {
       foreach ($this->solr_escapes as $ch) {
         $solr_escapes_from[] = $ch;
