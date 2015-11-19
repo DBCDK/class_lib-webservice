@@ -516,7 +516,7 @@ class SolrQuery {
    */
   private function escape_solr_quoted_term($term) {
     static $from = array('(', ')');
-    static $to = array('//(', '//)');
+    static $to = array('\\(', '\\)');
     $str = self::escape_solr_term($term);
     return str_replace($from, $to, $str);
   }
