@@ -28,9 +28,10 @@ define('TREE', $_REQUEST['tree']);
 class SolrQuery {
 
   var $cql_dom;  ///< -
-  // full set of escapes as seen in the solr-doc. We use those who so far has been verified
+  // full set of escapes as seen in the solr-doc. 
+  // We use those who so far has been verified and does not conflict with cql behaviour, like ? and *
   //var $solr_escapes = array('\\','+','-','&&','||','!','(',')','{','}','[',']','^','"','~','*','?',':');
-  var $solr_escapes = array('\\', '+', '-', '!', '{', '}', '[', ']', '^', '~', ':');  ///< -
+  var $solr_escapes = array('+', '-', '!', '{', '}', '[', ']', '^', '~', ':');  ///< -
   var $solr_ignores = array();         ///< this should be kept empty
   var $phrase_index = array();  ///< -
   var $search_term_format = array();  ///< -
