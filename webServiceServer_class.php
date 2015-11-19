@@ -254,6 +254,19 @@ abstract class webServiceServer {
   /** \brief Show the service version
   *
   */
+  private function update_registry($operation) {
+    $registry = $this->config->get_section('service_registry');
+    if ($registry) {
+      require_once('OLS_class_lib/registry_class.php');
+      $this->watch->start('registry');
+      Registry::set($this->default_namespace, $operation, $this->config->get_value('version', 'setup'), $registry);
+      $this->watch->stop('registry');
+    }
+  }
+
+  /** \brief Show the service version
+  *
+  */
   private function version() {
     die($this->version);
   }
@@ -416,7 +429,7 @@ abstract class webServiceServer {
         $error = $reg_errors[$i_test];
         foreach ($test as $i => $t) {
           $reply=$curl->get($url.'?action='.$t);
-          $preg_match=$reg_match[$i];
+          $preg_match = $reg_match[$i];
           if (preg_match("/$preg_match/",$reply)) {
             unset($error);
             break;
@@ -543,6 +556,7 @@ abstract class webServiceServer {
                                     $_SERVER['REMOTE_ADDR']);
           }
           verbose::set_tracking_id($this->config->get_value('default_namespace_prefix', 'setup'), $params->trackingId->_value);
+          self::update_registry($this->soap_action);
           return $this-> {$this->soap_action}($params);
         }
       }
