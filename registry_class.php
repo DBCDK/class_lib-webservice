@@ -44,7 +44,7 @@ class Registry {
    * @param version (string)
    * @param setting (array) 
    * */
-  static function set($service_name, $operation, $version, $settings) {
+  static public function set($service_name, $operation, $version, $settings) {
     if ($registry = $settings['registry']) {
       if (empty($settings['ignore_in_url']) || (strpos($_SERVER['QUERY_STRING'], $settings['ignore_in_url']) === FALSE)) {
         if (!$freq = intval($settings['frequency'])) {
@@ -63,7 +63,7 @@ class Registry {
    * @param handle (string)
    * @param answer (string)
    * */
-  static function receiveResponse($handle, $answer) {
+  static public function receiveResponse($handle, $answer) {
     self::$response = $answer;
   }
 
@@ -71,7 +71,7 @@ class Registry {
    * \brief to return response set by receiveResponse() above
    * @retval (string)
    * */
-  static function get_response() {
+  static public function get_response() {
     return self::$response;
   }
 
@@ -79,7 +79,7 @@ class Registry {
    * \brief Send the http request and do no wait for an answer
    * @param url (string)
    * */
-  private function do_curl($url) {
+  static private function do_curl($url) {
     static $curl;
     if (empty($curl)) {
       $curl = new Curl();
@@ -93,7 +93,7 @@ class Registry {
    * \brief Send the http request and do no wait for an answer
    * @param url (string)
    * */
-  private function curl_options() {
+  static private function curl_options() {
     return array(CURLOPT_RETURNTRANSFER => TRUE,
                  CURLINFO_HEADER_OUT => TRUE,
                  CURLOPT_HTTPHEADER => array('Content-Type: text/html; charset=utf-8'),
