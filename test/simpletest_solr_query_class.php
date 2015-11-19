@@ -143,6 +143,13 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_quoted_parenthesis() {
+    $tests = array('dkcclphrase.cclphrase = "karen blixen (f. 1885)"' => 'dkcclphrase.cclphrase:karen\ blixen\ \(f.\ 1885\)');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function test_interval() {
     $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO en}',
                    'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:{en TO *]',
@@ -196,7 +203,7 @@ class TestOfSolrQueryClass extends UnitTestCase {
                    'term.term="karen*"' => 'term.term:karen*', 
                    'term.term=(karen* AND wulf)' => 'term.term:karen* AND term.term:wulf',
                    'term.term="karen* wulf"' => 'term.term:(karen* wulf)',
-                   'term.term="karen\\* wulf"' => 'term.term:"karen\\\\* wulf"~9999');
+                   'term.term="karen\\* wulf"' => 'term.term:"karen\\* wulf"~9999');
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send), $recieve);
     }
