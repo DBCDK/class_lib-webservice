@@ -164,7 +164,7 @@ class aaa {
         $name = $ressource->_value->name->_value;
         foreach ($ressource->_value->right as $right) {
           $r = $right->_value;
-          $rights->$name->$r = TRUE;
+          Object::set_element($rights, $name, $r, TRUE);
         }
       }
     }
@@ -301,7 +301,6 @@ class aaa {
   *
   **/
   private function fetch_rights_from_userid($userid, $group) {
-    $rights = new stdClass;
     if (empty($this->fors_oci)) $this->fors_oci = new Oci($this->fors_credentials);
     try {
       $this->fors_oci->connect();
@@ -318,15 +317,15 @@ class aaa {
                                  AND t.attr1id = map1.objecttypeattr2');
       $buf = $this->fors_oci->fetch_all_into_assoc();
       foreach ($buf as $val) {
-        $rights->$val['OBJECTTYPENAME2']->$val['FUNCTIONTYPEID'] = TRUE;
+        Object::set_element($rights, $val['OBJECTTYPENAME2'], $val['FUNCTIONTYPEID'], TRUE);
       }
       try {
         $this->fors_oci->bind('bind_bibnr', $group);
         $this->fors_oci->set_query('SELECT bib_nr FROM vip WHERE kmd_nr = :bind_bibnr');
         $buf = $this->fors_oci->fetch_all_into_assoc();
-        $rights->vipInfo->agencyId->$group = TRUE;
+        Object::set_element($rights->vipInfo, 'agencyId', $group, TRUE);
         foreach ($buf as $val) {
-          $rights->vipInfo->subAgencyId->$val['BIB_NR'] = TRUE;
+          Object::set_element($rights->vipInfo, 'subAgencyId', $val['BIB_NR'], TRUE);
         }
       }
       catch (ociException $e) {
@@ -336,7 +335,6 @@ class aaa {
     catch (ociException $e) {
       verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
     }
-
     return $rights;
   }
 
