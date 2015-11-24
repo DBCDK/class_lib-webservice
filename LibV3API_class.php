@@ -72,7 +72,7 @@ class LibV3API {
 
     function getDBtime() {
         $sql = "select to_char(current_timestamp,'DDMMYYYY HH24MISS') tid "
-                . "from dual";
+            . "from dual";
         $rows = $this->oci->fetch_all_into_assoc($sql);
         $tid = $rows[0]['TID'];
         return $tid;
@@ -162,6 +162,7 @@ class LibV3API {
         $marc = new marc();
         $marc->fromIso($data);
         $lokalid = false;
+        $result = array();
         while ($marc->thisField('014')) {
             while ($marc->thisSubfield('a')) {
                 $lokalid = $marc->subfield();
@@ -176,6 +177,7 @@ class LibV3API {
     }
 
     function getMarcByDanbibid($danbibid, $bibliotek) {
+        $lokalid = '';
         $where = "where danbibid = $danbibid and bibliotek = $bibliotek ";
         return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
     }
@@ -188,7 +190,7 @@ class LibV3API {
     function getIdsByLokalidBibliotek($lokalid, $bibliotek) {
         $ids = array();
         $select = "select id from poster where lokalid = '$lokalid' and "
-                . "bibliotek = '$bibliotek' ";
+            . "bibliotek = '$bibliotek' ";
         $res = $this->oci->fetch_all_into_assoc($select);
         foreach ($res as $id) {
             $ids[] = $id['ID'];
@@ -246,7 +248,7 @@ class LibV3API {
         $marclngth = substr($data, 0, 5);
         if ($marclngth > 4000) {
             $sql = "select data from poster_overflow "
-                    . "where id = $id order by lbnr";
+                . "where id = $id order by lbnr";
             $overflow = $this->oci->fetch_all_into_assoc($sql);
             foreach ($overflow as $record) {
                 $data .= $record['DATA'];
