@@ -88,7 +88,8 @@ class NcipInfo {
       $this->oci->bind('bind_bibno', $bibno);
       $this->oci->set_query(
           'SELECT laanertjek.address, laanertjek.password,
-                  vip_kat.ncip_renew, vip_kat.ncip_cancel, vip_kat.ncip_update_request, vip_kat.ncip_lookup_user
+                  vip_kat.ncip_renew, vip_kat.ncip_cancel, vip_kat.ncip_update_request, vip_kat.ncip_lookup_user,
+                  vip_kat.ncip_lookup_user_address, vip_kat.ncip_lookup_user_password
              FROM fjernadgang_andre, fjernadgang, laanertjek, vip_kat
             WHERE fjernadgang_andre.navn = :bind_bib_dk 
               AND fjernadgang_andre.faust = fjernadgang.faust 
