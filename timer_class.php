@@ -69,27 +69,33 @@ class stopwatch {
   /**
    * 	\brief start a timer
    *  @param   $s		Name of timer to start
-   *  @param   $ignore (bool)	Ignore already started timer (default false)
+   *  @param   $ignore (bool)	Ignore already started timer (default true)
    *************/
-  function start($s, $ignore = 1) {
-    if ($ignore == 0 && $this->timers[$s])
+  function start($s, $ignore = TRUE) {
+    if (!isset($this->timers[$s])) {
+      $this->timers[$s] = microtime();
+      if (!isset($this->sums[$s])) $this->sums[$s] = 0;
+    }
+    elseif (!$ignore) {
       die("FATAL: Cannot start timer $s... already running");
-    $this->timers[$s] = microtime();
-    if (!isset($this->sums[$s])) $this->sums[$s] = 0;
+    }
   }
 
   /**
   * \brief stop a timer
    * @param    $s		Name of timer to stop
-   * @param    $ignore (bool)	Ignore not running timer (default false)
+   * @param    $ignore (bool)	Ignore not running timer (default true)
    *************/
-  function stop($s, $ignore = 1) {
-    if ($ignore == 0 && !$this->timers[$s])
+  function stop($s, $ignore = TRUE) {
+    if (isset($this->timers[$s])) {
+      list($usec_stop,  $sec_stop) = explode(" ", microtime());
+      list($usec_start, $sec_start) = explode(" ", $this->timers[$s]);
+      $this->timers[$s] = null;
+      $this->sums[$s] += ((float)$usec_stop - (float)$usec_start) + (float)($sec_stop - $sec_start);
+    }
+    elseif (!$ignore) {
       die("FATAL: Cannot stop timer $s... not running");
-    list($usec_stop,  $sec_stop) = explode(" ", microtime());
-    list($usec_start, $sec_start) = explode(" ", $this->timers[$s]);
-    $this->timers[$s] = null;
-    $this->sums[$s] += ((float)$usec_stop - (float)$usec_start) + (float)($sec_stop - $sec_start);
+    }
   }
 
 
