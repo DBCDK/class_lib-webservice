@@ -98,7 +98,10 @@ class inifile {
   **/
   public function inifile($filename) {
     $this->ini_filename = $filename;
-    if ($this->ini_file_array = $this->parse_ini($filename)) {
+    if ($this->ini_file_array = self::parse_ini($filename)) {
+      if (self::get_value('use_environment_vars', 'setup')) {
+        self::fetch_env_vars();
+      }
       return true;
     }
     else {
@@ -318,11 +321,11 @@ class inifile {
       $value = trim($value);
 
       if ($i == 0) {
-        $globals = $this->parse_ini_array($globals,$key,$value);
+        $globals = self::parse_ini_array($globals,$key,$value);
       }
       else {
         if (! array_key_exists($i-1,$values)) $values[$i-1] = array();
-        $values[ $i-1 ] = $this->parse_ini_array($values[$i-1],$key,$value);
+        $values[ $i-1 ] = self::parse_ini_array($values[$i-1],$key,$value);
       }
     }
 
@@ -355,14 +358,14 @@ class inifile {
       $key = substr($key,0,$pos);
       if (!isset($res_array[$key]))
         $res_array[$key] = array();
-      $eval_this = '$res_array[\''.$key.'\']'.$key_suffix.' = $this->parse_constants($this->parse_reserved_words(\''.$value.'\'));';
-//                echo "**********\n key_suffix:$key_suffix\n" . $eval_this . "\n parse_const: " . $this->parse_constants($this->parse_reserved_words("'".$value."'")) . "\n";
+      $eval_this = '$res_array[\''.$key.'\']'.$key_suffix.' = self::parse_constants(self::parse_reserved_words(\''.$value.'\'));';
+//                echo "**********\n key_suffix:$key_suffix\n" . $eval_this . "\n parse_const: " . self::parse_constants(self::parse_reserved_words("'".$value."'")) . "\n";
       eval($eval_this);
 //                exit;
     }
     else {
-      $value = $this->parse_reserved_words($value);
-      $value = $this->parse_constants($value);
+      $value = self::parse_reserved_words($value);
+      $value = self::parse_constants($value);
       $res_array[$key] = $value;
     }
     return $res_array;
@@ -423,6 +426,25 @@ class inifile {
 
     return (string)$val;
 
+  }
+
+  /**
+  * Overwrite inifile setting in corresponding env var is set
+  *
+  **/
+  private function fetch_env_vars() {
+    foreach ($this->ini_file_array as &$section) {
+      foreach ($section as $key => &$value) {
+        if ($new = getenv($key)) {
+          if (is_scalar($value)) {
+            $value = $new;
+          }
+          if (is_array($value)) {
+            $value = explode('\n', $new);
+          }
+        }
+      }
+    }
   }
 
 
