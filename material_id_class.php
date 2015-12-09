@@ -38,49 +38,58 @@
  *  if (materialId::validateISSN($issn)) { ... }
  *  if (materialId::validateFaust($faust)) { ... }
  *  $isbn13 = materialId::convertISBNToEAN($isbn);
- * 
+ *
  */
 class materialId {
 
     private function __construct() {
-        
+
     }
 
     private function __destruct() {
-        
+
     }
 
     private function __clone() {
-        
+
     }
 
-    /** \brief 
+    /** \brief
      * @param $isbn string The ISBN number to normalize
      * @retval string The normalized ISBN number
      * */
-    function normalizeISBN($isbn) {
+    public static function normalizeISBN($isbn) {
         $res = array();
         foreach (preg_split('//', $isbn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
-                case 'x': case 'X':
+                case 'x':
+                case 'X':
                     if ((count($res) == 0) or (count($res) == 9)) {  // 'X' only allowed in first or last position
                         $res[] = 'X';
                     }
                     break;
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
                     $res[] = $c;
                     break;
                 default:
-                  if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                    break 2;  // If any illegal characters are found, we stop searching => exit loop
-                  }
+                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                        break 2;  // If any illegal characters are found, we stop searching => exit loop
+                    }
             }
         }
         return implode($res);
     }
 
-    /** \brief 
+    /** \brief
      * @param $isbn string The isbn to validate
      * @retval string The validated ISBN number if valid, otherwise 0 is returned
      * */
@@ -108,7 +117,7 @@ class materialId {
         return $isbn;
     }
 
-    /** \brief 
+    /** \brief
      * @param $ean string The EAN number to normalize
      * @retval string The normalized EAN number
      * */
@@ -116,20 +125,28 @@ class materialId {
         $res = array();
         foreach (preg_split('//', $ean, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
                     $res[] = $c;
                     break;
                 default:
-                  if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                    break 2;  // If any illegal characters are found, we stop searching => exit loop
-                  }
+                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                        break 2;  // If any illegal characters are found, we stop searching => exit loop
+                    }
             }
         }
         return implode($res);
     }
 
-    /** \brief 
+    /** \brief
      * @param $ean string The EAN number to validate
      * @retval string The validated EAN number if valid, otherwise 0 is returned
      * */
@@ -147,7 +164,7 @@ class materialId {
         return $ean;
     }
 
-    /** \brief 
+    /** \brief
      * @param $issn string The ISSN number to normalize
      * @retval string The normalized ISSN number
      * */
@@ -155,25 +172,34 @@ class materialId {
         $res = array();
         foreach (preg_split('//', $issn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
-                case 'x': case 'X':
+                case 'x':
+                case 'X':
                     if (count($res) == 7) {  // 'X' only allowed in last position
                         $res[] = 'X';
                     }
                     break;
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
                     $res[] = $c;
                     break;
                 default:
-                  if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                    break 2;  // If any illegal characters are found, we stop searching => exit loop
-                  }
+                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                        break 2;  // If any illegal characters are found, we stop searching => exit loop
+                    }
             }
         }
         return implode($res);
     }
 
-    /** \brief 
+    /** \brief
      * @param $issn string The ISSN number to validate
      * @retval string The validated ISSN number if valid, otherwise 0 is returned
      * */
@@ -196,7 +222,7 @@ class materialId {
         return $issn;
     }
 
-    /** \brief 
+    /** \brief
      * @param $faust string The Faust number to normalize
      * @param $withSpaces boolean
      * @retval string The normalized Faust number
@@ -205,23 +231,31 @@ class materialId {
         $res = array();
         foreach (preg_split('//', $faust, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
                     $res[] = $c;
                     break;
                 default:
-                  if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                    break 2;  // If any illegal characters are found, we stop searching => exit loop
-                  }
+                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                        break 2;  // If any illegal characters are found, we stop searching => exit loop
+                    }
             }
         }
-          $ln = count($res);
-        if ( $ln < 7 || $ln > 8 ) 
-          return false;
-        if ( $withSpaces) {
-          $res[$ln-1] = ' ' . $res[$ln-1];
-          $res[$ln-4] = ' ' . $res[$ln-4];
-          $res[$ln-7] = ' ' . $res[$ln-7];
+        $ln = count($res);
+        if ($ln < 7 || $ln > 8)
+            return false;
+        if ($withSpaces) {
+            $res[$ln - 1] = ' ' . $res[$ln - 1];
+            $res[$ln - 4] = ' ' . $res[$ln - 4];
+            $res[$ln - 7] = ' ' . $res[$ln - 7];
         }
         if (count($res) == 7) {
             return '0' . implode($res);
@@ -230,7 +264,7 @@ class materialId {
         }
     }
 
-    /** \brief 
+    /** \brief
      * @param $faust string The Faust number to validate
      * @retval mixed The validated Faust number if valid, otherwise 0 is returned
      * */
@@ -251,7 +285,7 @@ class materialId {
         }
     }
 
-    /** \brief 
+    /** \brief
      * @param $isbn string The isbn to convert
      * @retval mixed The ISBN as an EAN (ISBN13) number
      * */
@@ -262,7 +296,7 @@ class materialId {
         $sum = 0;
         for ($i = 0; $i < 13; $i++) {
             if (strtoupper($ean[$i]) == 'X') {
-                $sum+= 10;
+                $sum += 10;
             } else {
                 $sum += (($i & 1) ? 3 : 1) * ($ean[$i] - '0');
             }
@@ -276,7 +310,7 @@ class materialId {
     }
 
     /** \brief convert a ean (ISBN13) to a isbn (ISBN10)
-     * @param $ean string To isbn 
+     * @param $ean string To isbn
      * @retval mixed - integer or boolean
      */
     function convertEANToISBN($ean) {
@@ -286,12 +320,12 @@ class materialId {
         $sum = 0;
         for ($i = 0; $i < 9; $i++) {
             if (strtoupper($isbn[$i]) == 'X') {
-                $sum+= 10;
+                $sum += 10;
             } else {
                 $sum += $isbn[$i] * ($i + 1);
             }
         }
-        $checkciffer = ( $sum % 11 );
+        $checkciffer = ($sum % 11);
         if ($checkciffer == 10)
             $checkciffer = 'x';
         $isbn[9] = $checkciffer;

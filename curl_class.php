@@ -186,7 +186,7 @@ class Curl {
      * Set multiple options for a cURL transfer
      *
      * @link http://dk2.php.net/curl_setopt_array @endlink
-     * @param $options  - The array of curl options. See $curl_default_options (array)
+     * @param $options - The array of curl options. See $curl_default_options (array)
      * @return bool  Returns TRUE if all options were successfully set (on all handles).
      *               If an option could not be successfully set, FALSE is immediately returned,
      *               ignoring any future options in the options array.
@@ -266,8 +266,7 @@ class Curl {
                 if (curl_getinfo($info['handle'], CURLINFO_HTTP_CODE) == 200)
                     $this->wait_for_connections--;
             }
-        }
-        while ($this->wait_for_connections && ($status === CURLM_CALL_MULTI_PERFORM || $active));
+        } while ($this->wait_for_connections && ($status === CURLM_CALL_MULTI_PERFORM || $active));
         if ($info = curl_multi_info_read($this->curl_multi_handle)) {
             $multi_status[$info['handle']] = $info['result'];
         }
@@ -300,8 +299,8 @@ class Curl {
      * Returns the current setting of the request option.
      * If no handle_number has been set, it return the settings of all handles.
      *
-     * @param $option     - One of the valid CURLOPT defines. (mixed)
-     * @param $handle_no  - Handle number. (integer)
+     * @param $option - One of the valid CURLOPT defines. (mixed)
+     * @param $handle_no - Handle number. (integer)
      * @returns mixed
      */
     public function get_option($option = null, $handle_no = 0) {
@@ -329,9 +328,9 @@ class Curl {
      * Set a curl option.
      *
      * @link http://www.php.net/curl_setopt @endlink
-     * @param $option     - One of the valid CURLOPT defines. (mixed)
-     * @param $value      - The value of the curl option. (mixed)
-     * @param $handle_no  - Handle number. (integer)
+     * @param $option - One of the valid CURLOPT defines. (mixed)
+     * @param $value - The value of the curl option. (mixed)
+     * @param $handle_no - Handle number. (integer)
      */
     public function set_option($option, $value, $handle_no = null) {
 
@@ -342,8 +341,7 @@ class Curl {
                 if (!$res)
                     return FALSE;
             }
-        }
-        else {
+        } else {
             self::handle_check($handle_no);
             $this->curl_options[$handle_no][$option] = $value;
             $res = curl_setopt($this->curl_handle[$handle_no], $option, $value);
@@ -353,8 +351,8 @@ class Curl {
 
     /**
      * Set CURLOPT_URL value(s).
-     * @param $value(s)   - The value of the curl option. (mixed)
-     * @param $handle_no  - Handle number. Default 0. (integer)
+     * @param $value (s)   - The value of the curl option. (mixed)
+     * @param $handle_no - Handle number. Default 0. (integer)
      */
     public function set_url($value, $handle_no = 0) {
         if (is_array($value)) {
@@ -374,8 +372,8 @@ class Curl {
 
     /**
      * Set HTTP proxy value(s).
-     * @param $value      - HTTP proxy
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - HTTP proxy
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_proxy($value, $handle_no = null) {
         if ($ret = self::set_option(CURLOPT_HTTPPROXYTUNNEL, TRUE, $handle_no))
@@ -385,7 +383,7 @@ class Curl {
 
     /**
      * Set using cookies
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function use_cookies($handle_no = null) {
         return self::set_option(CURLOPT_HEADERFUNCTION, array($this, 'callback_save_cookies'), $handle_no);
@@ -393,9 +391,9 @@ class Curl {
 
     /**
      * Set HTTP authentication value(s).
-     * @param $user       - HTTP user
-     * @param $passwd     - HTTP password
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $user - HTTP user
+     * @param $passwd - HTTP password
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_authentication($user, $passwd, $handle_no = null) {
         return self::set_option(CURLOPT_USERPWD, $user . ':' . $passwd, $handle_no);
@@ -403,9 +401,9 @@ class Curl {
 
     /**
      * Set HTTP proxy authentication value(s).
-     * @param $user       - HTTP proxy user
-     * @param $passwd     - HTTP proxy password
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $user - HTTP proxy user
+     * @param $passwd - HTTP proxy password
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_proxy_authentication($user, $passwd, $handle_no = null) {
         return self::set_option(CURLOPT_PROXYUSERPWD, '[' . $user . ']:[' . $passwd . ']', $handle_no);
@@ -413,8 +411,8 @@ class Curl {
 
     /**
      * Set timeout
-     * @param $seconds    - timeout ind seconds
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $seconds - timeout ind seconds
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_timeout($seconds, $handle_no = null) {
         return self::set_option(CURLOPT_TIMEOUT, $seconds, $handle_no);
@@ -422,7 +420,7 @@ class Curl {
 
     /**
      * Set number of connections to wait for
-     * @param $wait_for_connections    - max connections to wait for
+     * @param $wait_for_connections - max connections to wait for
      */
     public function set_wait_for_connections($wait_for_connections) {
         $this->wait_for_connections = $wait_for_connections;
@@ -431,8 +429,8 @@ class Curl {
 
     /**
      * Set POST value(s).
-     * @param $value      - The value(s) to post
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - The value(s) to post
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_post($value, $handle_no = null) {
         if ($ret = self::set_option(CURLOPT_POST, 1, $handle_no))
@@ -445,8 +443,8 @@ class Curl {
 
     /**
      * Set POST value(s) with Content-Type: text/xml.
-     * @param $value      - The value(s) to post
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - The value(s) to post
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_post_xml($value, $handle_no = null) {
         return self::set_post_with_header($value, 'Content-Type: text/xml', $handle_no);
@@ -454,8 +452,8 @@ class Curl {
 
     /**
      * Set POST value(s) with Content-Type: application/xml.
-     * @param $value      - The value(s) to post
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - The value(s) to post
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_post_application_xml($value, $handle_no = null) {
         return self::set_post_with_header($value, 'Content-Type: application/xml', $handle_no);
@@ -464,8 +462,8 @@ class Curl {
     /**
      * Set POST value(s).
      * @param $hander_line - Like 'Content-Type: ...'
-     * @param $value      - The value(s) to post
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - The value(s) to post
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_post_with_header($value, $header_line, $handle_no = null) {
         $headers = $this->get_option(CURLOPT_HTTPHEADER, $handle_no);
@@ -477,8 +475,8 @@ class Curl {
 
     /**
      * Set SOAP Action
-     * @param $value      - The soap-action
-     * @param $handle_no  - Handle number. Default all handle numbers. (integer)
+     * @param $value - The soap-action
+     * @param $handle_no - Handle number. Default all handle numbers. (integer)
      */
     public function set_soap_action($action, $handle_no = null) {
         $headers = $this->get_option(CURLOPT_HTTPHEADER, $handle_no);
@@ -502,7 +500,7 @@ class Curl {
     /**
      * Return the status information of the last curl request.
      *
-     * @param $field       [optional] the particular portion (string)
+     * @param $field [optional] the particular portion (string)
      *                     of the status information desired.
      *                     If omitted the array of status
      *                     information is returned.  If a non-existent
@@ -534,7 +532,7 @@ class Curl {
     /**
      * Did the last curl exec operation have an error?
      *
-     * @param $handle_no    - Handle number. (integer)
+     * @param $handle_no - Handle number. (integer)
      * @return mixed  The error message associated with the error if an error
      *                occurred, FALSE otherwise.
      */
@@ -578,7 +576,7 @@ class Curl {
     /**
      * Check if there's a handle for the handle number, and if not, create the handle
      * and assign default values.
-     * @param $handle_no    - Handle number. (integer)
+     * @param $handle_no - Handle number. (integer)
      */
     private function handle_check($handle_no) {
         if (!isset($this->curl_handle[$handle_no])) {
