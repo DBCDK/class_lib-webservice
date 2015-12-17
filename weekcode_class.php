@@ -13,6 +13,7 @@ class weekcode {
     private $db;
     private $tablename;
     private $parametertable;
+    private $errormsg;
 
     /**
      * weekcode constructor.
@@ -252,7 +253,9 @@ class weekcode {
         foreach ($wcodes as $date => $newcode) {
             $valid = $this->checkWeekcode($newcode);
             if (!$valid) {
-                throw new weekcodeException("dat/week code is not vbalid: $newcode");
+                $this->errormsg = "dat eller ugekode er ikke valid. \"$newcode\"";
+                return false;
+//                throw new weekcodeException("dat/week code is not vbalid: $newcode");
             }
 
         }
@@ -274,6 +277,11 @@ class weekcode {
 //            }
         }
         $this->db->end_transaction();
+        return true;
+    }
+
+    function getErrMsg() {
+        return $this->errormsg;
     }
 
 }
