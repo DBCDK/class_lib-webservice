@@ -72,6 +72,8 @@ class CQL_parser {
                  'relevant' => array('symbol' => TRUE)),
               'all' => array(                 // all/relevant as a test
                  'relevant' => array('symbol' => TRUE)),
+              'and' => array(                 // and/maybe as test
+                 'dbc.and_semantic' => array('symbol' => '/^=$/', 'unit' => '/^maybe$/', 'error' => 46)),
               'any' => array(                 // any/relevant as a test
                  'relevant' => array('symbol' => TRUE)),
               'prox' => array(                // prox is not supported, but modifiers could be defines as this
