@@ -97,11 +97,21 @@ class NcipInfo {
               AND (laanertjek.type = :bind_ncip OR laanertjek.type = :bind_ncipk)
               AND vip_kat.bib_nr = :bind_bibno
               AND fjernadgang.laanertjekmetode_id = laanertjek.id_nr');
-      if ($buf = $this->oci->fetch_into_assoc()) {
+      $buf = $this->oci->fetch_into_assoc();
+      if (empty($buf)) {
+        $this->oci->bind('bind_bibno', $bibno);
+        $this->oci->set_query(
+            'SELECT vip_kat.ncip_renew, vip_kat.ncip_cancel, vip_kat.ncip_update_request, vip_kat.ncip_lookup_user,
+                    vip_kat.ncip_lookup_user_address, vip_kat.ncip_lookup_user_password
+               FROM vip_kat
+              WHERE vip_kat.bib_nr = :bind_bibno');
+       $buf = $this->oci->fetch_into_assoc();
+      }
+      if (is_array($buf)) {
         $ret = array_change_key_case($buf, CASE_LOWER);
-        if (isset($this->memcache)) {
-          $this->memcache->set($cachekey, $ret);
-        }
+      }
+      if (isset($this->memcache)) {
+        $this->memcache->set($cachekey, $ret);
       }
     }
     catch (ociException $e) {
