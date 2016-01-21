@@ -30,6 +30,7 @@ class TestOfIpClass extends UnitTestCase {
     $this->assertFalse(ip_func::ip_in_interval('0.0.0.0', '0.0.0.0-255.255.255.255'));
     $this->assertTrue(ip_func::ip_in_interval('255.255.255.255', '0.0.0.0-255.255.255.255'));
     $this->assertFalse(ip_func::ip_in_interval('255.255.255.255.255', '0.0.0.0-255.255.255.255'));
+    $this->assertTrue(ip_func::ip_in_interval('130.185.135.200', '109.70.55.170; 195.90.100.62; 89.221.161.174;130.185.135.197; 130.185.135.199; 130.185.135.200; 130.185.135.204'));
   }
 
 }
