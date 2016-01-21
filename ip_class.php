@@ -48,9 +48,9 @@ class ip_func {
     if ($ip_int = ip2long($ip)) {
       foreach (explode(";", $intervals) as $interval) {
         list($from, $to) = explode("-", $interval);
-        $from_int = $to_int = ip2long($from);
+        $from_int = $to_int = ip2long(trim($from));
         if (!empty($to))
-          $to_int = ip2long($to);
+          $to_int = ip2long(trim($to));
         if ($ip_int >= $from_int && $ip_int <= $to_int)
           return TRUE;
       }
