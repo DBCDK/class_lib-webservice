@@ -26,6 +26,7 @@
  * Usage: \n
  * Object::set_value(object, tag-to-set, value); \n
  * Object::set_namespace(object, tag-to-set, value); \n
+ * Object::set_array_value(object, array-to-set, value); \n
  * Object::set_element(object, tag-to-set, element, value); \n
  *
  * Example:
@@ -48,7 +49,21 @@
  *     $test->tag = new stdClass()
  *     $test->tag->$sub_tag = 19;
  *   use:
- *     Object::set_element($test, 'tag', 'sub_tag', $var);
+ *     Object::set_element($test, 'tag', 'sub_tag', 19);
+ *
+ *   instead of:
+ *     $test = new stdClass();
+ *     $test->arr[] = 19;
+ *   use:
+ *     Object::set_aray($test, 'arr', 19);
+ *
+ *   instead of:
+ *     $test = new stdClass();
+ *     $help = new stdClass();
+ *     $help->_value = 19;
+ *     $test->arr[] = $help;
+ *   use:
+ *     Object::set_aray_value($test, 'arr', 19);
  *
  * @author Finn Stausgaard - DBC
 **/
