@@ -64,14 +64,13 @@ class ShowPriority {
   * @retval array - array with agency as index and priority as value
   **/
   public function get_priority($agency) {
-    $agency_list = array();
     if ($this->agency_cache) {
       $cache_key = md5('PRIORITY_' . $agency . $this->agency_uri);
       $agency_list = $this->agency_cache->get($cache_key);
     }
 
-
     if (empty($agency_list)) {
+      $agency_list = array();
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, constant('AGENCY_TIMEOUT'));
       $res_xml = $curl->get(sprintf($this->agency_uri, $agency, $this->tracking_id));
