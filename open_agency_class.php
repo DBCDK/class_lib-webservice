@@ -58,7 +58,7 @@ class OpenAgency {
   public function get_agency_rules($agency) {
     $agency_rules = FALSE;
     if ($this->agency_cache) {
-      $cache_key = md5('BRANCH_TYPES_' . $this->agency_uri . $agency);
+      $cache_key = md5('AGENCY_RULES_' . $this->agency_uri . $agency);
       $agency_rules = $this->agency_cache->get($cache_key);
     }
 
