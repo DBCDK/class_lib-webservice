@@ -27,6 +27,9 @@
  * need curl_class and memcache_class to be defined
  *
  * @author Finn Stausgaard - DBC
+ *
+ * NB!! this should be replaced with get_library_rules() in open_agency_v2_class.php
+ *
 **/
 
 require_once('OLS_class_lib/memcache_class.php');
