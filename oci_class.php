@@ -299,7 +299,7 @@ class oci {
     $this->clear_OCI_error();
 
     if (is_resource($this->connect)) {
-      // $this->oci_log('OCI', 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' reuse connection');
+      // $this->oci_log(OCI, 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' reuse connection');
       return TRUE;
     }
 
@@ -309,12 +309,12 @@ class oci {
     
     if (!is_resource($this->connect)) {
       if ($connect_count > 1) {
-        $this->oci_log('WARNING', 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' reconnect (' . $connect_count . ') with error: ' . $this->get_error_string());
+        $this->oci_log(WARNING, 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' reconnect (' . $connect_count . ') with error: ' . $this->get_error_string());
         return $this->connect($connect_count - 1);
       }
 
       $this->set_OCI_error(oci_error());
-      $this->oci_log('ERROR', 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' failed with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' failed with error: ' . $this->get_error_string());
       throw new ociException(oci_error());
     } 
     else {
@@ -363,15 +363,16 @@ class oci {
      else {
        $this->set_OCI_error('No OCI connection');
      }
-     $this->oci_log('ERROR', 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+     $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
      throw new ociException($this->error);
     }
     
     if (!empty($this->bind_list)) {
       foreach ($this->bind_list as $k => $v) {
+         $this->oci_log(OCI, 'ocibind:: ' . $v['name'] . ' bind to ' . $v['value']);
         if (! @oci_bind_by_name($this->statement, $v['name'], $v['value'], $v['maxlength'], $v['type'])) {
           $this->set_OCI_error(oci_error($this->statement));
-          $this->oci_log('ERROR', 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . ' type: '. $v['type'] . ' with error: ' . $this->get_error_string());
+          $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . ' type: '. $v['type'] . ' with error: ' . $this->get_error_string());
           throw new ociException($this->error);
         }
       }
@@ -384,11 +385,11 @@ class oci {
       $success  = @ociexecute($this->statement, OCI_DEFAULT);
     if (! $success) {
       $this->set_OCI_error(oci_error($this->statement));
-      $this->oci_log('ERROR', 'ociexecute:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'ociexecute:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
     $this->num_rows = oci_num_rows($this->statement);
-    $this->oci_log('OCI', 'ociexecute:: ' . $this->query . ' success with no error: ' . $this->get_error_string());
+    $this->oci_log(OCI, 'ociexecute:: ' . $this->query . ' success with no error: ' . $this->get_error_string());
     return TRUE;
   }
 
@@ -408,7 +409,7 @@ class oci {
       $this->statement = @ociparse($this->connect, $this->query);
       $this->set_OCI_error(oci_error($this->connect));
       if (!is_resource($this->statement)) {
-        $this->oci_log('ERROR', 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
 
@@ -417,7 +418,7 @@ class oci {
           $success = @oci_bind_by_name($this->statement, $v['name'], $v['value'], $v['maxlength'], $v['type']);
           $this->set_OCI_error(oci_error($this->statement));
           if (!$success) {
-            $this->oci_log('ERROR', 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . 'type: '. $v['type'] . ' with error: ' . $this->get_error_string());
+            $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . 'type: '. $v['type'] . ' with error: ' . $this->get_error_string());
             throw new ociException($this->error);
           }
         }
@@ -427,27 +428,27 @@ class oci {
       // Creates an "empty" OCI-Lob object to bind to the locator
       if (! $dataLOB = @oci_new_descriptor($this->connect, OCI_D_LOB)) {
         $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log('ERROR', 'oci_new_descriptor:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'oci_new_descriptor:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
 
       // Bind the returned Oracle LOB locator to the PHP LOB object
       if (! @oci_bind_by_name($this->statement, ":data_loc", $dataLOB, strlen($data), OCI_B_BLOB)) {
         $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log('ERROR', 'oci_bind_by_name:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'oci_bind_by_name:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
 
       if (! @ociexecute($this->statement, OCI_DEFAULT)) {
         $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log('ERROR', 'ociexecute:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'ociexecute:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
       
       // Now import a file to the LOB
       if (!$dataLOB->save($data)) {
         $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log('ERROR', 'save:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'save:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
 
@@ -466,7 +467,7 @@ class oci {
   function commit() {
     if (! oci_commit($this->connect)) {
       $this->set_OCI_error(oci_error($this->statement));
-      $this->oci_log('ERROR', 'commit:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'commit:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
       
@@ -480,7 +481,7 @@ class oci {
   function rollback() {
     if (! oci_rollback($this->connect)) {
       $this->set_OCI_error(oci_error($this->statement));
-      $this->oci_log('ERROR', 'rollback:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'rollback:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
     return TRUE;
@@ -495,7 +496,7 @@ class oci {
       return $lob;
     else {
       $this->set_OCI_error(oci_error($this->statement));
-      $this->oci_log('ERROR', 'create_lob:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'create_lob:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
 
@@ -536,7 +537,7 @@ class oci {
 
     if (! $res =oci_fetch_row($this->statement)) {
       $this->set_OCI_error(oci_error($this->statement));
-      $this->oci_log('ERROR', 'fetch_BLOB:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'fetch_BLOB:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
     
@@ -558,7 +559,7 @@ class oci {
     if (! $this->result=oci_fetch_array($this->statement, OCI_ASSOC+OCI_RETURN_NULLS)) {
       $this->set_OCI_error(oci_error($this->statement));
       if ($this->error) {
-        $this->oci_log('ERROR', 'oci_fetch_array:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+        $this->oci_log(ERROR, 'oci_fetch_array:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
         throw new ociException($this->error);
       }
     }
@@ -583,7 +584,7 @@ class oci {
     }
     $this->set_OCI_error(oci_error($this->statement));
     if ($this->error) {
-      $this->oci_log('ERROR', 'oci_fetch_all_into_assoc:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      $this->oci_log(ERROR, 'oci_fetch_all_into_assoc:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException(oci_error());
     }
     return $this->result;
