@@ -233,6 +233,22 @@ abstract class webServiceServer {
     }
     else
       self::soap_error('Error in request validation.');
+
+    if ($duplicate_request_to = $this->config->get_value('duplicate_request_to')) {
+      $curl = new curl();
+      $request = $this->objconvert->obj2soap($request_xmlobj, $soap_namespace);
+      foreach ($duplicate_request_to as $no => $uri) {
+        $curl->set_option(CURLOPT_TIMEOUT, 0, $no);
+        $curl->set_url($uri, $no);
+        if ($soap_namespace == 'http://www.w3.org/2003/05/soap-envelope') {
+          $curl->set_post_with_header($request, 'Content-Type: application/soap+xml', $no);
+        }
+        else {
+          $curl->set_post_with_header($request, 'Content-Type: text/xml; charset=utf-8', $no);
+        }
+      }
+      $reply = $curl->get();
+    }
   }
 
   /** \brief Handles rest request, converts it to xml and calls soap_request()
