@@ -235,8 +235,16 @@ abstract class webServiceServer {
       self::soap_error('Error in request validation.');
 
     if ($duplicate_request_to = $this->config->get_value('duplicate_request_to')) {
-      $curl = new curl();
+      reset($request_xmlobj);
+      $request = key($request_xmlobj);
+      if (is_null($request_xmlobj->$request->_value->authentication->_value)) {
+        unset($request_xmlobj->$request->_value->authentication);
+      }
+      if (empty($request_xmlobj->$request->_value->trackingId)) {
+        $request_xmlobj->$request->_value->trackingId->_value = $this->tracking_id;
+      }
       $request = $this->objconvert->obj2soap($request_xmlobj, $soap_namespace);
+      $curl = new curl();
       foreach ($duplicate_request_to as $no => $uri) {
         $curl->set_option(CURLOPT_TIMEOUT, 0, $no);
         $curl->set_url($uri, $no);
