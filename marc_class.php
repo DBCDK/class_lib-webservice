@@ -257,11 +257,11 @@ class marc implements Iterator {
             throw new marcException("to many result in \"findSubFields\"");
         if ($maxres == 1)
             if (array_key_exists(0, $subreturn)) {
-                return($subreturn[0]);
+                return ($subreturn[0]);
             } else {
                 return "";
             } else
-            return($subreturn);
+            return ($subreturn);
     }
 
     /** \brief
@@ -310,6 +310,9 @@ class marc implements Iterator {
             $this->subfield = $subfield;
             $this->subfieldIndex = -1;
         }
+        if (!array_key_exists($this->marc_arrayIndex, $this->marc_array)) {
+            return false;
+        }
         $sub = $this->marc_array[$this->marc_arrayIndex];
         for ($i = $this->subfieldIndex + 1; $i < count($sub['subfield']); $i++) {
             if (substr($sub['subfield'][$i], 0, 1) == $this->subfield) {
@@ -324,7 +327,7 @@ class marc implements Iterator {
 
     /** \brief
      *
-     * @param type $field
+     * @param $field string
      * @return boolean
      */
     function updateField($field) {
@@ -687,7 +690,7 @@ class marc implements Iterator {
             $fldno = substr($isomarc, 24 + ($indx++ * 12), 3);
         }
 //print_r($this->marc_array);
-        return($this->marc_array);
+        return ($this->marc_array);
     }
 
     /** \brief
@@ -829,7 +832,7 @@ class marc implements Iterator {
         $total += 25 + strlen($adrss);
         $adrslngth = 25 + $cntfields * 12;
         $head = substr($total + 100000, 1, 5) . $headinfo .
-                substr($adrslngth + 100000, 1, 5) . "   45  ";
+            substr($adrslngth + 100000, 1, 5) . "   45  ";
         return $head . $adrss . $data . $this->endOfRecord;
     }
 
