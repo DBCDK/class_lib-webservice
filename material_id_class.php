@@ -121,7 +121,7 @@ class materialId {
      * @param $ean string The EAN number to normalize
      * @retval string The normalized EAN number
      * */
-    function normalizeEAN($ean) {
+    public static function normalizeEAN($ean) {
         $res = array();
         foreach (preg_split('//', $ean, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
@@ -150,7 +150,7 @@ class materialId {
      * @param $ean string The EAN number to validate
      * @retval string The validated EAN number if valid, otherwise 0 is returned
      * */
-    function validateEAN($ean) {
+    public static function validateEAN($ean) {
         if (strlen($ean) != 13)
             return 0;
         $sum = 0;
