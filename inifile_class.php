@@ -96,7 +96,7 @@ class inifile {
   * @param $filename string  The .ini file to be processed. string
   * @retval boolean
   **/
-  public function inifile($filename) {
+  public function __construct($filename) {
     $this->ini_filename = $filename;
     if ($this->ini_file_array = self::parse_ini($filename)) {
       if (self::get_value('use_environment_vars', 'setup')) {
