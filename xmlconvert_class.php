@@ -75,6 +75,8 @@ class xmlconvert {
           foreach ($node->attributes as $attr) {
             $i = strpos($attr->nodeName, ':');
             $a_nodename = $attr->localName;
+            $subnode->_attributes = new stdClass();
+            $subnode->_attributes->{$a_nodename} = new stdClass();
             if ($attr->namespaceURI)
               $subnode->_attributes->{$a_nodename}->_namespace = htmlspecialchars($attr->namespaceURI);
             $subnode->_attributes->{$a_nodename}->_value = $attr->nodeValue;
