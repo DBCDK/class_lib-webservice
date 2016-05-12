@@ -147,6 +147,10 @@ class FormatRecords {
             $error = 'HTTP error ' . $curl_status[$i]['http_code'] . ' . formatting record';
           }
           if ($error) {
+            $js_obj = new stdClass();
+            $js_obj->{$output_format} = new stdClass();
+            $js_obj->{$output_format}->_value = new stdClass();
+            $js_obj->{$output_format}->_value->error = new stdClass();
             $js_obj->{$output_format}->_namespace = $this->namespace;
             $js_obj->{$output_format}->_value->error->_value = $error;
             $js_obj->{$output_format}->_value->error->_namespace = $this->namespace;
