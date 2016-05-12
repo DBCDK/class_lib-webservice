@@ -243,7 +243,7 @@ class Curl {
 
         // set cookies and add the handles
         foreach ($this->curl_handle as $key => $handle) {
-            if ($this->cookies[$handle]) {
+            if ($this->cookies[intval($handle)]) {
                 self::set_option(CURLOPT_COOKIE, implode(';', $this->cookies[$handle]));
             }
             curl_multi_add_handle($this->curl_multi_handle, $this->curl_handle[$key]);
@@ -262,7 +262,7 @@ class Curl {
             curl_multi_select($this->curl_multi_handle, 0.01);
             $status = curl_multi_exec($this->curl_multi_handle, $active);
             if ($info = curl_multi_info_read($this->curl_multi_handle)) {
-                $multi_status[$info['handle']] = $info['result'];
+                $multi_status[intval($info['handle'])] = $info['result'];
                 if (curl_getinfo($info['handle'], CURLINFO_HTTP_CODE) == 200)
                     $this->wait_for_connections--;
             }
@@ -275,7 +275,7 @@ class Curl {
             $this->curl_status[$key]['errno'] = curl_errno($this->curl_handle[$key]);
             $this->curl_status[$key]['error'] = curl_error($this->curl_handle[$key]);
             if (empty($this->curl_status[$key]['errno']) && isset($multi_status[$handle])) {
-                $this->curl_status[$key]['errno'] = $multi_status[$handle];
+                $this->curl_status[$key]['errno'] = $multi_status[intval($handle)];
             }
             if ($this->curl_status[$key]['errno'] == 28) { // CURLE_OPERATION_TIMEDOUT
                 $this->curl_status[$key]['http_code'] = 504;  // Gateway timeout
