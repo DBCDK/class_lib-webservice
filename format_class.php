@@ -89,6 +89,9 @@ class FormatRecords {
       $dom->preserveWhiteSpace = false;
     }
     $output_format = $param->outputFormat->_value;
+    $form_req = new stdClass();
+    $form_req->formatSingleManifestationRequest = new stdClass();
+    $form_req->formatSingleManifestationRequest->_value = new stdClass();
     $form_req->formatSingleManifestationRequest->_value->agency = $param->agency;
     $form_req->formatSingleManifestationRequest->_value->holdBackEndDate = $param->holdBackEndDate;
     $form_req->formatSingleManifestationRequest->_value->language = $param->language;
