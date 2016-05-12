@@ -56,7 +56,7 @@ class stopwatch {
    * @param    $postfix		Output postfix remember newline
    * @param    $format		Output format ("%s => %01.6f")
    *************/
-  function stopwatch($prefix = null, $delim = null, $postfix = null, $format = null) {
+  function __construct($prefix = null, $delim = null, $postfix = null, $format = null) {
     $this->prefix  = $prefix;
     $this->delim   = $delim;
     $this->postfix = $postfix;
