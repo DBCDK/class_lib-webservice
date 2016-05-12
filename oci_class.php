@@ -167,7 +167,7 @@ class oci {
   * @param $database string - name (from tnsnames.ora)
   */
 
-  function oci($username, $password='', $database='') {
+  function __construct($username, $password='', $database='') {
     
     if ($password == '' && $database == '') {
       $this->username = '';
