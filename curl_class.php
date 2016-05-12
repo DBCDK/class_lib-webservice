@@ -268,7 +268,7 @@ class Curl {
             }
         } while ($this->wait_for_connections && ($status === CURLM_CALL_MULTI_PERFORM || $active));
         if ($info = curl_multi_info_read($this->curl_multi_handle)) {
-            $multi_status[$info['handle']] = $info['result'];
+            $multi_status[intval($info['handle'])] = $info['result'];
         }
         foreach ($this->curl_handle as $key => $handle) {
             $this->curl_status[$key] = curl_getinfo($this->curl_handle[$key]);
