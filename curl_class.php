@@ -151,7 +151,7 @@ class Curl {
      * @link http://www.php.net/curl_init @endlink
      * @param $url [optional] the URL to be accessed by this instance of the class. (string)
      */
-    public function curl($url = NULL) {
+    public function __construct($url = NULL) {
         global $curl_default_options;
 
         $this->curl_options = null;
