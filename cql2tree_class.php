@@ -211,6 +211,8 @@ class CQL_parser {
         $this->val .= $this->qs[$this->qi];
         $this->qi++;
       }
+      if (!trim(substr($this->val, 1)))
+        self::add_diagnostic(27, $this->qi);
       $this->val .= $mark;
       $this->lval = strtolower($this->val);
       if ($this->qi < $this->ql) 
@@ -586,6 +588,7 @@ class CQL_parser {
             16 => 'Unsupported index',
             19 => 'Unsupported relation',
             20 => 'Unsupported relation modifier',
+            27 => 'Empty term unsupported',
             37 => 'Unsupported boolean operator',
             40 => 'Unsupported proximity relation',
             41 => 'Unsupported proximity distance',
