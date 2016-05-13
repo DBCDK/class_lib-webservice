@@ -198,6 +198,15 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+// should perhaps cast an error
+  function test_nada() {
+    $tests = array('""' => '',
+                   'term.filter=filter and ""' => '');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function test_trunkation() {
     $tests = array('term.term=karen*' => 'term.term:karen*',
                    'term.term="karen*"' => 'term.term:karen*', 
