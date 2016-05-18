@@ -206,10 +206,10 @@ class CQL_parser {
       while ($this->qi < $this->ql && $this->qs[$this->qi] != $mark) {
 // FVS - 20150622
 // do not remove \ from query string. * means masking/truncation while \* means search for the character *
-//        if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) 
-//          $this->qi++;
-        $this->val .= $this->qs[$this->qi];
-        $this->qi++;
+        if ($this->qs[$this->qi] == '\\' && $this->qi < $this->ql - 1) {
+          $this->val .= $this->qs[$this->qi++];
+        }
+        $this->val .= $this->qs[$this->qi++];
       }
       if (!trim(substr($this->val, 1)))
         self::add_diagnostic(27, $this->qi);
