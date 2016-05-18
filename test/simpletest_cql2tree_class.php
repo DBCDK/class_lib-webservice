@@ -95,6 +95,21 @@ class TestOfCql2TreeClass extends UnitTestCase {
     $this->assertEqual($tree['right']['relation'], '=');
   }
 
+  function test_quote() {
+    list($tree, $diags) = self::get_tree('term.term="karen \"blixen\" 1885"');
+    $this->assertEqual($tree['type'], 'searchClause');
+    $this->assertEqual($tree['term'], '"karen \"blixen\" 1885"');
+    $this->assertEqual($tree['slop'], 9999);
+    list($tree, $diags) = self::get_tree('term.term="karen \"blixen 1885"');
+    $this->assertEqual($tree['type'], 'searchClause');
+    $this->assertEqual($tree['term'], '"karen \"blixen 1885"');
+    $this->assertEqual($tree['slop'], 9999);
+    list($tree, $diags) = self::get_tree('dkcclphrase.cclphrase="karen \"blixen\" 1885"');
+    $this->assertEqual($tree['type'], 'searchClause');
+    $this->assertEqual($tree['term'], '"karen \"blixen\" 1885"');
+    $this->assertEqual($tree['slop'], 9999);
+  }
+
   function test_slop() {
     list($tree, $diags) = self::get_tree('term.slop="karen blixen"');
     $this->assertEqual($tree['type'], 'searchClause');

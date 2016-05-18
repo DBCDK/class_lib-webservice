@@ -150,6 +150,14 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
+  function test_quote() {
+    $tests = array('dkcclphrase.cclphrase = "karen \"blixen\" 1885"' => 'dkcclphrase.cclphrase:karen\ \blixen\\\\ 1885',
+                   'dkcclterm.cclterm = "karen \"blixen\" 1885"' => 'dkcclterm.cclterm:"karen \"blixen\" 1885"~9999');
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
+    }
+  }
+
   function test_interval() {
     $tests = array('dkcclphrase.cclphrase < en' => 'dkcclphrase.cclphrase:[* TO en}',
                    'dkcclphrase.cclphrase > en' => 'dkcclphrase.cclphrase:{en TO *]',
