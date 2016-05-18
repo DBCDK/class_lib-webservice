@@ -198,15 +198,6 @@ class TestOfSolrQueryClass extends UnitTestCase {
     }
   }
 
-// should perhaps cast an error
-  function test_nada() {
-    $tests = array('""' => '',
-                   'term.filter=filter and ""' => '');
-    foreach ($tests as $send => $recieve) {
-      $this->assertEqual($this->get_edismax($send), $recieve);
-    }
-  }
-
   function test_trunkation() {
     $tests = array('term.term=karen*' => 'term.term:karen*',
                    'term.term="karen*"' => 'term.term:karen*', 
@@ -237,6 +228,14 @@ class TestOfSolrQueryClass extends UnitTestCase {
                                                                     'sort' => 'sum(query($t0,33),query($t1,33),query($t2,33)) asc'));
     foreach ($tests as $send => $recieve) {
       $this->assertEqual($this->get_edismax($send, TRUE), $recieve);
+    }
+  }
+
+  function test_empty_string() {
+    $tests = array('""'                        => array(array('no' => 27, 'description' => 'Empty term unsupported', 'details' => '', 'pos' => 1)),
+                   'term.filter=filter and ""' => array(array('no' => 27, 'description' => 'Empty term unsupported', 'details' => '', 'pos' => 24)));
+    foreach ($tests as $send => $recieve) {
+      $this->assertEqual($this->get_edismax($send), $recieve);
     }
   }
 
