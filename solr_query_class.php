@@ -377,7 +377,7 @@ class SolrQuery {
   private function make_bestmatch_term($term, $relation, $prefix, $field, $slop) {
     $ret = array();
     if ($quote = self::is_quoted($term)) {
-      $term = str_replace($quote, '', $term);
+      $term = self::delete_quotes($term, $quote);
     }
     $terms = explode(' ', self::normalize_term($term));
     foreach ($terms as $t) {
@@ -407,7 +407,7 @@ class SolrQuery {
     }
     if (in_array($prefix, $this->phrase_index)) { 
       if ($quote) { 
-        $term = str_replace($quote, '', self::escape_solr_quoted_term($term));
+        $term = self::delete_quotes(self::escape_solr_quoted_term($term), $quote);
       } 
       if ($space) { 
         $term = str_replace(' ', '\\ ', $term);
@@ -420,20 +420,20 @@ class SolrQuery {
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) { 
         if ($space) { 
           if ($relation == 'any') { 
-            $term = '(' . preg_replace('/\s+/', ' OR ', str_replace($quote, '', $term)) . ')';
+            $term = '(' . preg_replace('/\s+/', ' OR ', self::delete_quotes($term, $quote)) . ')';
           } 
           elseif ($relation == 'all') { 
-            $term = '(' . preg_replace('/\s+/', ' AND ', str_replace($quote, '', $term)) . ')';
+            $term = '(' . preg_replace('/\s+/', ' AND ', self::delete_quotes($term, $quote)) . ')';
           } 
           elseif ($wildcard && $quote) { 
-            $term = '(' . str_replace($quote, '', $term) . ')';
+            $term = '(' . self::delete_quotes($term, $quote) . ')';
           } 
           else { 
             $m_slop = '~' . $slop;
           } 
         } 
         elseif ($quote) { 
-          $term = str_replace($quote, '', $term);
+          $term = self::delete_quotes($term, $quote);
         } 
         $m_term = self::escape_solr_term($term) . $m_slop;
       } 
@@ -441,13 +441,51 @@ class SolrQuery {
     return  $m_field . $m_term;
   }
 
-  /** \brief Return the quote used or FALSE
+  /** \brief Return the quote used or empty string (FALSE)
    * @param $str string
-   * @retval mixed - the quote or FALSE
+   * @retval mixed - the quote or empty string
    */
   private function is_quoted($str) {
-    return (strpos($str, '"') !== FALSE ? '"' : (strpos($str, "'") !== FALSE ? "'" : ''));
+    foreach (array('"', "'") as $ch) {
+      $p = strpos($str, $ch);
+      if (($p !== FALSE) && ($p === 0 || trim(substr($str, 0, ($p - 1))) == '')) {
+        return $ch;
+      }
+    }
+    return '';
   }
+
+  /** \brief remove unescaped quotes from string
+   * @param $str string
+   * @param $quote character (' or ")
+   * @retval string 
+   */
+  private function delete_quotes($str, $quote) {
+    static $US = '\037';
+    $ret = str_replace('\\' . $quote, $US, $str);
+    $ret = str_replace($quote, '', $ret);
+    return str_replace($US, '\\' . $quote, $ret);
+  }
+
+  /** \brief remove first and last quote from string - not used
+   * @param $str string
+   * @param $quote character (' or ")
+   * @retval string 
+   */
+  // this one trims as well, and performs many tests
+  private function delete_first_and_last_quote($str, $quote) {
+    $first = strpos($str, $quote);
+    $last = strrpos($str, $quote);
+    if ($first !== FALSE &&
+        $first < $last &&
+        ($first == 0 || trim(substr($str, 0, $first)) == '') &&
+        (trim(substr($str, ($last + 1))) == '') &&
+        (substr($str, ($last - 1), 1) != '\\')) {
+      return substr(substr($str, 0, $last), ($first + 1));
+    }
+    return $str;
+  }
+
 
   /** \brief Return TRUE if * or ? is used as wildcard
    * @param $str string
