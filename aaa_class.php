@@ -157,7 +157,7 @@ class aaa {
   private function fetch_rights_from_fors_rights_ws($user, $group, $password, $ip, $fors_rights_url) {
     require_once('OLS_class_lib/curl_class.php');
     $curl = new curl();
-    $url = sprintf($fors_rights_url, $user, $group, $password, $ip);
+    $url = sprintf($fors_rights_url, urlencode($user), urlencode($group), urlencode($password), urlencode($ip));
     $reply = unserialize($curl->get($url));
     if (isset($reply->forsRightsResponse->_value->ressource)) {
       foreach ($reply->forsRightsResponse->_value->ressource as $ressource) {
