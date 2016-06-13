@@ -373,7 +373,7 @@ abstract class webServiceServer {
 
   /** \brief
   *  Return TRUE if the IP is in in_house_ip_list, or if in_house_ip_list is not set, if the name is in in_house_domain
-  *  NB: getcallbyaddr() can take some time or even time out, is the remote name server is slow or wrongly configured
+  *  NB: gethostbyaddr() can take some time or even time out, is the remote name server is slow or wrongly configured
   */
   protected function in_house() {
     static $homie;
