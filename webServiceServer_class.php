@@ -372,21 +372,27 @@ abstract class webServiceServer {
   }
 
   /** \brief
-  *  Return TRUE if the IP is in_house_domain
+  *  Return TRUE if the IP is in in_house_ip_list, or if in_house_ip_list is not set, if the name is in in_house_domain
+  *  NB: getcallbyaddr() can take some time or even time out, is the remote name server is slow or wrongly configured
   */
   protected function in_house() {
     static $homie;
     if (!isset($homie)) {
-      if (!$domain = $this->config->get_value('in_house_domain', 'setup'))
-        $domain = '.dbc.dk';
-      @ $remote = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-      $domains = explode(';', $domain);
-      foreach ($domains as $dm) {
-        $dm = trim($dm);
-        if ($homie = (strpos($remote, $dm) + strlen($dm) == strlen($remote)))
-          if ($homie = (gethostbyname($remote) == $_SERVER['REMOTE_ADDR'])) // paranoia check
-            break;
+      if (FALSE !== ($in_house_ip_list = $this->config->get_value('in_house_ip_list', 'setup'))) {
+        $homie = ip_func::ip_in_interval($_SERVER['REMOTE_ADDR'], $in_house_ip_list);
+      }
+      else {
+        if (!$domain = $this->config->get_value('in_house_domain', 'setup'))
+          $domain = '.dbc.dk';
+        @ $remote = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+        $domains = explode(';', $domain);
+        foreach ($domains as $dm) {
+          $dm = trim($dm);
+          if ($homie = (strpos($remote, $dm) + strlen($dm) == strlen($remote)))
+            if ($homie = (gethostbyname($remote) == $_SERVER['REMOTE_ADDR'])) // paranoia check
+              break;
         }
+      }
     }
     return $homie;
   }
