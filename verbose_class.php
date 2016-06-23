@@ -91,7 +91,7 @@ class verbose {
      * @param date_format (string) - format-string for date()
      * */
     static public function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
-        self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string) microtime(), 2, 6) . ':' . getmypid();
+        self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
         if (!self::$date_format = $date_format)
             self::$date_format = 'H:i:s-d/m/y';
         if (strtolower(substr($verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
@@ -162,7 +162,7 @@ class verbose {
                 fwrite($fp, $vtext . self::$my_pid . ' ' . date(self::$date_format) . ' ' . self::$tracking_id . ' ' . $str);
                 fclose($fp);
             } else
-                die('FATAL: Cannot open ' . self::$verbose_file_name);
+                die('FATAL: Cannot open ' . self::$verbose_file_name . "getcwd:" . getcwd());
         }
     }
 
@@ -172,7 +172,7 @@ class verbose {
      * @param t_id Current tracking_id
      */
     static public function set_tracking_id($t_service_prefix, $t_id = '') {
-        self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') .  self::$tracking_id .  ($t_id ? '<' . $t_id : '');
+        self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') . self::$tracking_id . ($t_id ? '<' . $t_id : '');
         return self::$tracking_id;
     }
 

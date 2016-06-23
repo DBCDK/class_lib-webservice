@@ -206,6 +206,10 @@ class LibV3API {
         }
         $this->return[] = $result[0];
         if ($this->hsb) {
+            $m = new marc();
+            $n = new marc();
+            $m->fromIso($result[0]['DATA']);
+//            $strng = $m->toLineFormat();
             $res = $this->fetchHSB($result[0]['DATA']);
             while ($res) {
                 $result = $this->getMarcByLB($res['lokalid'], $res['bibliotek']);
@@ -223,7 +227,9 @@ class LibV3API {
         return $this->return;
     }
 
+
     function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'Basis') {
+
         $this->set($base);
         if ($wh) {
             $where = $wh;
@@ -256,6 +262,15 @@ class LibV3API {
             $result[0]['DATA'] = $data;
         }
 
+        return $result;
+    }
+
+    function getLekNoViaRel($lokalid, $bibliotek) {
+        $sql = "select * from poster where id in ( "
+            . "select fromid from postrelationer where toid in ( "
+            . "select id from poster "
+            . "where lokalid = '$lokalid' and bibliotek = '$bibliotek'))";
+        $result = $this->oci->fetch_all_into_assoc($sql);
         return $result;
     }
 
