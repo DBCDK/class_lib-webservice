@@ -72,10 +72,9 @@ class xmlconvert {
         $localName = $node->localName;
         $subnode->_value = $this->xml2obj($node, $force_NS);
         if ($node->hasAttributes()) {
+          $subnode->_attributes = new stdClass();
           foreach ($node->attributes as $attr) {
-            $i = strpos($attr->nodeName, ':');
             $a_nodename = $attr->localName;
-            $subnode->_attributes = new stdClass();
             $subnode->_attributes->{$a_nodename} = new stdClass();
             if ($attr->namespaceURI)
               $subnode->_attributes->{$a_nodename}->_namespace = htmlspecialchars($attr->namespaceURI);

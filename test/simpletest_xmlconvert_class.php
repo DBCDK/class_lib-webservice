@@ -32,6 +32,10 @@ class TestOfXmlConvertClass extends UnitTestCase {
     $res->tag->_attributes->attr->_value = 'ATTR';
     $this->assertEqual(self::convert('<ns1:tag xmlns:ns1="http://somenamespace.com" attr="ATTR">value</ns1:tag>'), $res);
     $this->assertEqual(self::convert('<tag xmlns="http://somenamespace.com" attr="ATTR">value</tag>'), $res);
+
+    $res->tag->_attributes->attr2->_value = 'ATTR2';
+    $this->assertEqual(self::convert('<ns1:tag xmlns:ns1="http://somenamespace.com" attr="ATTR" attr2="ATTR2">value</ns1:tag>'), $res);
+    $this->assertEqual(self::convert('<tag xmlns="http://somenamespace.com" attr="ATTR" attr2="ATTR2">value</tag>'), $res);
   }
 
   function convert($xml) {
