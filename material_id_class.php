@@ -93,7 +93,7 @@ class materialId {
      * @param $isbn string The isbn to validate
      * @retval string The validated ISBN number if valid, otherwise 0 is returned
      * */
-    public static function validateISBN($isbn) {
+    function validateISBN($isbn) {
         $arr = array();
         if (strlen($isbn) != 10)
             return 0;
@@ -168,7 +168,7 @@ class materialId {
      * @param $issn string The ISSN number to normalize
      * @retval string The normalized ISSN number
      * */
-    public static function normalizeISSN($issn) {
+    function normalizeISSN($issn) {
         $res = array();
         foreach (preg_split('//', $issn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
@@ -203,7 +203,7 @@ class materialId {
      * @param $issn string The ISSN number to validate
      * @retval string The validated ISSN number if valid, otherwise 0 is returned
      * */
-    public static function validateISSN($issn) {
+    function validateISSN($issn) {
         if (strlen($issn) != 8)
             return 0;
         $sum = 0;
@@ -227,7 +227,7 @@ class materialId {
      * @param $withSpaces boolean
      * @retval string The normalized Faust number
      * */
-    public static function normalizeFaust($faust, $withSpaces = false) {
+    function normalizeFaust($faust, $withSpaces = false) {
         $res = array();
         foreach (preg_split('//', $faust, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
@@ -268,13 +268,12 @@ class materialId {
      * @param $faust string The Faust number to validate
      * @retval mixed The validated Faust number if valid, otherwise 0 is returned
      * */
-    public static function validateFaust($faust) {
-        $sum = 0;
+    function validateFaust($faust) {
         if (strlen($faust) != 8)
             return 0;
         $vgt = 2;
         for ($i = 0; $i < 8; $i++) {
-            $sum += ($faust[$i] - '0') * ($vgt - $i);
+            @ $sum += ($faust[$i] - '0') * ($vgt - $i);
             if ($i == 0) {
                 $vgt = 8;
             }
@@ -290,7 +289,7 @@ class materialId {
      * @param $isbn string The isbn to convert
      * @retval mixed The ISBN as an EAN (ISBN13) number
      * */
-    public static function convertISBNToEAN($isbn) {
+    function convertISBNToEAN($isbn) {
         if (strlen($isbn) != 10)
             return 0;
         $ean = "978" . $isbn;
@@ -314,7 +313,7 @@ class materialId {
      * @param $ean string To isbn
      * @retval mixed - integer or boolean
      */
-    public static function convertEANToISBN($ean) {
+    function convertEANToISBN($ean) {
         if (strlen($ean) != 13)
             return 0;
         $isbn = substr($ean, 3, 9);
