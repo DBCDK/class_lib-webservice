@@ -264,6 +264,15 @@ class marc implements Iterator {
             return ($subreturn);
     }
 
+    function substitute($field, $subfield, $txt) {
+        while ($this->thisField($field)) {
+            while ($this->thisSubfield($subfield)) {
+                $this->updateSubfield($txt);
+            }
+        }
+
+    }
+
     /** \brief
      * -
      * @param $field string
