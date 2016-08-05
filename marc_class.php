@@ -384,8 +384,8 @@ class marc implements Iterator {
      * @retval boolean
      */
     function remSubfield() {
-        if (!$this->marc_arrayIndex)
-            return false;
+//        if (!$this->marc_arrayIndex)
+//            return false;
         if ($this->subfieldIndex < 0)
             return false;
         $newSubfield = array();
