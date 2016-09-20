@@ -102,9 +102,7 @@ class SolrQuery {
       $this->phrase_index = $config->get_value('phrase_index', 'setup');
       $this->search_term_format = $repository['handler_format'];
     }
-    if ($holdings_include) {
-      $this->holdings_include = ' OR ' . $holdings_include;
-    }
+    $this->holdings_include = $holdings_include;
     ini_set('xdebug.max_nesting_level', 1000);  // each operator can cause a recursive call 
   }
 
@@ -208,6 +206,7 @@ class SolrQuery {
    */
   private function apply_handler(&$solr_nodes, $type, $handler) {
     if ($handler && $format = $this->search_term_format[$handler][$type]) {
+      $q = array();
       foreach ($solr_nodes['handler'][$type] as $idx => $h) {
         if ($handler == $h) {
           $q[] = $solr_nodes[$type][$idx];
@@ -216,7 +215,8 @@ class SolrQuery {
         }
       }
       $handler_q = '(' . implode(' AND ', $q) . ')';
-      $solr_nodes[$type][$last_idx] = str_replace('__COLLECTION_INCLUDE__', $this->holdings_include, sprintf($format, $handler_q));
+      $solr_nodes['handler_var'][$handler] = 'fq_' . $handler . '=' . urlencode($handler_q);
+      $solr_nodes[$type][$last_idx] = sprintf($this->holdings_include, '(' . sprintf($format, '$fq_' . $handler) . ')');
     }
   }
 
