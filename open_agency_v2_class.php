@@ -56,6 +56,52 @@ class OpenAgency {
   }
 
   /**
+  * \brief Fetch agencies by rule using openAgency::libraryRules
+  *
+  * @param string $rule
+  * @param string $setting (0 or 1)
+  * @param string $agency_type 
+  * @retval array 
+  *
+  **/
+  public function get_libraries_by_rule($rule, $setting='1', $agency_type='') {
+    $libraries = FALSE;
+    if ($this->agency_cache) {
+      $cache_key = md5(__CLASS__ . __FUNCTION__ . $rule . $setting . $agency_type);
+      $libraries = $this->agency_cache->get($cache_key);
+    }
+
+    if ($libraries === FALSE) {
+      $libraries = array();
+      self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $rule . ')');
+      $curl = new curl();
+      $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
+      $url = sprintf(self::oa_uri($this->config['librariesByRule']), $rule, $setting, $this->tracking_id);
+      $res_xml = $curl->get($url);
+      $curl_err = $curl->get_status();
+      if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
+        self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot fetch library Rules from ' . $url);
+      }
+      else {
+        $dom = new DomDocument();
+        $dom->preserveWhiteSpace = false;
+        if (@ $dom->loadXML($res_xml)) {
+          foreach ($dom->getElementsByTagName('libraryRules') as $agency) {
+            if ($agency_type == '' || $agency_type == $agency->getElementsByTagName('agencyType')->item(0)->nodeValue) {
+            $libraries[$agency->getElementsByTagName('agencyId')->item(0)->nodeValue] = $agency->getElementsByTagName('agencyId')->item(0)->nodeValue;
+            }
+          }
+        }
+        if ($this->agency_cache) {
+          $this->agency_cache->set($cache_key, $libraries);
+        }
+      }
+      $curl->close();
+    }
+    return $libraries;
+  }
+
+  /**
   * \brief Fetch agency rules using openAgency::libraryRules
   *
   * @param string $agency
