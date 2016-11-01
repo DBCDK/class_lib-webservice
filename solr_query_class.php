@@ -36,6 +36,7 @@ class SolrQuery {
   var $phrase_index = array();  ///< -
   var $search_term_format = array();  ///< -
   var $holdings_include = '';   ///< -
+  var $holdings_filter = '';   ///< -
   var $best_match = FALSE;  ///< -
   var $operator_translate = array();  ///< -
   var $indexes = array();  ///< -
@@ -112,7 +113,8 @@ class SolrQuery {
    * @param $query string
    * @retval struct
    */
-  public function parse($query) {
+  public function parse($query, $holdings_filter='') {
+    $this->holdings_filter = $holdings_filter;
     $parser = new CQL_parser();
     $parser->set_prefix_namespaces($this->cqlns);
     $parser->set_indexes($this->indexes);
@@ -186,7 +188,7 @@ class SolrQuery {
     foreach (array('q', 'fq') as $type) {
       foreach ($solr_nodes['handler'][$type] as $handler) {
         if ($handler) {
-          self::apply_handler($solr_nodes, $type, $handler);
+          self::apply_handler($solr_nodes, $type, $handler, $this->holdings_filter);
           $found[$handler][$type] = TRUE;
           break;
         }
@@ -197,6 +199,11 @@ class SolrQuery {
         $this->error[] = self::set_error(18, 'Mixed filter use for the applied indexes');
       }
     }
+    if ($this->holdings_filter && empty($found['holding'])) {   // inject holdings filter when holding handler is not used
+       $solr_nodes['fq'][] = $this->holdings_filter;
+       $solr_nodes['handler']['fq'][] = 'holding';
+       self::apply_handler($solr_nodes, 'fq', 'holding');
+    }
   }
 
   /** \brief locate handlers 
@@ -204,7 +211,7 @@ class SolrQuery {
    * @param $type string - - q og fq
    * @param $handler string - - name of handler
    */
-  private function apply_handler(&$solr_nodes, $type, $handler) {
+  private function apply_handler(&$solr_nodes, $type, $handler, $holdings_filter='') {
     if ($handler && $format = $this->search_term_format[$handler][$type]) {
       $q = array();
       foreach ($solr_nodes['handler'][$type] as $idx => $h) {
@@ -215,6 +222,9 @@ class SolrQuery {
         }
       }
       $handler_q = '(' . implode(' AND ', $q) . ')';
+      if ($holdings_filter) {
+        $handler_q .= ' OR ' . $holdings_filter;
+      }
       $solr_nodes['handler_var'][$handler] = 'fq_' . $handler . '=' . urlencode($handler_q);
       $solr_nodes[$type][$last_idx] = sprintf($this->holdings_include, '(' . sprintf($format, '$fq_' . $handler) . ')');
     }
