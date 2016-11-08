@@ -102,8 +102,7 @@ class marc implements Iterator {
 
         if ($txt1 == $txt2) {
             return true;
-        }
-        else {
+        } else {
             if ($loose) {
                 $pos = strpos($txt1, $txt2);
                 if ($pos !== false) {
@@ -113,8 +112,7 @@ class marc implements Iterator {
                 if ($pos !== false) {
                     return true;
                 }
-            }
-            else {
+            } else {
                 return false;
             }
         }
@@ -174,8 +172,7 @@ class marc implements Iterator {
         }
         if ($found) {
             return false;
-        }
-        else {
+        } else {
             $this->insert($newField);
             return true;
         }
@@ -267,12 +264,10 @@ class marc implements Iterator {
         if ($maxres == 1) {
             if (array_key_exists(0, $subreturn)) {
                 return ($subreturn[0]);
-            }
-            else {
+            } else {
                 return "";
             }
-        }
-        else {
+        } else {
             return ($subreturn);
         }
     }
@@ -544,8 +539,7 @@ class marc implements Iterator {
         if (!$marcLength = @fread($this->fp, 5)) {
             if (!feof($this->fp)) {
                 throw new marcException("reading error");
-            }
-            else {
+            } else {
                 return false;
 
 //                throw new marcException("reading beyond end of medium");
@@ -629,8 +623,7 @@ class marc implements Iterator {
             $subfields[] = $subfield . $data;
             $newfield['subfield'] = $subfields;
             $this->insert($newfield);
-        }
-        else {
+        } else {
             $this->marc_array[$key]['subfield'][] = $subfield . $data;
         }
     }
@@ -721,8 +714,7 @@ class marc implements Iterator {
             if ($fldno == '000') {
                 $marcar1['indicator'] = "";
                 $marcar1['subfield'][] = substr(array_shift($subfield), 0, 24);
-            }
-            else {
+            } else {
                 $marcar1['indicator'] = array_shift($subfield);
                 $marcar1['subfield'] = $subfield;
             }
@@ -754,19 +746,45 @@ class marc implements Iterator {
      * -
      * @retval string The marc record as lineformat
      */
-    function toLineFormat() {
+    function toLineFormat($linelength = 0) {
         $strng = "";
         foreach ($this->marc_array as $field) {
             if ($field['field'] == '000') {
                 continue;
             }
-            $strng .= $field['field'] . " " . $field['indicator'];
+            $ln = '';
+            $ln .= $field['field'] . " " . $field['indicator'];
             foreach ($field['subfield'] as $subfield) {
-                $strng .= "*" . $subfield;
+                $ln .= "*" . $subfield;
             }
-            $strng .= "\n";
+            if ($linelength) {
+                $first = true;
+                while (strlen($ln) > $linelength) {
+                    if ($first) {
+                        $strng .= substr($ln, 0, $linelength) . "\n";
+                        $ln = substr($ln, $linelength);
+                        $first = false;
+                    } else {
+                        $strng .= '    ' . substr($ln, 0, $linelength - 4) . "\n";
+                        $ln = substr($ln, $linelength - 4);
+                    }
+                }
+                if (strlen($ln)) {
+                    if ($first) {
+                        $strng .= $ln . "\n";
+                    } else {
+                        $strng .= '    ' . $ln . "\n";
+                    }
+                }
+            } else {
+                $strng .= $ln . "\n";
+            }
         }
-        return $strng;
+        if ($linelength) {
+            return $strng . "$\n";
+        } else {
+            return $strng;
+        }
     }
 
     /** \brief
