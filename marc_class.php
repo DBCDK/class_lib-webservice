@@ -748,12 +748,18 @@ class marc implements Iterator {
      */
     function toLineFormat($linelength = 0) {
         $strng = "";
+        if ($linelength != 0) {
+            $spc = ' ';
+        } else {
+            $spc = '';
+        }
+//        $spc = '';
         foreach ($this->marc_array as $field) {
             if ($field['field'] == '000') {
                 continue;
             }
             $ln = '';
-            $ln .= $field['field'] . " " . $field['indicator'];
+            $ln .= $field['field'] . " " . $field['indicator'] . $spc;
             foreach ($field['subfield'] as $subfield) {
                 $ln .= "*" . $subfield;
             }
@@ -908,27 +914,37 @@ class marc implements Iterator {
      *
      * TEST WHETER A MARC RECORD HAS A POINTER TO A "LEKTØR UDTALELSE"
      */
-    function HasLektoer() {
+    function HasLektoer($incl_choice = false) {
+        $choice = '';
+        $ret = false;
         $f990s = $this->findSubFields('990', 'b');
         foreach ($f990s as $f990) {
+            $choice .= strtoupper($f990) . ' ';
             if (strtolower($f990) == 'l') {
-                return true;
+                $ret = true;
             }
         }
         $fd90s = $this->findSubFields('d90', 'b');
         foreach ($fd90s as $fd90) {
+            $choice .= strtoupper($fd90) . ' ';
             if (strtolower($fd90) == 'l') {
-                return true;
+                $ret = true;
             }
         }
         $f06s = $this->findSubFields('f06', 'b');
         foreach ($f06s as $f06) {
+            $choice .= strtoupper($f06) . ' ';
             if (strtolower($f06) == 'l') {
-                return true;
+                $ret = true;
             }
         }
-        return false;
+        if ($incl_choice) {
+            return array('status' => $ret, 'choice' => $choice);
+        } else {
+            return $ret;
+        }
     }
+
 }
 
 ?>

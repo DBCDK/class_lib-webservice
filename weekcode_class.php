@@ -40,10 +40,11 @@ class weekcode {
                 . "days int, "
                 . "numbers integer) ";
             $this->db->exe($sql);
+
+            $default = "insert into " . $this->parametertable . " "
+                . "(days,numbers) values (4,1)";
+            $this->db->exe($default);
         }
-        $default = "insert into " . $this->parametertable . " "
-            . "(days,numbers) values (4,1)";
-        $this->db->exe($default);
     }
 
     /**
@@ -165,8 +166,8 @@ class weekcode {
 
         // is there an exception in the table?
         $sql = "select weekcode from " . $this->tablename . " "
-            . "where to_char(date,'YYYYMMDD') = '$today' "
-            . "and type = 'dat' ";
+            . "where to_char(date,'YYYYMMDD') = '$today' ";
+//            . "and type = 'dat' ";
         $rows = $this->db->fetch($sql);
         if ($rows) {
             return $rows[0]['weekcode'];
@@ -192,8 +193,8 @@ class weekcode {
 
         // is there an exception in the table?
         $sql = "select weekcode from " . $this->tablename . " "
-            . "where to_char(date,'YYYYMMDD') = '$today' "
-            . "and type = 'week' ";
+            . "where to_char(date,'YYYYMMDD') = '$today' ";
+//            . "and type = 'week' ";
         $rows = $this->db->fetch($sql);
         if ($rows) {
             return $rows[0]['weekcode'];
