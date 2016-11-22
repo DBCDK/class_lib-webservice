@@ -343,6 +343,31 @@ class objconvert {
     return $ret;
   }
 
+  /** \brief Set namespace on all object nodes but attributes
+   * @param $obj mixed -
+   * @param $ns string -
+   * @retval mixed
+   */
+  public function set_obj_namespace_on_tags($obj, $ns, $in_attribute = FALSE) {
+    if (empty($obj) || is_scalar($obj))
+      return $obj;
+    if (is_array($obj)) {
+      $ret = array();
+      foreach ($obj as $key => $val) {
+        $ret[$key] = $this->set_obj_namespace_on_tags($val, $ns, $in_attribute);
+      }
+    }
+    else {
+      $ret = new stdClass();
+      foreach ($obj as $key => $val) {
+        $ret->$key = $this->set_obj_namespace_on_tags($val, $ns, $in_attribute || $key == '_attributes');
+        if ($key === '_value' && !$in_attribute)
+          $ret->_namespace = $ns;
+      }
+    }
+    return $ret;
+  }
+
   /** \brief produce balanced xml
    * @param $tag string -
    * @param $attr string -
