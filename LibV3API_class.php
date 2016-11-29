@@ -16,8 +16,7 @@ require_once 'marc_class.php';
 require_once "verbose_class.php";
 require_once "oci_class.php";
 
-class LibV3API
-{
+class LibV3API {
 
 //  private $oci;
     private $withAuthor;
@@ -27,23 +26,20 @@ class LibV3API
     private $PhusOci;
     private $BasisOci;
 
-    function __construct($ociuser, $ocipasswd, $ocidatabase)
-    {
+    function __construct($ociuser, $ocipasswd, $ocidatabase) {
         $this->oci = new oci($ociuser, $ocipasswd, $ocidatabase);
         $this->oci->set_charset('WE8ISO8859P1');
         $this->oci->connect();
         $this->BasisOci = $this->oci;
     }
 
-    function setPhusLogin($ociuser, $ocipasswd, $ocidatabase)
-    {
+    function setPhusLogin($ociuser, $ocipasswd, $ocidatabase) {
         $this->PhusOci = new oci($ociuser, $ocipasswd, $ocidatabase);
         $this->PhusOci->set_charset('WE8ISO8859P1');
         $this->PhusOci->connect();
     }
 
-    function close()
-    {
+    function close() {
         $this->BasisOci->disconnect();
         $this->PhusOci->disconnect();
     }
@@ -58,25 +54,23 @@ class LibV3API
      * hsb:  head bind section. all records (from this and up) will be fetched
      *
      */
-    function set($name, $value = true)
-    {
+    function set($name, $value = true) {
         switch ($name) {
-            case 'withAuthor' :
-                $this->withAuthor = $value;
-                break;
-            case 'hsb':
-                $this->hsb = $value;
-                break;
-            case 'Basis' :
-                $this->oci = $this->BasisOci;
-                break;
-            case 'Phus' :
-                $this->oci = $this->PhusOci;
+        case 'withAuthor' :
+            $this->withAuthor = $value;
+            break;
+        case 'hsb':
+            $this->hsb = $value;
+            break;
+        case 'Basis' :
+            $this->oci = $this->BasisOci;
+            break;
+        case 'Phus' :
+            $this->oci = $this->PhusOci;
         }
     }
 
-    function getDBtime()
-    {
+    function getDBtime() {
         $sql = "select to_char(current_timestamp,'DDMMYYYY HH24MISS') tid "
             . "from dual";
         $rows = $this->oci->fetch_all_into_assoc($sql);
@@ -90,8 +84,7 @@ class LibV3API
      *
      * en forbedret udgave:
      */
-    function getUpdatedRecs($lastupdated)
-    {
+    function getUpdatedRecs($lastupdated) {
 //        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster "
 //                . "where ajourdato > to_date('$lastupdated','DDMMYYYY HH24MISS') "
 //                . "and bibliotek = '870970'  "
@@ -118,8 +111,7 @@ class LibV3API
      * 100/700.  If so replace data with the data fra the
      * authority record.
      */
-    function insertAuthors($data)
-    {
+    function insertAuthors($data) {
         $marc = new marc();
         $marc->fromIso($data);
         $ln = $marc->toLineFormat();
@@ -166,8 +158,7 @@ class LibV3API
         return $data;
     }
 
-    function fetchHSB($data)
-    {
+    function fetchHSB($data) {
         $marc = new marc();
         $marc->fromIso($data);
         $lokalid = false;
@@ -185,21 +176,18 @@ class LibV3API
         return $result;
     }
 
-    function getMarcByDanbibid($danbibid, $bibliotek)
-    {
+    function getMarcByDanbibid($danbibid, $bibliotek) {
         $lokalid = '';
         $where = "where danbibid = $danbibid and bibliotek = $bibliotek ";
         return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
     }
 
-    function getMarcById($id)
-    {
+    function getMarcById($id) {
         $where = "where id = $id";
         return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
     }
 
-    function getIdsByLokalidBibliotek($lokalid, $bibliotek)
-    {
+    function getIdsByLokalidBibliotek($lokalid, $bibliotek) {
         $ids = array();
         $select = "select id from poster where lokalid = '$lokalid' and "
             . "bibliotek = '$bibliotek' ";
@@ -210,8 +198,7 @@ class LibV3API
         return $ids;
     }
 
-    function getMarcByLokalidBibliotek($lokalid, $bibliotek, $wh = "")
-    {
+    function getMarcByLokalidBibliotek($lokalid, $bibliotek, $wh = "") {
         $this->return = array();
 //        $pointer017 = true;
 //        while ($pointer017) {
@@ -252,8 +239,7 @@ class LibV3API
     }
 
 
-    function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'Basis')
-    {
+    function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'Basis') {
 
         $this->set($base);
         if ($wh) {
@@ -290,13 +276,13 @@ class LibV3API
         return $result;
     }
 
-    function getLekNoViaRel($lokalid, $bibliotek)
-    {
+    function getLekNoViaRel($lokalid, $bibliotek) {
         $lokalid = str_replace(' ', '', $lokalid);
         $sql = "select * from poster where id in ( "
             . "select fromid from postrelationer where toid in ( "
             . "select id from poster "
-            . "where lokalid = '$lokalid' and bibliotek = '$bibliotek'))";
+            . "where lokalid = '$lokalid' and bibliotek = '$bibliotek')) "
+            . "order by lokalid";
         $result = $this->oci->fetch_all_into_assoc($sql);
         return $result;
     }
