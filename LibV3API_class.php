@@ -283,7 +283,21 @@ class LibV3API {
             . "select id from poster "
             . "where lokalid = '$lokalid' and bibliotek = '$bibliotek')) "
             . "order by lokalid";
-        $result = $this->oci->fetch_all_into_assoc($sql);
+        $sql = "select fromid from postrelationer r, poster p
+                  where id = toid
+                  and lokalid = '$lokalid' and bibliotek = '$bibliotek'";
+        $rows = $this->oci->fetch_all_into_assoc($sql);
+        $result = array();
+        if ($rows) {
+            foreach ($rows as $row) {
+                $res = $this->getMarcByDanbibid($row['FROMID'], $bibliotek);
+                if ($res) {
+                    $result[] = $res[0];
+                }
+
+            }
+        }
+
         return $result;
     }
 
