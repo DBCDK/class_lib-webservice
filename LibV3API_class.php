@@ -241,6 +241,9 @@ class LibV3API {
 
     function getMarcByLB($lokalid, $bibliotek, $wh = "", $base = 'Basis') {
 
+        if (strlen($lokalid) == 8 and $bibliotek == '870970') {
+            $lokalid = substr($lokalid, 0, 1) . ' ' . substr($lokalid, 1, 3) . ' ' . substr($lokalid, 4, 3) . ' ' . substr($lokalid, 7, 1);
+        }
         $this->set($base);
         if ($wh) {
             $where = $wh;
