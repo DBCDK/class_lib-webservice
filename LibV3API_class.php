@@ -304,4 +304,18 @@ class LibV3API {
         return $result;
     }
 
+    /**
+     * @param $ts ts will be a string on formated 'YYYY-MM-DD HH24:MI:SS'
+     * Return an array of database items
+     */
+    function getUpdatedSince($ts) {
+        $f = 'YYYY-MM-DD HH24:MI:SS';
+        $sql = "select lokalid, bibliotek, 
+                to_char(opretdato,'$f') as opretdato,
+                to_char(ajourdato,'$f') as ajourdato
+                from poster
+               where ajourdato >  to_date('$ts','$f') ";
+        $arr = $this->BasisOci->fetch_all_into_assoc($sql);
+        return $arr;
+    }
 }
