@@ -243,8 +243,10 @@ class Curl {
 
         // set cookies and add the handles
         foreach ($this->curl_handle as $key => $handle) {
-            if ($this->cookies[intval($handle)]) {
-                self::set_option(CURLOPT_COOKIE, implode(';', $this->cookies[$handle]));
+            if (array_key_exists(intval($handle), $this->cookies)) {
+                if ($this->cookies[intval($handle)]) {
+                    self::set_option(CURLOPT_COOKIE, implode(';', $this->cookies[$handle]));
+                }
             }
             curl_multi_add_handle($this->curl_multi_handle, $this->curl_handle[$key]);
         }
