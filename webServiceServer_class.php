@@ -280,7 +280,7 @@ abstract class webServiceServer {
   */
   private function update_registry($operation) {
     $registry = $this->config->get_section('service_registry');
-    if ($registry) {
+    if ($registry && $registry['registry']) {
       require_once('OLS_class_lib/registry_class.php');
       $this->watch->start('registry');
       Registry::set($this->default_namespace, $operation, $this->config->get_value('version', 'setup'), $registry);
