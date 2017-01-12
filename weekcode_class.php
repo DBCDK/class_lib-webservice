@@ -131,7 +131,7 @@ class weekcode {
      * @return string
      */
     function calculateWeekCode($today, $straight) {
-        $numbers = 1;
+        $numbers = 2;
         $days = $sec = 0;
         $year = substr($today, 0, 4);
         $month = substr($today, 4, 2);
