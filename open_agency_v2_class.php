@@ -196,7 +196,7 @@ class OpenAgency {
   *
   * @retval mixed - profile if found, FALSE otherwise
   **/
-  public function get_search_profile($agency, $profile_name, $profile_version) {
+  public function get_search_profile($agency, $profile_name, $profile_version = '3') {
     if ($this->agency_cache) {
       $cache_key = md5(__CLASS__ . __FUNCTION__ . $agency . '_' . $profile_version);
       $this->profiles = $this->agency_cache->get($cache_key);
