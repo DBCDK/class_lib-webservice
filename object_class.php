@@ -79,8 +79,8 @@ class Object {
    * @param name (string)
    * @param value (mixed)
    **/
-  static public function set_value(&$obj, $name, $value) {
-    self::set_element($obj, $name, '_value', $value);
+  static public function set_value(&$obj, $name, $value, $set_empty = TRUE) {
+    if ($set_empty || !empty($value)) self::set_element($obj, $name, '_value', $value);
   }
 
   /** \brief Sets _namespace on object
