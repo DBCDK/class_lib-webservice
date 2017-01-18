@@ -178,7 +178,7 @@ class LibV3API {
 
     function getMarcByDanbibid($danbibid, $bibliotek) {
         $lokalid = '';
-        $where = "where danbibid = $danbibid and bibliotek = $bibliotek ";
+        $where = "where danbibid = $danbibid and bibliotek = '$bibliotek' ";
         return $this->getMarcByLokalidBibliotek($lokalid, $bibliotek, $where);
     }
 
