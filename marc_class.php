@@ -155,7 +155,7 @@ class marc implements Iterator {
     /** \brief
      * If a field is already present nothing happens (return false)
      * otherwise the field is inserted ( return true)
-     * @param $newField string
+     * @param $newField array
      * @retval boolean
      */
     function insertWithoutDublets($newField) {
