@@ -625,7 +625,7 @@ abstract class webServiceServer {
         $html = strpos($info, '__REQS__') ? $info : str_replace('__INFO__', $info, self::sample_form());
 
         if ($info || count($fnames)) {
-          asort($fnames);
+          natsort($fnames);
           foreach ($fnames as $fname) {
             $contents = str_replace("\r\n", PHP_EOL, file_get_contents($fname));
             $contents=addcslashes(str_replace("\n",'\n',$contents), '"');
