@@ -66,12 +66,13 @@ class objconvert {
   private $namespaces=array();
   private $used_namespaces=array();
   private $default_namespace;
+  private $timer;
 
   /** \brief -
    * @param $xmlns array -
    * @param $tag_seq string -
    */
-  public function __construct($xmlns='', $tag_seq='') {
+  public function __construct($xmlns='', $tag_seq='', $timer = NULL) {
     if ($xmlns) {
       foreach ($xmlns as $prefix => $ns) {
         if ($prefix == 'NONE' || $prefix == '0')
@@ -80,6 +81,7 @@ class objconvert {
       }
     }
     $this->tag_sequence = $tag_seq;
+    $this->timer = $timer;
   }
 
   /** \brief -
@@ -97,6 +99,7 @@ class objconvert {
    * @retval string
    */
   public function obj2json($obj) {
+    if ($this->timer) $this->timer->start('obj2json');
     foreach ($this->namespaces as $ns => $prefix) {
       if ($prefix)
         $o_ns->$prefix = $ns;
@@ -105,6 +108,7 @@ class objconvert {
     }
     $json_obj = $this->obj2badgerfish_obj($obj);
     $json_obj->{'@namespaces'} = $o_ns;
+    if ($this->timer) $this->timer->stop('obj2json');
     return json_encode($json_obj);
   }
 
@@ -211,6 +215,7 @@ class objconvert {
    * @retval string
    */
   public function obj2xml($obj) {
+    if ($this->timer) $this->timer->start('obj2xml');
     $this->check_tag_sequence();
     $ret = '';
     if ($obj) {
@@ -224,6 +229,7 @@ class objconvert {
           $ret .= $this->build_xml($tag, $o);
       }
     }
+    if ($this->timer) $this->timer->stop('obj2xml');
     return $ret;
   }
 
