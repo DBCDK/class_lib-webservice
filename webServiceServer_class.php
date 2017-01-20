@@ -179,7 +179,8 @@ abstract class webServiceServer {
       }
 
       // initialize objconvert and load namespaces
-      $this->objconvert = new objconvert($this->xmlns, $this->tag_sequence);
+      if ($_GET['marshal'] && self::in_house()) $timer = &$this->watch;
+      $this->objconvert = new objconvert($this->xmlns, $this->tag_sequence, $timer);
       $this->objconvert->set_default_namespace($this->default_namespace);
 
       // handle request
