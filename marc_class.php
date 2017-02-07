@@ -945,6 +945,29 @@ class marc implements Iterator {
         }
     }
 
+    function changeOrderSubfields($fieldName, $order) {
+        foreach ($this->marc_array as $key => $value) {
+            if ($value['field'] == $fieldName) {
+                $oldSub = $value['subfield'];
+                $newSub = array();
+                for ($i = 0; $i < strlen($order); $i++) {
+                    $s = substr($order, $i, 1);
+                    foreach ($oldSub as $k => $o) {
+                        if ($s == substr($o, 0, 1)) {
+                            $newSub[] = $o;
+                            $oldSub[$k] = '@'; // a subfield code I hope dosen't exsist
+                        }
+                    }
+                }
+                foreach ($oldSub as $o) {
+                    if (substr($o, 0, 1) != '@') {
+                        $newSub[] = $o;
+                    }
+                }
+                $this->marc_array[$key]['subfield'] = $newSub;
+            }
+        }
+    }
 }
 
 ?>
