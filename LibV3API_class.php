@@ -78,6 +78,23 @@ class LibV3API {
         return $tid;
     }
 
+    function getLekUpdates($lastupdated) {
+//        $f001d = 'd' . substr($lastupdated, 0, 8);
+//        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster
+//               where data like '%$f001d%'
+//               and bibliotek = '870976'
+//               and lokalid like '3%'
+//          UNION
+        $sql = "select lokalid, to_char(ajourdato,'DDMMYYYY HH24MISS') as dato from poster
+           where ajourdato > to_timestamp('$lastupdated','DDMMYYYY HH24MISS')
+           and bibliotek = '870976'
+           and lokalid like '3%' 
+           order by ajourdato desc
+           ";
+        $updates = $this->oci->fetch_all_into_assoc($sql);
+        return $updates;
+    }
+
     /**
      *
      * @param type $lastupdate
