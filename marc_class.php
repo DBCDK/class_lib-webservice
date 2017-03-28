@@ -964,6 +964,15 @@ class marc implements Iterator {
         }
     }
 
+    function concat(marc $hsb) {
+        foreach ($hsb->marc_array as $newf) {
+            if ($newf['field'] != '000') {
+                $this->marc_array[] = $newf;
+            }
+        }
+    }
+
+
     function changeOrderSubfields($fieldName, $order) {
         foreach ($this->marc_array as $key => $value) {
             if ($value['field'] == $fieldName) {
