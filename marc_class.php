@@ -139,13 +139,19 @@ class marc implements Iterator {
 
     /** \brief
      * Returns all fields matching $fieldName
+     * $fieldName can be masked from right
+     * ex. 5xx means all fields starting with 5
      * @param $fieldName string
      * @retval array - of fields
      */
     function findFields($fieldName) {
+        $lng = 3;
+        if ($pos = strpos($fieldName, 'x')) {
+            $lng = $pos;
+        }
         $fields = array();
         foreach ($this->marc_array as $value) {
-            if ($value['field'] == $fieldName) {
+            if (substr($value['field'], 0, $lng) == substr($fieldName, 0, $lng)) {
                 $fields[] = $value;
             }
         }

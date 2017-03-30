@@ -81,28 +81,28 @@ class materialId {
         $res = array();
         foreach (preg_split('//', $isbn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
-                case 'x':
-                case 'X':
-                    if ((count($res) == 0) or (count($res) == 9)) {  // 'X' only allowed in first or last position
-                        $res[] = 'X';
-                    }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    $res[] = $c;
-                    break;
-                default:
-                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                        break 2;  // If any illegal characters are found, we stop searching => exit loop
-                    }
+            case 'x':
+            case 'X':
+                if ((count($res) == 0) or (count($res) == 9)) {  // 'X' only allowed in first or last position
+                    $res[] = 'X';
+                }
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                $res[] = $c;
+                break;
+            default:
+                if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                    break 2;  // If any illegal characters are found, we stop searching => exit loop
+                }
             }
         }
         return implode($res);
@@ -112,7 +112,7 @@ class materialId {
      * @param $isbn string The isbn to validate
      * @retval string The validated ISBN number if valid, otherwise 0 is returned
      * */
-    function validateISBN($isbn) {
+    public static function validateISBN($isbn) {
         $arr = array();
         if (strlen($isbn) != 10)
             return 0;
@@ -144,22 +144,22 @@ class materialId {
         $res = array();
         foreach (preg_split('//', $ean, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    $res[] = $c;
-                    break;
-                default:
-                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                        break 2;  // If any illegal characters are found, we stop searching => exit loop
-                    }
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                $res[] = $c;
+                break;
+            default:
+                if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                    break 2;  // If any illegal characters are found, we stop searching => exit loop
+                }
             }
         }
         return implode($res);
@@ -187,32 +187,32 @@ class materialId {
      * @param $issn string The ISSN number to normalize
      * @retval string The normalized ISSN number
      * */
-    function normalizeISSN($issn) {
+    public static function normalizeISSN($issn) {
         $res = array();
         foreach (preg_split('//', $issn, 0, PREG_SPLIT_NO_EMPTY) as $c) {
             switch ($c) {
-                case 'x':
-                case 'X':
-                    if (count($res) == 7) {  // 'X' only allowed in last position
-                        $res[] = 'X';
-                    }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    $res[] = $c;
-                    break;
-                default:
-                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                        break 2;  // If any illegal characters are found, we stop searching => exit loop
-                    }
+            case 'x':
+            case 'X':
+                if (count($res) == 7) {  // 'X' only allowed in last position
+                    $res[] = 'X';
+                }
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                $res[] = $c;
+                break;
+            default:
+                if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                    break 2;  // If any illegal characters are found, we stop searching => exit loop
+                }
             }
         }
         return implode($res);
@@ -222,7 +222,7 @@ class materialId {
      * @param $issn string The ISSN number to validate
      * @retval string The validated ISSN number if valid, otherwise 0 is returned
      * */
-    function validateISSN($issn) {
+    public static function validateISSN($issn) {
         if (strlen($issn) != 8)
             return 0;
         $sum = 0;
@@ -246,26 +246,26 @@ class materialId {
      * @param $withSpaces boolean
      * @retval string The normalized Faust number
      * */
-    function normalizeFaust($faust, $withSpaces = false) {
+    public static function normalizeFaust($faust, $withSpaces = false) {
         $res = array();
         foreach (preg_split('//', $faust, 0, PREG_SPLIT_NO_EMPTY) as $c) {  // Remove any characters except numbers
             switch ($c) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    $res[] = $c;
-                    break;
-                default:
-                    if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
-                        break 2;  // If any illegal characters are found, we stop searching => exit loop
-                    }
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                $res[] = $c;
+                break;
+            default:
+                if (!strpbrk(" \t-", $c)) {  // Whitespace and dash is legal
+                    break 2;  // If any illegal characters are found, we stop searching => exit loop
+                }
             }
         }
         $ln = count($res);
@@ -287,7 +287,7 @@ class materialId {
      * @param $faust string The Faust number to validate
      * @retval mixed The validated Faust number if valid, otherwise 0 is returned
      * */
-    function validateFaust($faust) {
+    public static function validateFaust($faust) {
         if (strlen($faust) != 8)
             return 0;
         $vgt = 2;
@@ -308,7 +308,7 @@ class materialId {
      * @param $isbn string The isbn to convert
      * @retval mixed The ISBN as an EAN (ISBN13) number
      * */
-    function convertISBNToEAN($isbn) {
+    public static function convertISBNToEAN($isbn) {
         if (strlen($isbn) != 10)
             return 0;
         $ean = "978" . $isbn;
@@ -332,7 +332,7 @@ class materialId {
      * @param $ean string To isbn
      * @retval mixed - integer or boolean
      */
-    function convertEANToISBN($ean) {
+    public static function convertEANToISBN($ean) {
         if (strlen($ean) != 13)
             return 0;
         $isbn = substr($ean, 3, 9);
