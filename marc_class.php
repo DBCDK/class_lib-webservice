@@ -297,6 +297,11 @@ class marc implements Iterator {
         }
     }
 
+    /**
+     * @param $field
+     * @param $subfield
+     * @param $txt
+     */
     function substitute($field, $subfield, $txt) {
         while ($this->thisField($field)) {
             while ($this->thisSubfield($subfield)) {
@@ -304,6 +309,10 @@ class marc implements Iterator {
             }
         }
 
+    }
+
+    function clearThisField() {
+        $this->field = '---';
     }
 
     /** \brief
@@ -713,7 +722,12 @@ class marc implements Iterator {
             $this->field = array();
             $this->field['field'] = substr($ln, 0, 3);
             $this->field['indicator'] = substr($ln, 4, 2);
-            $this->field['subfield'] = explode("*", substr($ln, 7));
+            $sln = str_replace('@*', chr(1), substr($ln, 7));
+//            $sln = substr($ln, 7);
+            $this->field['subfield'] = explode("*", $sln);
+            foreach ($this->field['subfield'] as $key => $value) {
+                $this->field['subfield'][$key] = str_replace(chr(1), '@*', $value);
+            }
             $this->marc_array[] = $this->field;
         }
     }
