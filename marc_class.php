@@ -1043,6 +1043,17 @@ class marc implements Iterator {
 //        echo "\n----$strng\n----\n";
         $this->fromString($strng);
     }
+
+    function merge191919(marc $marc191919) {
+
+        $arr = $marc191919->getArray();
+        foreach ($arr as $f) {
+            if ($f['field'] == '001' or $f['field'] == '004') {
+                continue;
+            }
+            $this->insert($f);
+        }
+    }
 }
 
 ?>
