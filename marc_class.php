@@ -1016,6 +1016,33 @@ class marc implements Iterator {
             }
         }
     }
+
+    function fromMarcExchange($xml) {
+
+        $strng = '';
+        $dom = new DOMDocument($xml);
+        $dom->loadXML($xml);
+//        foreach ($dom->getElementsByTagNameNS('info:lc/xmlns/marcxchange-v1', '*') as $element) {
+//            echo 'local name: ', $element->localName, ', prefix: ', $element->prefix, "\n";
+//        }
+        foreach ($dom->getElementsByTagName('*') as $element) {
+//            echo 'local name: ', $element->localName, ', prefix: ', $element->prefix, "\n";
+            if ($element->localName == 'datafield') {
+                $field = $element->getAttribute('tag');
+                $indk1 = $element->getAttribute('ind1');
+                $indk2 = $element->getAttribute('ind2');
+                $strng .= "\n" . $field . ' ' . $indk1 . $indk2;
+            }
+            if ($element->localName == 'subfield') {
+                $subfield = $element->getAttribute('code');
+                $data = $element->nodeValue;
+                $strng .= '*' . $subfield . $data;
+            }
+        }
+        $strng = ltrim($strng, "\n");
+//        echo "\n----$strng\n----\n";
+        $this->fromString($strng);
+    }
 }
 
 ?>
