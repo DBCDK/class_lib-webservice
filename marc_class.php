@@ -1039,13 +1039,15 @@ class marc implements Iterator {
                 $strng .= '*' . $subfield . $data;
             }
         }
-        $strng = ltrim($strng, "\n");
+        $strng = utf8_decode(ltrim($strng, "\n"));
 //        echo "\n----$strng\n----\n";
         $this->fromString($strng);
     }
 
     function merge191919(marc $marc191919) {
 
+        // this method merge a 870970 record and a 191919 record from rawrepo.
+        // The data is altered in order to sent it back to Basis without syntax errors.
         $arr = $marc191919->getArray();
         foreach ($arr as $f) {
             if ($f['field'] == '001' or $f['field'] == '004') {
@@ -1053,6 +1055,17 @@ class marc implements Iterator {
             }
             $this->insert($f);
         }
+        $f = $this->findSubFields('001', 'a', 1);
+        $f = substr($f, 0, 1) . ' ' . substr($f, 1, 3) . ' ' . substr($f, 4, 3) . ' ' . substr($f, 7, 1);
+        $this->substitute('001', 'a', $f);
+        $f = $this->findSubFields('f07', 'a', 1);
+        if ($f) {
+            $f = substr($f, 0, 1) . ' ' . substr($f, 1, 3) . ' ' . substr($f, 4, 3) . ' ' . substr($f, 7, 1);
+            $this->substitute('f07', 'a', $f);
+        }
+        $f996 = $this->findSubFields('996', 'a', 1);
+        $this->remField('996');
+        $this->insert_subfield($f996, 's10', 'a');
     }
 }
 
