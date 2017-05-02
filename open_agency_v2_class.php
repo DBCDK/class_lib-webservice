@@ -93,7 +93,8 @@ class OpenAgency {
           }
         }
         if ($this->agency_cache) {
-          $this->agency_cache->set($cache_key, $libraries);
+          if (!$this->agency_cache->set($cache_key, $libraries))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
         }
       }
       $curl->close();
@@ -135,7 +136,8 @@ class OpenAgency {
           }
         }
         if ($this->agency_cache) {
-          $this->agency_cache->set($cache_key, $library_rules);
+          if (!$this->agency_cache->set($cache_key, $library_rules))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
         }
       }
       $curl->close();
@@ -179,7 +181,8 @@ class OpenAgency {
           $agency_list[$agency] = 0;
         }
         if ($this->agency_cache) {
-          $this->agency_cache->set($cache_key, $agency_list);
+          if (!$this->agency_cache->set($cache_key, $agency_list))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
         }
       }
     }
@@ -251,7 +254,8 @@ class OpenAgency {
           $this->profiles = array();
         }
         if ($this->agency_cache) {
-          $this->agency_cache->set($cache_key, $this->profiles);
+          if (!$this->agency_cache->set($cache_key, $this->profiles))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
         }
       }
     }
@@ -325,11 +329,12 @@ class OpenAgency {
           }
         }
         else {
-          self::report_fatal_error(__CLASS__ . '::' . __FUNCTION__ . '(): No agencies found ' . sprintf($this->agency_uri));
+          self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): No agencies found ' . sprintf($this->agency_uri));
         }
         $curl->close();
         if ($this->agency_cache) {
-          $this->agency_cache->set($cache_key, $this->library_type_tab);
+          if (!$this->agency_cache->set($cache_key, $this->library_type_tab))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
         }
       }
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss');
