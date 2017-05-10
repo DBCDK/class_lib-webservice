@@ -62,10 +62,7 @@ class aaa {
     }
     $this->fors_rights_url = $aaa_setup['aaa_fors_rights'];
     $this->ip_rights = $aaa_setup['aaa_ip_rights'];
-    if (!$this->cache_key_prefix = $aaa_setup['aaa_cache_key_prefix']) {
-      $this->cache_key_prefix = 'AAA';
-    }
-    $this->cache_key_prefix .= $hash;
+    $this->cache_key_prefix = md5($hash . json_encode($aaa_setup));
   }
 
   /**
