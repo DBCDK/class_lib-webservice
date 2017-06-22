@@ -12,6 +12,8 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Finn Stausgaard - DBC
 */
 
 /**
@@ -23,6 +25,8 @@ require_once('cql2tree_class.php');
 
 define('DEVELOP', FALSE);
 define('TREE', $_REQUEST['tree']);
+define('HOLDINGS_AGENCYID_INDEX', 'holdingsitem.agencyId');
+define('RENAME_HOLDINGS_AGENCYID_INDEX', 'rec.holdingsAgencyId');
 
 
 class SolrQuery {
@@ -126,7 +130,7 @@ class SolrQuery {
       $ret['error'] = $diags;;
     }
     else {
-      $trees = self::split_tree($tree);
+      $trees = self::handle_holdingsitem_agency_id(self::split_tree($tree));
       $ret['edismax'] = self::trees_2_edismax($trees);
       $ret['best_match'] = self::trees_2_bestmatch($trees);
       $ret['operands'] = self::trees_2_operands($trees);
@@ -157,6 +161,32 @@ class SolrQuery {
   }
 
   // ------------------------- Private functions below -------------------------------------
+
+  /** \brief Rename HOLDINGS_AGENCYID_INDEX if no other fields with identical prefix are used, 
+   *         if other fields are used, copy the tree and renamed the copied one
+   * @param @trees array - of tree
+   * @retval array
+   */
+  private function handle_holdingsitem_agency_id($trees) {
+    list($prefix, $field) = explode('.', HOLDINGS_AGENCYID_INDEX);
+    foreach ($trees as $idx => $tree) {
+      if ($tree['prefix'] == $prefix && $tree['field'] != $field) {
+        $mixed_holdings_fields = TRUE;
+      }
+    }
+    $new_trees = $trees;
+    foreach ($trees as $idx => $tree) {
+      if ($tree['prefix'] == $prefix && $tree['field'] == $field) {
+        $m_idx = $idx;
+        if ($mixed_holdings_fields) {
+          $m_idx = count($trees);
+          $new_trees[] = $tree;
+        }
+        list($new_trees[$m_idx]['prefix'], $new_trees[$m_idx]['field']) = explode('.', RENAME_HOLDINGS_AGENCYID_INDEX);
+      }
+    }
+    return $new_trees;
+  }
 
   /** \brief convert all cql-trees to edismax-strings
    * @param @trees array - of trees
