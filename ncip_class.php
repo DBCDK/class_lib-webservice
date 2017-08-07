@@ -279,14 +279,16 @@ class ncip extends http_wrapper {
 *
 */
   private function _create_lookup_user_request($xml) {
-    if (!isset($this->parameters["UserElementType"])) $this->parameters["UserElementType"] = "Name Information";
+    if (!isset($this->parameters["UserElementTypeName"])) $this->parameters["UserElementTypeName"] = "Name Information";
+    if (!isset($this->parameters["UserElementTypeAddress"])) $this->parameters["UserElementTypeAddress"] = "User Address Information";
     if (!isset($this->parameters["LoanedItemsDesired"])) $this->parameters["LoanedItemsDesired"] = 1;
     if (!isset($this->parameters["RequestedItemsDesired"])) $this->parameters["RequestedItemsDesired"] = 1;
     if (!isset($this->parameters["UserFiscalAccountDesired"])) $this->parameters["UserFiscalAccountDesired"] = 1;
     $xml->appendChild(self::_create_header("InitiationHeader"));
     $xml->appendChild(self::_create_authentication_input($this->parameters["UserId"], "text/plain", "User Id"));
     $xml->appendChild(self::_create_authentication_input($this->parameters["UserPIN"], "text/plain", "PIN"));
-    $xml->appendChild(self::_create_scheme_value_pair("UserElementType", "http://www.niso.org/ncip/v1_0/schemes/userelementtype/userelementtype.scm", $this->parameters["UserElementType"]));
+    $xml->appendChild(self::_create_scheme_value_pair("UserElementType", "http://www.niso.org/ncip/v1_0/schemes/userelementtype/userelementtype.scm", $this->parameters["UserElementTypeName"]));
+    $xml->appendChild(self::_create_scheme_value_pair("UserElementType", "http://www.niso.org/ncip/v1_0/schemes/userelementtype/userelementtype.scm", $this->parameters["UserElementTypeAddress"]));
     if (!empty($this->parameters["LoanedItemsDesired"])) $xml->appendChild($this->dom->createElement("LoanedItemsDesired"));
     if (!empty($this->parameters["RequestedItemsDesired"])) $xml->appendChild($this->dom->createElement("RequestedItemsDesired"));
     if (!empty($this->parameters["UserFiscalAccountDesired"])) $xml->appendChild($this->dom->createElement("UserFiscalAccountDesired"));
@@ -912,6 +914,17 @@ class ncip extends http_wrapper {
       $unstructuredPersonalUserName = $userOptionalFields->getElementsByTagName("UnstructuredPersonalUserName")->item(0);
       if (isset($unstructuredPersonalUserName)) {
         $user["UnstructuredPersonalUserName"] = $unstructuredPersonalUserName->nodeValue;
+      }
+      $electronicAddressData = $userOptionalFields->getElementsByTagName("ElectronicAddressData")->item(0);
+      if (isset($electronicAddressData)) {
+        $user["ElectronicAddressData"] = $electronicAddressData->nodeValue;
+      }
+      $structuredAddress = $userOptionalFields->getElementsByTagName("StructuredAddress")->item(0);
+      if (isset($structuredAddress)) {
+        $user["Street"] = $structuredAddress->getElementsByTagName("Street")->item(0)->nodeValue;
+        $user["District"] = $structuredAddress->getElementsByTagName("District")->item(0)->nodeValue;
+        $user["Country"] = $structuredAddress->getElementsByTagName("Country")->item(0)->nodeValue;
+        $user["PostalCode"] = $structuredAddress->getElementsByTagName("PostalCode")->item(0)->nodeValue;
       }
     }
     return $user;
