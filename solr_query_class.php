@@ -162,18 +162,30 @@ class SolrQuery {
 
   // ------------------------- Private functions below -------------------------------------
 
+  /** \brief locates usage of more than one holdingsItem fields
+   * @param @tree 
+   * @retval boolean
+   */
+  private function mixed_fields($tree) {
+    if ($tree['type'] == 'boolean') {
+      return self::mixed_fields($tree['left']) || self::mixed_fields($tree['right']);
+    }
+    else {
+      list($prefix, $field) = explode('.', HOLDINGS_AGENCYID_INDEX);
+      return ($tree['prefix'] == $prefix) && ($tree['field'] != $field);
+    }
+  }
+
   /** \brief Rename HOLDINGS_AGENCYID_INDEX if no other fields with identical prefix are used, 
    *         if other fields are used, copy the tree and renamed the copied one
    * @param @trees array - of tree
    * @retval array
    */
   private function handle_holdingsitem_agency_id($trees) {
-    list($prefix, $field) = explode('.', HOLDINGS_AGENCYID_INDEX);
     foreach ($trees as $idx => $tree) {
-      if ($tree['prefix'] == $prefix && $tree['field'] != $field) {
-        $mixed_holdings_fields = TRUE;
-      }
+      $mixed_holdings_fields = $mixed_holdings_fields || self::mixed_fields($tree);
     }
+    list($prefix, $field) = explode('.', HOLDINGS_AGENCYID_INDEX);
     $new_trees = $trees;
     foreach ($trees as $idx => $tree) {
       if ($tree['prefix'] == $prefix && $tree['field'] == $field) {
