@@ -60,6 +60,8 @@
  * @author Finn Stausgaard - DBC
 */
 
+define('NO_PREFIX', '_NO_PREFIX_');
+
 class objconvert {
 
   private $tag_sequence=array();
@@ -193,7 +195,7 @@ class objconvert {
       if ($this->used_namespaces[$ns] || empty($prefix))
         $used_ns .= ' xmlns' . ($prefix ? ':'.$prefix : '') . '="' . $ns . '"';
     }
-    if ($this->default_namespace) {
+    if ($this->default_namespace && $this->used_namespaces[NO_PREFIX]) {
       $used_ns .= ' xmlns="' . $this->default_namespace . '"';
     }
     return $used_ns;
@@ -244,8 +246,10 @@ class objconvert {
       foreach ($obj->_attributes as $a_name => $a_val) {
         if ($a_val->_namespace)
           $a_prefix = $this->set_prefix_separator($this->get_namespace_prefix($a_val->_namespace));
-        else
+        else {
+          $this->used_namespaces[NO_PREFIX] = TRUE;
           $a_prefix = '';
+        }
         $attr .= ' ' . $a_prefix . $a_name . '="' . htmlspecialchars($a_val->_value) . '"';
 // prefix in value hack
         $this->set_used_prefix($a_val->_value);
@@ -253,6 +257,8 @@ class objconvert {
     }
     if ($obj->_namespace)
       $prefix = $this->set_prefix_separator($this->get_namespace_prefix($obj->_namespace));
+    else 
+      $this->used_namespaces[NO_PREFIX] = TRUE;
     if (is_scalar($obj->_value))
       if ($obj->_cdata)
         return $this->tag_me($prefix.$tag, $attr, '<![CDATA[' . $obj->_value . ']]>');
@@ -273,6 +279,9 @@ class objconvert {
           break;
         }
       }
+    }
+    else {
+      $this->used_namespaces[NO_PREFIX] = TRUE;
     }
   }
 
