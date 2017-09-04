@@ -848,24 +848,36 @@ class ncip extends http_wrapper {
     if (!empty($user["Problem"])) return $user;
     $user = array_merge($user, self::_parse_unique_id_header($lookupResponse, "User"));
     unset($user["Problem"]);  // UniqueIdHeader behover ikke at vaere der - saa undertryk fejl
-    $userFiscalAccount = $lookupResponse->getElementsByTagName("UserFiscalAccount")->item(0);
-    if (!empty($userFiscalAccount)) {
-      self::_get_element($user["UserFiscalAccount"], $userFiscalAccount, array("AccountBalance", "CurrencyCode",  "Value"), "AccountBalanceCurrency");
-      self::_get_element($user["UserFiscalAccount"], $userFiscalAccount, array("AccountBalance", "MonetaryValue"), "AccountBalanceValue");
-      foreach ( $userFiscalAccount->getElementsByTagName("AccountDetails") as $detail ) {
-        $fiscal = array();
-        self::_get_element($fiscal, $detail, "AccrualDate");
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "FiscalTransactionType",  "Value"), "FiscalTransactionType");
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "Amount",  "CurrencyCode", "Value"), "CurrencyCode");
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "Amount",  "MonetaryValue"));
-        self::_get_element($fiscal['UniqueItemId'], $detail, array("FiscalTransactionInformation", "ItemDetails",  "UniqueItemId", "UniqueAgencyId", "Value"), "UniqueAgencyId");
-        self::_get_element($fiscal['UniqueItemId'], $detail, array("FiscalTransactionInformation", "ItemDetails",  "UniqueItemId", "ItemIdentifierValue"));
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "Author"));
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "Title"));
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "PublicationDate"));
-        self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "BibliographicRecordId", "BibliographicRecordIdentifier"), "BibliographicRecordId");
-        if (!empty($fiscal)) $user["UserFiscalAccount"][] = $fiscal;
+    //$userFiscalAccount = $lookupResponse->getElementsByTagName("UserFiscalAccount")->item(0);
+    $fiscalAccountBalance = 0;
+    foreach ($lookupResponse->getElementsByTagName("UserFiscalAccount") as $userFiscalAccount) {
+      if (!empty($userFiscalAccount)) {
+        self::_get_element($user["UserFiscalAccount"], $userFiscalAccount, array("AccountBalance", "CurrencyCode",  "Value"), "AccountBalanceCurrency");
+        self::_get_element($user["UserFiscalAccount"], $userFiscalAccount, array("AccountBalance", "MonetaryValue"), "AccountBalanceValue");
+        $fiscalValue = $user["UserFiscalAccount"]["AccountBalanceValue"];
+        $fiscalAccountBalance += $fiscalValue;
+        $fiscalCurrency = $user["UserFiscalAccount"]["AccountBalanceCurrency"];
+        if ($userFiscalAccount->getElementsByTagName("AccountDetails")->length) {
+          foreach ( $userFiscalAccount->getElementsByTagName("AccountDetails") as $detail ) {
+            $fiscal = array();
+            self::_get_element($fiscal, $detail, "AccrualDate");
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "FiscalTransactionType",  "Value"), "FiscalTransactionType");
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "Amount",  "CurrencyCode", "Value"), "CurrencyCode");
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "Amount",  "MonetaryValue"));
+            self::_get_element($fiscal['UniqueItemId'], $detail, array("FiscalTransactionInformation", "ItemDetails",  "UniqueItemId", "UniqueAgencyId", "Value"), "UniqueAgencyId");
+            self::_get_element($fiscal['UniqueItemId'], $detail, array("FiscalTransactionInformation", "ItemDetails",  "UniqueItemId", "ItemIdentifierValue"));
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "Author"));
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "Title"));
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "PublicationDate"));
+            self::_get_element($fiscal, $detail, array("FiscalTransactionInformation", "ItemDetails",  "BibliographicDescription", "BibliographicRecordId", "BibliographicRecordIdentifier"), "BibliographicRecordId");
+            if (!empty($fiscal)) $user["UserFiscalAccount"][] = $fiscal;
+          }
+        }
+        else {
+          $user["UserFiscalAccount"][] = array("CurrencyCode" => $fiscalCurrency, "MonetaryValue" => $fiscalValue);
+        }
       }
+      $user["UserFiscalAccount"]["AccountBalanceValue"] = $fiscalAccountBalance;
     }
     $userTransaction = $lookupResponse->getElementsByTagName("UserTransaction")->item(0);
     if (!empty($userTransaction)) {
