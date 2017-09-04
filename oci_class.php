@@ -370,8 +370,8 @@ class oci {
     
     if (!empty($this->bind_list)) {
       foreach ($this->bind_list as $k => $v) {
-         $this->oci_log(OCI, 'ocibind:: ' . $v['name'] . ' bind to ' . $v['value']);
-        if (! @oci_bind_by_name($this->statement, $v['name'], $v['value'], $v['maxlength'], $v['type'])) {
+         $this->oci_log(OCI, 'ocibind:: ' . $v['name'] . ' bind to ' . $this->bind_list[$k]['value']);
+        if (! @oci_bind_by_name($this->statement, $v['name'], $this->bind_list[$k]['value'], $v['maxlength'], $v['type'])) {
           $this->set_OCI_error(oci_error($this->statement));
           $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . ' type: '. $v['type'] . ' with error: ' . $this->get_error_string());
           throw new ociException($this->error);
