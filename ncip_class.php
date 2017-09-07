@@ -874,7 +874,7 @@ class ncip extends http_wrapper {
           }
         }
         else {
-          $user["UserFiscalAccount"][] = array("CurrencyCode" => $fiscalCurrency, "MonetaryValue" => $fiscalValue);
+          $user["UserFiscalAccount"][] = array("CurrencyCode" => $fiscalCurrency, "MonetaryValue" => $fiscalValue, "Title" => "", "AccrualDate" => "1970-01-01");
         }
       }
       $user["UserFiscalAccount"]["AccountBalanceValue"] = $fiscalAccountBalance;
