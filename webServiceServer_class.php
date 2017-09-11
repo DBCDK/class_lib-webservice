@@ -140,6 +140,11 @@ abstract class webServiceServer {
       }
       self::rest_request();
     }
+    // pjo 11/9/17 for php 7. @see http://php.net/manual/en/reserved.variables.httprawpostdata.php.
+    elseif(file_get_contents("php://input")){
+      $xml=file_get_contents("php://input");
+      self::soap_request($xml);
+    }
     elseif (self::in_house()
             || $this->config->get_value('show_samples', 'setup')
             || ip_func::ip_in_interval($_SERVER['REMOTE_ADDR'], $this->config->get_value('show_samples_ip_list', 'setup'))) {
