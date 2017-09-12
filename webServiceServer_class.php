@@ -131,6 +131,10 @@ abstract class webServiceServer {
     elseif (!empty($GLOBALS['HTTP_RAW_POST_DATA'])) {
       self::soap_request($GLOBALS['HTTP_RAW_POST_DATA']);
     }
+    // pjo 11/9/17 for php 7. @see http://php.net/manual/en/reserved.variables.httprawpostdata.php.
+    elseif($xml=file_get_contents("php://input")){
+      self::soap_request($xml);
+    }
     elseif (!empty($_SERVER['QUERY_STRING']) && ($_REQUEST['action'] || $_REQUEST['json'])) {
       self::rest_request();
     }
@@ -139,11 +143,6 @@ abstract class webServiceServer {
         $_SERVER['QUERY_STRING'] .= ($_SERVER['QUERY_STRING'] ? '&' : '') . $k . '=' . $v;
       }
       self::rest_request();
-    }
-    // pjo 11/9/17 for php 7. @see http://php.net/manual/en/reserved.variables.httprawpostdata.php.
-    elseif(file_get_contents("php://input")){
-      $xml=file_get_contents("php://input");
-      self::soap_request($xml);
     }
     elseif (self::in_house()
             || $this->config->get_value('show_samples', 'setup')
