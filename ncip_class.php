@@ -1074,8 +1074,10 @@ class ncip extends http_wrapper {
   private function _parse_cancel_request_item_response($cancelResponse) {
     $request = self::_parse_header("ResponseHeader", $cancelResponse);
     if (!empty($request["Problem"])) return $request;
+/* remove check for mandatory UniqueUserId in response, since Cicero does not fill this
     $request = array_merge($request, self::_parse_unique_id_header($cancelResponse, "User"));
     if (!empty($request["Problem"])) return $request;
+*/
     $request = array_merge($request, self::_parse_unique_id_header($cancelResponse, "Request"));
     return $request;
   }
