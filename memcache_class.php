@@ -67,7 +67,7 @@ class Cache {
    * @param key (string)
    **/
   public function get($key) {
-    if (is_object($this->memcache)) {
+    if (is_object($this->memcache) && ($_GET['cache'] != 'SkipCache')) {
       return $this->memcache->get($key);
     }
     return FALSE;
