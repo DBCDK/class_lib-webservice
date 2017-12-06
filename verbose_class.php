@@ -115,7 +115,7 @@ class verbose {
     /**
      * \brief Logs to a file, or prints out log message.
      * @param verbose_level Level of verbose output (string)
-     * @param str Log string to write (string)
+     * @param string Log string to write (string)
      */
     static public function log($verbose_level, $str) {
         if (self::$verbose_file_name && $verbose_level & self::$verbose_mask) {
