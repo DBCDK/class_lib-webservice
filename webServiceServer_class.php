@@ -245,9 +245,6 @@ abstract class webServiceServer {
       if (is_null($request_xmlobj->$request->_value->authentication->_value)) {
         unset($request_xmlobj->$request->_value->authentication);
       }
-      if (empty($request_xmlobj->$request->_value->trackingId) && $this->tracking_id) {
-        $request_xmlobj->$request->_value->trackingId->_value = $this->tracking_id;
-      }
       $request = $this->objconvert->obj2soap($request_xmlobj, $soap_namespace);
       $curl = new curl();
       foreach ($duplicate_request_to as $no => $uri) {
