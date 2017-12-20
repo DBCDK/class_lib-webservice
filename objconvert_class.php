@@ -394,7 +394,7 @@ class objconvert {
       return $val;
     }
     else {
-      if ($attr && $attr[0] <> ' ') $space = ' ';
+      $space = ($attr && $attr[0] <> ' ') ? ' ' : '';
       return '<' . $tag . $space . $attr . '>' . $val . '</' . $tag . '>';
     }
   }
