@@ -244,7 +244,7 @@ class objconvert {
     $ret = '';
     if (isset($obj->_attributes)) {
       foreach ($obj->_attributes as $a_name => $a_val) {
-        if ($a_val->_namespace)
+        if (isset($a_val->_namespace))
           $a_prefix = $this->set_prefix_separator($this->get_namespace_prefix($a_val->_namespace));
         else {
           $this->used_namespaces[NO_PREFIX] = TRUE;
@@ -255,12 +255,12 @@ class objconvert {
         $this->set_used_prefix($a_val->_value);
       }
     }
-    if ($obj->_namespace)
+    if (isset($obj->_namespace))
       $prefix = $this->set_prefix_separator($this->get_namespace_prefix($obj->_namespace));
     else 
       $this->used_namespaces[NO_PREFIX] = TRUE;
     if (is_scalar($obj->_value))
-      if ($obj->_cdata)
+      if (isset($obj->_cdata))
         return $this->tag_me($prefix.$tag, $attr, '<![CDATA[' . $obj->_value . ']]>');
       else
         return $this->tag_me($prefix.$tag, $attr, htmlspecialchars($obj->_value));
