@@ -408,6 +408,7 @@ class SolrQuery {
   private function make_bestmatch_sort($query) {
     $qs = explode(' or ', $query);
     $fraction = floor(100 / count($qs));
+    $sort = '';
     foreach ($qs as $qi => $q) {
       $n = 't' . $qi;
       $ret[$n] = $q;
@@ -454,6 +455,7 @@ class SolrQuery {
     $term = self::normalize_term($term, $quote);
     $term = self::convert_old_recid($term, $prefix, $field);
     $space = strpos($term, ' ') !== FALSE;
+    $m_field = '';
     if ($field && ($field <> 'serverChoice')) {
       $m_field = self::join_prefix_and_field($prefix, $field, ':');
     }
@@ -470,6 +472,7 @@ class SolrQuery {
     } 
     else { 
       if (!$m_term = self::make_term_interval($term, $relation, $quote)) { 
+        $m_slop = '';
         if ($space) { 
           if ($relation == 'any') { 
             $term = '(' . preg_replace('/\s+/', ' OR ', self::delete_quotes($term, $quote)) . ')';
