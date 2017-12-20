@@ -278,7 +278,7 @@ class OpenAgency {
     if ($this->library_type_tab === FALSE) {
       self::fetch_library_type_tab();
     }
-    return $this->library_type_tab[$agency][AGENCY_TYPE];
+    return isset($this->library_type_tab[$agency]) ? $this->library_type_tab[$agency][AGENCY_TYPE] : null;
   }
 
   /**
