@@ -311,8 +311,8 @@ class SolrQuery {
    */
   private function set_slop($node) {
     if ($node['relation'] == 'adj') return '0';
-    elseif ($node['modifiers']['word']) return '9999';
-    elseif ($node['modifiers']['string']) return '0';
+    elseif (!empty($node['modifiers']['word'])) return '9999';
+    elseif (!empty($node['modifiers']['string'])) return '0';
     else return $node['slop'];
   }
 
@@ -322,7 +322,7 @@ class SolrQuery {
    * $retval string
    */
   private function use_rank($node, $ranking) {
-    if ($node['modifiers']['relevant']) {
+    if (!empty($node['modifiers']['relevant'])) {
       if ($ranking) {
         $this->error[] = self::set_error(21, 'relation modifier relevant used more than once');
       }
@@ -408,7 +408,7 @@ class SolrQuery {
   private function make_bestmatch_sort($query) {
     $qs = explode(' or ', $query);
     $fraction = floor(100 / count($qs));
-    $sort = '';
+    $comma = $sort = '';
     foreach ($qs as $qi => $q) {
       $n = 't' . $qi;
       $ret[$n] = $q;
