@@ -199,7 +199,7 @@ abstract class webServiceServer {
           // Branch to outputType
           list($service, $req) = each($request_xmlobj);
           if (empty($this->output_type) || $req->_value->outputType->_value)
-            $this->output_type = $req->_value->outputType->_value;
+            $this->output_type = isset($req->_value->outputType) ? $req->_value->outputType->_value : '';;
           switch ($this->output_type) {
             case 'json':
               header('Content-Type: application/json');
