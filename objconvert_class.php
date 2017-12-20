@@ -241,7 +241,7 @@ class objconvert {
    * @retval string
    */
   private function build_xml($tag, $obj) {
-    $ret = '';
+    $attr = $prefix = $ret = '';
     if (isset($obj->_attributes)) {
       foreach ($obj->_attributes as $a_name => $a_val) {
         if (isset($a_val->_namespace))
