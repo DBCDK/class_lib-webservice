@@ -242,7 +242,7 @@ class objconvert {
    */
   private function build_xml($tag, $obj) {
     $ret = '';
-    if ($obj->_attributes) {
+    if (isset($obj->_attributes)) {
       foreach ($obj->_attributes as $a_name => $a_val) {
         if ($a_val->_namespace)
           $a_prefix = $this->set_prefix_separator($this->get_namespace_prefix($a_val->_namespace));
