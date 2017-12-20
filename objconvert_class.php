@@ -191,6 +191,7 @@ class objconvert {
    * @retval string
    */
   private function get_used_namespaces_as_header() {
+    $used_ns = '';
     foreach ($this->namespaces as $ns => $prefix) {
       if (isset($this->used_namespaces[$ns]) || empty($prefix))
         $used_ns .= ' xmlns' . ($prefix ? ':'.$prefix : '') . '="' . $ns . '"';
