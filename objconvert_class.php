@@ -192,7 +192,7 @@ class objconvert {
    */
   private function get_used_namespaces_as_header() {
     foreach ($this->namespaces as $ns => $prefix) {
-      if ($this->used_namespaces[$ns] || empty($prefix))
+      if (isset($this->used_namespaces[$ns]) || empty($prefix))
         $used_ns .= ' xmlns' . ($prefix ? ':'.$prefix : '') . '="' . $ns . '"';
     }
     if ($this->default_namespace && $this->used_namespaces[NO_PREFIX]) {
