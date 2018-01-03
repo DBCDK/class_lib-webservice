@@ -248,7 +248,7 @@ abstract class webServiceServer {
       $request = $this->objconvert->obj2soap($request_xmlobj, $soap_namespace);
       $curl = new curl();
       foreach ($duplicate_request_to as $no => $uri) {
-        $curl->set_option(CURLOPT_TIMEOUT, 0, $no);
+        $curl->set_option(CURLOPT_TIMEOUT_MS, 10, $no);
         $curl->set_url($uri, $no);
         if ($soap_namespace == 'http://www.w3.org/2003/05/soap-envelope') {
           $curl->set_post_with_header($request, 'Content-Type: application/soap+xml', $no);
