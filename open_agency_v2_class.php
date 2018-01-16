@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ **/
 
 /**
  * makes open_agency_class, search_profile_class, show_priority_class and agency_type_class obsolete
@@ -29,42 +29,51 @@
  * need curl_class and memcache_class to be defined
  *
  * @author Finn Stausgaard - DBC
-**/
+ **/
 
 require_once('OLS_class_lib/memcache_class.php');
 require_once('OLS_class_lib/curl_class.php');
 
+/**
+ * Class OpenAgency
+ */
 class OpenAgency {
 
-  private $config;	
-  private $agency_cache;		  // cache object
-  private $agency_uri;	      // uri of openagency service
-  private $tracking_id;	      // 
+  private $config;
+  private $agency_cache;      // cache object
+  private $agency_uri;        // uri of openagency service
+  private $tracking_id;        //
   private $library_type_tab = FALSE;
 
+  /**
+   * OpenAgency constructor.
+   * @param $config
+   */
   public function __construct($config) {
-    define('AGENCY_TYPE', 'a'); 
-    define('BRANCH_TYPE', 'b'); 
+    define('AGENCY_TYPE', 'a');
+    define('BRANCH_TYPE', 'b');
     $this->config = $config;
     if ($this->config['cache_host']) {
       $this->agency_cache = new cache($this->config['cache_host'], $this->config['cache_port'], $this->config['cache_expire']);
     }
-    if (!isset($this->config['timeout'])) { $this->config['timeout'] = 10; }
+    if (!isset($this->config['timeout'])) {
+      $this->config['timeout'] = 10;
+    }
     if (class_exists('verbose')) {
       $this->tracking_id = verbose::$tracking_id;
     }
   }
 
   /**
-  * \brief Fetch agencies by rule using openAgency::libraryRules
-  *
-  * @param string $rule
-  * @param string $setting (0 or 1)
-  * @param string $agency_type 
-  * @retval array 
-  *
-  **/
-  public function get_libraries_by_rule($rule, $setting='1', $agency_type='') {
+   * \brief Fetch agencies by rule using openAgency::libraryRules
+   *
+   * @param string $rule
+   * @param string $setting (0 or 1)
+   * @param string $agency_type
+   * @return array
+   *
+   **/
+  public function get_libraries_by_rule($rule, $setting = '1', $agency_type = '') {
     $libraries = FALSE;
     if ($this->agency_cache) {
       $cache_key = md5(__CLASS__ . __FUNCTION__ . $rule . $setting . $agency_type);
@@ -72,7 +81,7 @@ class OpenAgency {
     }
 
     if ($libraries === FALSE) {
-      $libraries = array();
+      $libraries = [];
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $rule . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -88,7 +97,7 @@ class OpenAgency {
         if (@ $dom->loadXML($res_xml)) {
           foreach ($dom->getElementsByTagName('libraryRules') as $agency) {
             if ($agency_type == '' || $agency_type == $agency->getElementsByTagName('agencyType')->item(0)->nodeValue) {
-            $libraries[$agency->getElementsByTagName('agencyId')->item(0)->nodeValue] = $agency->getElementsByTagName('agencyId')->item(0)->nodeValue;
+              $libraries[$agency->getElementsByTagName('agencyId')->item(0)->nodeValue] = $agency->getElementsByTagName('agencyId')->item(0)->nodeValue;
             }
           }
         }
@@ -103,12 +112,12 @@ class OpenAgency {
   }
 
   /**
-  * \brief Fetch agency rules using openAgency::libraryRules
-  *
-  * @param string $agency
-  * @retval array 
-  *
-  **/
+   * \brief Fetch agency rules using openAgency::libraryRules
+   *
+   * @param string $agency
+   * @return array
+   *
+   **/
   public function get_library_rules($agency) {
     $library_rules = FALSE;
     if ($this->agency_cache) {
@@ -117,7 +126,7 @@ class OpenAgency {
     }
 
     if ($library_rules === FALSE) {
-      $library_rules = array();
+      $library_rules = [];
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -146,11 +155,11 @@ class OpenAgency {
   }
 
   /**
-  * \brief Get a given prority list for the agency
-  *
-  * @param $agency string - agency-id
-  * @retval array - array with agency as index and priority as value
-  **/
+   * \brief Get a given prority list for the agency
+   *
+   * @param $agency string - agency-id
+   * @return array - array with agency as index and priority as value
+   **/
   public function get_show_priority($agency) {
     if ($this->agency_cache) {
       $cache_key = md5(__CLASS__ . __FUNCTION__ . $agency);
@@ -158,7 +167,7 @@ class OpenAgency {
     }
 
     if (empty($agency_list)) {
-      $agency_list = array();
+      $agency_list = [];
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -191,14 +200,14 @@ class OpenAgency {
   }
 
   /**
-  * \brief Get a given profile for the agency
-  *
-  * @param $agency string - name of profile
-  * @param $profile_name string - name of profile
-  * @param $profile_version integer - version of profile: 2 or 3
-  *
-  * @retval mixed - profile if found, FALSE otherwise
-  **/
+   * \brief Get a given profile for the agency
+   *
+   * @param $agency string - name of profile
+   * @param $profile_name string - name of profile
+   * @param $profile_version string - version of profile: 2 or 3
+   *
+   * @return mixed - profile if found, FALSE otherwise
+   **/
   public function get_search_profile($agency, $profile_name, $profile_version = '3') {
     if ($this->agency_cache) {
       $cache_key = md5(__CLASS__ . __FUNCTION__ . $agency . '_' . $profile_version);
@@ -213,7 +222,7 @@ class OpenAgency {
       $res_xml = $curl->get($url);
       $curl_err = $curl->get_status();
       if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
-        $this->profiles[strtolower($profile__name)] = FALSE;
+        $this->profiles[strtolower($profile_name)] = FALSE;
         self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot fetch search profile from ' . $url);
       }
       else {
@@ -222,7 +231,7 @@ class OpenAgency {
         if (@ $dom->loadXML($res_xml)) {
           foreach ($dom->getElementsByTagName('profile') as $profile) {
             $p_name = '';
-            $p_val = array();
+            $p_val = [];
             foreach ($profile->childNodes as $p) {
               if ($p->localName == 'profileName') {
                 $p_name = $p->nodeValue;
@@ -251,7 +260,7 @@ class OpenAgency {
           }
         }
         else {
-          $this->profiles = array();
+          $this->profiles = [];
         }
         if ($this->agency_cache) {
           if (!$this->agency_cache->set($cache_key, $this->profiles))
@@ -269,11 +278,11 @@ class OpenAgency {
   }
 
   /**
-  * \brief Get a given agency_type for the agency
-  *
-  * @param $agency       name of agency
-  * @returns agency_type if found, NULL otherwise
-  **/
+   * \brief Get a given agency_type for the agency
+   *
+   * @param string $agency       name of agency
+   * @return mixed agency_type if found, NULL otherwise
+   **/
   public function get_agency_type($agency) {
     if ($this->library_type_tab === FALSE) {
       self::fetch_library_type_tab();
@@ -282,11 +291,11 @@ class OpenAgency {
   }
 
   /**
-  * \brief Get a given branch_type for the agency
-  *
-  * @param $agency       name of agency
-  * @returns branch_type if found, NULL otherwise
-  **/
+   * \brief Get a given branch_type for the agency
+   *
+   * @param string $agency       name of agency
+   * @return mixed branch_type if found, NULL otherwise
+   **/
   public function get_branch_type($agency) {
     if ($this->library_type_tab === FALSE) {
       self::fetch_library_type_tab();
@@ -295,8 +304,8 @@ class OpenAgency {
   }
 
   /**
-  * \brief Fetch agencyType and branchType using openAgency::findLibrary
-  **/
+   * \brief Fetch agencyType and branchType using openAgency::findLibrary
+   **/
   private function fetch_library_type_tab() {
     if ($this->agency_cache) {
       $cache_key = md5(__CLASS__ . __FUNCTION__);
@@ -304,7 +313,7 @@ class OpenAgency {
     }
 
     if (!$this->library_type_tab) {
-      $this->library_type_tab = array();
+      $this->library_type_tab = [];
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
       $url = sprintf(self::oa_uri($this->config['libraryType']), $this->tracking_id);
@@ -324,8 +333,7 @@ class OpenAgency {
           }
           foreach ($struct as $agency) {
             $this->library_type_tab[$agency->branchId->{'$'}] =
-              array(AGENCY_TYPE => $agency->agencyType->{'$'},
-                    BRANCH_TYPE => $agency->branchType->{'$'});
+              [AGENCY_TYPE => $agency->agencyType->{'$'}, BRANCH_TYPE => $agency->branchType->{'$'}];
           }
         }
         else {
@@ -343,12 +351,12 @@ class OpenAgency {
 
 
   /**
-  * \brief Make a full url for the openagency call. 
-  *        if $operation only conatin parameter part of the url, 'base_uri' is added to $operation 
-  * @param string $operation
-  * @retval string - full url
-  *
-  **/
+   * \brief Make a full url for the openagency call.
+   *        if $operation only conatin parameter part of the url, 'base_uri' is added to $operation
+   * @param string $operation
+   * @return string - full url
+   *
+   **/
   private function oa_uri($operation) {
     if (strpos($operation, '://') && (substr($operation, 0, 4) == 'http')) {
       return $operation;
@@ -358,35 +366,34 @@ class OpenAgency {
 
   /** \brief - xs:boolean to php bolean
    * @param string $str
-   * @retval boolean - return true if xs:boolean is so
+   * @return boolean - return true if xs:boolean is so
    */
   private function xs_boolean($str) {
     return (strtolower($str) == 'true' || $str == 1);
   }
 
-  /** \brief - 
+  /** \brief -
    * @param string $msg
    */
   private function trace($msg) {
     self::local_verbose(TRACE, $msg);
   }
 
-  /** \brief - 
+  /** \brief -
    * @param string $msg
    */
   private function fatal($msg) {
     self::local_verbose(FATAL, $msg);
   }
 
-  /** \brief - 
+  /** \brief -
    * @param string $level
    * @param string $msg
    */
   private function local_verbose($level, $msg) {
-    if (method_exists('verbose','log')) {
+    if (method_exists('verbose', 'log')) {
       verbose::log($level, $msg);
     }
   }
 
 }
-?>
