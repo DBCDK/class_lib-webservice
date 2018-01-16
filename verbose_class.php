@@ -61,121 +61,123 @@
 
 @ define('SYSLOG_PREFIX', 'syslog://');
 
+/**
+ * Class verbose
+ */
 class verbose {
 
-    static $verbose_file_name;      ///< -
-    static $syslog_facility = NULL; ///< -
-    static $syslog_id = '';         ///< -
-    static $verbose_mask;           ///< -
-    static $date_format;            ///< -
-    static $my_pid = '';            ///< -
-    static $tracking_id = '';       ///< -
+  static $verbose_file_name;      ///< -
+  static $syslog_facility = NULL; ///< -
+  static $syslog_id = '';         ///< -
+  static $verbose_mask;           ///< -
+  static $date_format;            ///< -
+  static $my_pid = '';            ///< -
+  static $tracking_id = '';       ///< -
 
-    private function __construct() {
+  /**
+   * verbose constructor.
+   */
+  private function __construct() {
+  }
 
+  private function __clone() {
+  }
+
+  /**
+   * \brief Sets loglevel and logfile
+   * @param string $verbose_file_name
+   * @param mixed $verbose_mask (string or integer)
+   * @param string $syslog_id - identifier to syslog
+   * @param string $date_format - format-string for date()
+   * */
+  static public function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
+    self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
+    if (!self::$date_format = $date_format)
+      self::$date_format = 'H:i:s-d/m/y';
+    if (strtolower(substr($verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
+      $facility = substr($verbose_file_name, strlen(SYSLOG_PREFIX));     //  syslog://[facility]
+      self::$syslog_facility = defined($facility) ? constant($facility) : LOG_LOCAL0;
+      self::$syslog_id = $syslog_id;
     }
-
-    private function __destruct() {
-
+    self::$verbose_file_name = $verbose_file_name;
+    if (!is_string($verbose_mask)) {
+      self::$verbose_mask = (empty($verbose_mask) ? 0 : $verbose_mask);
     }
-
-    private function __clone() {
-
+    else {
+      foreach (explode('+', $verbose_mask) as $vm) {
+        if (defined(trim($vm)))
+          self::$verbose_mask |= constant(trim($vm));
+        if ($vm == 'PID')
+          self::$my_pid = ' [' . getmypid() . ']';
+      }
     }
+  }
 
-    /**
-     * \brief Sets loglevel and logfile
-     * @param verbose_file_name (string)
-     * @param verbose_mask (string or integer)
-     * @param syslog_id (string) - identifier to syslog
-     * @param date_format (string) - format-string for date()
-     * */
-    static public function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
-        self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
-        if (!self::$date_format = $date_format)
-            self::$date_format = 'H:i:s-d/m/y';
-        if (strtolower(substr($verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
-            $facility = substr($verbose_file_name, strlen(SYSLOG_PREFIX));     //  syslog://[facility]
-            self::$syslog_facility = defined($facility) ? constant($facility) : LOG_LOCAL0;
-            self::$syslog_id = $syslog_id;
-        }
-        self::$verbose_file_name = $verbose_file_name;
-        if (!is_string($verbose_mask)) {
-            self::$verbose_mask = (empty($verbose_mask) ? 0 : $verbose_mask);
-        } else {
-            foreach (explode('+', $verbose_mask) as $vm) {
-                if (defined(trim($vm)))
-                    self::$verbose_mask |= constant(trim($vm));
-                if ($vm == 'PID')
-                    self::$my_pid = ' [' . getmypid() . ']';
-            }
-        }
+  /**
+   * \brief Logs to a file, or prints out log message.
+   * @param integer $verbose_level Level of verbose output
+   * @param string $str Log string to write
+   */
+  static public function log($verbose_level, $str) {
+    if (self::$verbose_file_name && $verbose_level & self::$verbose_mask) {
+      switch ($verbose_level) {
+        case WARNING :
+          $vtext = 'WARNING';
+          break;
+        case ERROR :
+          $vtext = 'ERROR';
+          break;
+        case FATAL :
+          $vtext = 'FATAL';
+          break;
+        case STAT :
+          $vtext = 'STAT';
+          break;
+        case TIMER :
+          $vtext = 'TIMER';
+          break;
+        case DEBUG :
+          $vtext = 'DEBUG';
+          break;
+        case TRACE :
+          $vtext = 'TRACE';
+          break;
+        case Z3950 :
+          $vtext = 'Z3950';
+          break;
+        case OCI :
+          $vtext = 'OCI';
+          break;
+        default :
+          $vtext = 'UNKNOWN';
+          break;
+      }
+
+      if (self::$syslog_facility) {
+        openlog(self::$syslog_id, LOG_ODELAY, self::$syslog_facility);
+        syslog(LOG_INFO, $vtext . ' ' . self::$tracking_id . ' ' . str_replace(PHP_EOL, '', $str));
+        closelog();
+      }
+      elseif ($fp = @ fopen(self::$verbose_file_name, 'a')) {
+        if (substr($str, strlen($str) - 1, 1) <> "\n")
+          $str .= "\n";
+        fwrite($fp, $vtext . self::$my_pid . ' ' . date(self::$date_format) . ' ' . self::$tracking_id . ' ' . $str);
+        fclose($fp);
+      }
+      else
+        die('FATAL: Cannot open ' . self::$verbose_file_name . "getcwd:" . getcwd());
     }
+  }
 
-    /**
-     * \brief Logs to a file, or prints out log message.
-     * @param verbose_level Level of verbose output (string)
-     * @param string Log string to write (string)
-     */
-    static public function log($verbose_level, $str) {
-        if (self::$verbose_file_name && $verbose_level & self::$verbose_mask) {
-            switch ($verbose_level) {
-                case WARNING :
-                    $vtext = 'WARNING';
-                    break;
-                case ERROR :
-                    $vtext = 'ERROR';
-                    break;
-                case FATAL :
-                    $vtext = 'FATAL';
-                    break;
-                case STAT :
-                    $vtext = 'STAT';
-                    break;
-                case TIMER :
-                    $vtext = 'TIMER';
-                    break;
-                case DEBUG :
-                    $vtext = 'DEBUG';
-                    break;
-                case TRACE :
-                    $vtext = 'TRACE';
-                    break;
-                case Z3950 :
-                    $vtext = 'Z3950';
-                    break;
-                case OCI :
-                    $vtext = 'OCI';
-                    break;
-                default :
-                    $vtext = 'UNKNOWN';
-                    break;
-            }
-
-            if (self::$syslog_facility) {
-                openlog(self::$syslog_id, LOG_ODELAY, self::$syslog_facility);
-                syslog(LOG_INFO, $vtext . ' ' . self::$tracking_id . ' ' . str_replace(PHP_EOL, '', $str));
-                closelog();
-            } elseif ($fp = @ fopen(self::$verbose_file_name, 'a')) {
-                if (substr($str, strlen($str) - 1, 1) <> "\n")
-                    $str .= "\n";
-                fwrite($fp, $vtext . self::$my_pid . ' ' . date(self::$date_format) . ' ' . self::$tracking_id . ' ' . $str);
-                fclose($fp);
-            } else
-                die('FATAL: Cannot open ' . self::$verbose_file_name . "getcwd:" . getcwd());
-        }
-    }
-
-    /**
-     * \brief Make a unique tracking id
-     * @param t_service_prefix Service prefix that identifies the service
-     * @param t_id Current tracking_id
-     */
-    static public function set_tracking_id($t_service_prefix, $t_id = '') {
-        self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') . self::$tracking_id . ($t_id ? '<' . $t_id : '');
-        return self::$tracking_id;
-    }
+  /**
+   * \brief Make a unique tracking id
+   * @param string $t_service_prefix Service prefix that identifies the service
+   * @param string $t_id Current tracking_id
+   * @return string
+   */
+  static public function set_tracking_id($t_service_prefix, $t_id = '') {
+    self::$tracking_id = $t_service_prefix . ($t_service_prefix ? ':' : '') . self::$tracking_id . ($t_id ? '<' . $t_id : '');
+    return self::$tracking_id;
+  }
 
 }
-
-?>
