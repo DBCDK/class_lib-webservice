@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 /**
  *
@@ -34,8 +34,7 @@
  *   $cache->set("my_settings", $my_settings);
  *
  * @author Finn Stausgaard - DBC
-*/
-
+ */
 class Cache {
   private $memcache = null;
   private $expire = 600;
@@ -46,12 +45,12 @@ class Cache {
    * @param port (integer)
    * @param expire (integer)
    **/
-  function __construct($host, $port=null, $expire=null) {
+  function __construct($host, $port = null, $expire = null) {
     $this->memcache = new Memcache();
     if (empty($port) && strpos($host, ":")) {
       list($host, $port) = explode(":", $host, 2);
     }
-    if (!@$this->memcache->connect($host,$port)) {
+    if (!@$this->memcache->connect($host, $port)) {
       $this->memcache = null;
     }
     if ($expire) {
@@ -59,12 +58,14 @@ class Cache {
     }
   }
 
-  function __destruct() { }
+  function __destruct() {
+  }
 
 
   /**
    * \brief Gets data store with key in the memcached server
    * @param key (string)
+   * @return boolean
    **/
   public function get($key) {
     if (is_object($this->memcache) && isset($_GET['cache']) && ($_GET['cache'] != 'SkipCache')) {
@@ -77,8 +78,10 @@ class Cache {
    * \brief store data with key in the memcache-server
    * @param key (string)
    * @param data (string)
+   * @param expire (mixed)
+   * @return boolean
    **/
-  public function set($key,$data, $expire = NULL) {
+  public function set($key, $data, $expire = NULL) {
     if (is_object($this->memcache)) {
       if (empty($expire)) {
         $expire = $this->expire;
@@ -89,7 +92,8 @@ class Cache {
       else {
         return $this->memcache->set($key, $data, FALSE, $expire);
       }
-    } else {
+    }
+    else {
       return FALSE;
     }
   }
@@ -97,6 +101,7 @@ class Cache {
   /**
    * \brief Delete data store with key in the memcached server
    * @param key (string)
+   * @return boolean
    **/
   public function delete($key) {
     if (is_object($this->memcache)) {
@@ -117,13 +122,14 @@ class Cache {
 
   /**
    * \brief set expire
+   * @param expire (mixed)
    **/
   public function set_expire($expire) {
     $this->expire = $expire;
   }
 
   /**
-   * \brief 
+   * \brief
    **/
   public function check() {
     return isset($this->memcache);

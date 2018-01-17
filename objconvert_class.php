@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /** \brief Convert ols-object to json, xml, php
@@ -58,23 +58,27 @@
  *                   json like: {"tagname":{"$":"A&A"},"@namespaces":null}
  *
  * @author Finn Stausgaard - DBC
-*/
+ */
 
 define('NO_PREFIX', '_NO_PREFIX_');
 
+/**
+ * Class objconvert
+ */
 class objconvert {
 
-  private $tag_sequence=array();
-  private $namespaces=array();
-  private $used_namespaces=array();
+  private $tag_sequence = array();
+  private $namespaces = array();
+  private $used_namespaces = array();
   private $default_namespace;
   private $timer;
 
   /** \brief -
-   * @param $xmlns array -
+   * @param $xmlns string|array -
    * @param $tag_seq string -
+   * @param $timer string -
    */
-  public function __construct($xmlns='', $tag_seq='', $timer = NULL) {
+  public function __construct($xmlns = '', $tag_seq = '', $timer = NULL) {
     if ($xmlns) {
       foreach ($xmlns as $prefix => $ns) {
         if ($prefix == 'NONE' || $prefix == '0')
@@ -98,7 +102,7 @@ class objconvert {
 
   /** \brief Convert ols-object to json
    * @param $obj object -
-   * @retval string
+   * @return string
    */
   public function obj2json($obj) {
     if ($this->timer) $this->timer->start('obj2json');
@@ -116,7 +120,7 @@ class objconvert {
 
   /** \brief compress ols object to badgerfish-inspired object
    * @param $obj object -
-   * @retval object
+   * @return object
    */
   private function obj2badgerfish_obj($obj) {
     if ($obj) {
@@ -135,7 +139,7 @@ class objconvert {
 
   /** \brief convert one object
    * @param $obj object -
-   * @retval object
+   * @return object
    */
   private function build_json_obj($obj) {
     if (is_scalar($obj->_value))
@@ -144,7 +148,7 @@ class objconvert {
       $ret = $this->obj2badgerfish_obj($obj->_value);
     if ($obj->_attributes) {
       foreach ($obj->_attributes as $aname => $aval) {
-        $ret->{'@'.$aname} = $this->build_json_obj($aval);
+        $ret->{'@' . $aname} = $this->build_json_obj($aval);
       }
     }
     if ($obj->_namespace)
@@ -154,16 +158,16 @@ class objconvert {
 
   /** \brief experimental php serialized
    * @param $obj object -
-   * @retval string
+   * @return string
    */
   public function obj2phps($obj) {
     return serialize($obj);
   }
 
   /** \brief Convert ols-object to xml with namespaces
-  * @param $obj object -
-  * @retval string
-  */
+   * @param $obj object -
+   * @return string
+   */
   public function obj2xmlNs($obj) {
     $this->used_namespaces = array();
     $xml = $this->obj2xml($obj);
@@ -176,25 +180,25 @@ class objconvert {
   /** \brief Convert ols-object to soap
    * @param $obj object -
    * @param $soap_ns string
-   * @retval string
+   * @return string
    */
   public function obj2soap($obj, $soap_ns = 'http://schemas.xmlsoap.org/soap/envelope/') {
     $this->used_namespaces = array();
     $xml = $this->obj2xml($obj);
-    return $this->xml_header() . 
-           '<SOAP-ENV:Envelope xmlns:SOAP-ENV="' . $soap_ns . '"' . 
-           $this->get_used_namespaces_as_header() . '><SOAP-ENV:Body>' . 
-           $xml . '</SOAP-ENV:Body></SOAP-ENV:Envelope>';
+    return $this->xml_header() .
+    '<SOAP-ENV:Envelope xmlns:SOAP-ENV="' . $soap_ns . '"' .
+    $this->get_used_namespaces_as_header() . '><SOAP-ENV:Body>' .
+    $xml . '</SOAP-ENV:Body></SOAP-ENV:Envelope>';
   }
 
   /** \brief
-   * @retval string
+   * @return string
    */
   private function get_used_namespaces_as_header() {
     $used_ns = '';
     foreach ($this->namespaces as $ns => $prefix) {
       if (isset($this->used_namespaces[$ns]) || empty($prefix))
-        $used_ns .= ' xmlns' . ($prefix ? ':'.$prefix : '') . '="' . $ns . '"';
+        $used_ns .= ' xmlns' . ($prefix ? ':' . $prefix : '') . '="' . $ns . '"';
     }
     if ($this->default_namespace && $this->used_namespaces[NO_PREFIX]) {
       $used_ns .= ' xmlns="' . $this->default_namespace . '"';
@@ -203,7 +207,7 @@ class objconvert {
   }
 
   /** \brief UTF-8 header
-   * @retval string
+   * @return string
    */
   private function xml_header() {
     return '<?xml version="1.0" encoding="UTF-8"?>';
@@ -215,7 +219,7 @@ class objconvert {
    * namespaces can be preset with add_namespace()
    *
    * @param $obj object -
-   * @retval string
+   * @return string
    */
   public function obj2xml($obj) {
     if ($this->timer) $this->timer->start('obj2xml');
@@ -239,7 +243,7 @@ class objconvert {
   /** \brief handles one node
    * @param $tag string -
    * @param $obj object -
-   * @retval string
+   * @return string
    */
   private function build_xml($tag, $obj) {
     $attr = $prefix = $ret = '';
@@ -258,15 +262,15 @@ class objconvert {
     }
     if (isset($obj->_namespace))
       $prefix = $this->set_prefix_separator($this->get_namespace_prefix($obj->_namespace));
-    else 
+    else
       $this->used_namespaces[NO_PREFIX] = TRUE;
     if (is_scalar($obj->_value))
       if (isset($obj->_cdata))
-        return $this->tag_me($prefix.$tag, $attr, '<![CDATA[' . $obj->_value . ']]>');
+        return $this->tag_me($prefix . $tag, $attr, '<![CDATA[' . $obj->_value . ']]>');
       else
-        return $this->tag_me($prefix.$tag, $attr, htmlspecialchars($obj->_value));
+        return $this->tag_me($prefix . $tag, $attr, htmlspecialchars($obj->_value));
     else
-      return $this->tag_me($prefix.$tag, $attr, $this->obj2xml($obj->_value));
+      return $this->tag_me($prefix . $tag, $attr, $this->obj2xml($obj->_value));
   }
 
   /** \brief Updates used_namespaces from prefix in $val
@@ -288,12 +292,13 @@ class objconvert {
 
   /** \brief returns prefixes and store namespaces
    * @param $ns string -
+   * @return string
    */
   private function get_namespace_prefix($ns) {
     if (empty($this->namespaces[$ns])) {
       $i = 1;
-      while (in_array('ns'.$i, $this->namespaces)) $i++;
-      $this->namespaces[$ns] = 'ns'.$i;
+      while (in_array('ns' . $i, $this->namespaces)) $i++;
+      $this->namespaces[$ns] = 'ns' . $i;
     }
     $this->used_namespaces[$ns] = TRUE;
     return $this->namespaces[$ns];
@@ -301,7 +306,7 @@ class objconvert {
 
   /** \brief Separator between prefix and tag-name in xml
    * @param $prefix string -
-   * @retval string
+   * @return string
    */
   private function set_prefix_separator($prefix) {
     if ($prefix) return $prefix . ':';
@@ -322,13 +327,13 @@ class objconvert {
    * @param $namespace string -
    * @param $prefix string -
    */
-  public function add_namespace($namespace,$prefix) {
-    $this->namespaces[$namespace]=$prefix;
+  public function add_namespace($namespace, $prefix) {
+    $this->namespaces[$namespace] = $prefix;
     asort($this->namespaces);
   }
 
   /** \brief Returns used namespaces
-   * @retval array
+   * @return array
    */
   public function get_namespaces() {
     return $this->namespaces;
@@ -337,7 +342,7 @@ class objconvert {
   /** \brief Set namespace on all object nodes
    * @param $obj mixed -
    * @param $ns string -
-   * @retval mixed
+   * @return mixed
    */
   public function set_obj_namespace($obj, $ns) {
     if (empty($obj) || is_scalar($obj))
@@ -362,7 +367,8 @@ class objconvert {
   /** \brief Set namespace on all object nodes but attributes
    * @param $obj mixed -
    * @param $ns string -
-   * @retval mixed
+   * @param $in_attribute boolean -
+   * @return mixed
    */
   public function set_obj_namespace_on_tags($obj, $ns, $in_attribute = FALSE) {
     if (empty($obj) || is_scalar($obj))
@@ -388,7 +394,7 @@ class objconvert {
    * @param $tag string -
    * @param $attr string -
    * @param $val string -
-   * @retval string
+   * @return string
    */
   public function tag_me($tag, $attr, $val) {
     if ($tag == '#text') {

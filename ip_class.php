@@ -17,33 +17,36 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 /**
-* \brief ip-related functions
-*
-* Example usage:
-*  if (ip_func::ip_in_interval("1.2.3.4", "1.2.2.2-1.2.2.9;1.2.3.1-1.2.3.8")) ...
-*
-*
-* @author Finn Stausgaard - DBC
-**/
-
+ * \brief ip-related functions
+ *
+ * Example usage:
+ *  if (ip_func::ip_in_interval("1.2.3.4", "1.2.2.2-1.2.2.9;1.2.3.1-1.2.3.8")) ...
+ *
+ *
+ * @author Finn Stausgaard - DBC
+ **/
 class ip_func {
 
   private static $_instance;
 
-  private function __construct() {}
+  /**
+   * ip_func constructor.
+   */
+  private function __construct() {
+  }
 
   /**
-  * \brief returns true if ip is found in intervals
-  *
-  * @param $ip         the ip-address to check (string)
-  * @param $intervals  ip-intervals (string)
-  *        one or more intervals separated by ;
-  *        each interval as n.n.n.n or n.n.n.n-m.m.m.m
-  * @returns boolean
-  **/
+   * \brief returns true if ip is found in intervals
+   *
+   * @param $ip         the ip-address to check (string)
+   * @param $intervals  ip-intervals (string)
+   *        one or more intervals separated by ;
+   *        each interval as n.n.n.n or n.n.n.n-m.m.m.m
+   * @returns boolean
+   **/
   public static function ip_in_interval($ip, $intervals) {
     if ($ip_int = ip2long($ip)) {
       foreach (explode(";", $intervals) as $interval) {
@@ -60,5 +63,3 @@ class ip_func {
   }
 
 }
-
-?>

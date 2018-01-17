@@ -18,7 +18,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /**
@@ -43,7 +43,6 @@
  * while($data=$oci->fetch_into_assoc()) {
  *   print_r($data);
  * }
-
  * $oci->disconnect();
  *
  * ?>
@@ -82,25 +81,26 @@
  *}
  *
  */
-
-
 class ociException extends Exception {
-  
- /** \brief constructor
-  * @param $ociError array -
-  */
+
+  /** \brief constructor
+   * @param $ociError array -
+   */
   public function __construct($ociError) {
     parent::__construct($ociError['message'] . ' --- ' . $ociError['sqltext']);
   }
 
- /** \brief toString
-  */
+  /** \brief toString
+   */
   public function __toString() {
-    return 'ociException -->'.$this->getMessage().' --- '.$this->getFile().':'.$this->getLine()."\nStack trace:\n".$this->getTraceAsString();
+    return 'ociException -->' . $this->getMessage() . ' --- ' . $this->getFile() . ':' . $this->getLine() . "\nStack trace:\n" . $this->getTraceAsString();
   }
 
 }
 
+/**
+ * Class oci
+ */
 class oci {
 
   ///////////////////////////////////////
@@ -138,7 +138,7 @@ class oci {
   var $error;
 
   /// Pagination enable flag - boolean
-  var $enable_pagination=false;
+  var $enable_pagination = false;
 
   /// Pagination begin - integer
   var $begin;
@@ -147,13 +147,13 @@ class oci {
   var $end;
 
   /// Default value for end - integer
-  var $end_default_val=25;
+  var $end_default_val = 25;
 
   /// Commit enabled - boolean
-  var $commit_enabled=false;
+  var $commit_enabled = false;
 
   /// Set max connect retries
-  var $num_connect_attempts=1;
+  var $num_connect_attempts = 1;
 
   /// Stores updated rows number - integer
   var $num_rows;
@@ -162,57 +162,58 @@ class oci {
   // PUBLIC METHODS //
   ////////////////////
 
- /** \brief  constructor
-  * @param $username string - for db connection OR credentials in format: user/pwd\@dbname
-  * @param $password string - for db connection
-  * @param $database string - name (from tnsnames.ora)
-  */
+  /** \brief  constructor
+   * @param $username string - for db connection OR credentials in format: user/pwd\@dbname
+   * @param $password string - for db connection
+   * @param $database string - name (from tnsnames.ora)
+   */
 
-  function __construct($username, $password='', $database='') {
-    
+  function __construct($username, $password = '', $database = '') {
+
     if ($password == '' && $database == '') {
       $this->username = '';
       $this->password = '';
       $this->database = '';
-      $expl=explode('/', $username, 2);
+      $expl = explode('/', $username, 2);
       $this->username = $expl[0];
       if (isset($expl[1])) {
         $expl = explode('@', $expl[1]);
         $this->password = $expl[0];
         if (isset($expl[1]))
-          $this->database = $expl[1];        
+          $this->database = $expl[1];
       }
-    } else {
+    }
+    else {
       $this->username = $username;
       $this->password = $password;
       $this->database = $database;
     }
     if (defined('OCI_NUM_CONNECT_ATTEMTS')
-        && is_numeric(OCI_NUM_CONNECT_ATTEMTS)
-        && OCI_NUM_CONNECT_ATTEMTS < 20)
+      && is_numeric(OCI_NUM_CONNECT_ATTEMTS)
+      && OCI_NUM_CONNECT_ATTEMTS < 20
+    )
       $this->num_connect_attempts = OCI_NUM_CONNECT_ATTEMTS;
-    
+
     $this->charset = NULL;
   }
-  
- /** \brief  destructor
-  */
+
+  /** \brief  destructor
+   */
   function destructor() {
     $this->disconnect();
   }
 
 
-
- /** \brief -
-  */
+  /** \brief -
+   */
   function cursor_open() {
     return oci_new_cursor($this->connect);
   }
 
- /** \brief Set's pagination start and end values and enables pagination flag
-  * @param $begin integer
-  * @param $end integer
-  */
+  /** \brief Set's pagination start and end values and enables pagination flag
+   * @param $begin integer
+   * @param $end integer
+   */
   function set_pagination($begin, $end) {
 
     if (empty($begin))
@@ -232,46 +233,48 @@ class oci {
   }
 
 
- /** \brief Sets number of attempts for connect
-  * @param $num_connect_attempts integer
-  */
+  /** \brief Sets number of attempts for connect
+   * @param $num_connect_attempts integer
+   * @return integer
+   */
   function set_num_connect_attempts($num_connect_attempts) {
     return $this->num_connect_attempts = $num_connect_attempts;
   }
 
- /** \brief sets charset
-  * @param $charset string
-  */
+  /** \brief sets charset
+   * @param $charset string
+   * @return string
+   */
   function set_charset($charset) {
     return $this->charset = $charset;
   }
 
- /** \brief Returns number of updated rows.
-  * NB: This function does not return number of rows selected! For SELECT statements this function 
-  *     will return the number of rows, that were fetched to the buffer with oci_fetch*() functions. 
-  * @retval integet
-  */
+  /** \brief Returns number of updated rows.
+   * NB: This function does not return number of rows selected! For SELECT statements this function
+   *     will return the number of rows, that were fetched to the buffer with oci_fetch*() functions.
+   * @return integer
+   */
   function get_num_rows() {
     return $this->num_rows;
   }
 
 
- /** \brief Check if connection is persistent
-  * @retval boolean
-  */
+  /** \brief Check if connection is persistent
+   * @return boolean
+   */
   function is_persistent_connect() {
     return $this->persistent_connect;
   }
 
- /** \brief Get OCI error
-  * @retval string.
-  */
+  /** \brief Get OCI error
+   * @return string.
+   */
   function get_error() {
     return $this->error;
   }
 
- /** \brief Return OCI error-string
-  */
+  /** \brief Return OCI error-string
+   */
   function get_error_string() {
     if ($this->error && is_array($this->error))
       return $this->error['code'] . ': ' . $this->error['message'];
@@ -280,22 +283,23 @@ class oci {
   }
 
 
- /** \brief Get OCI connector
-  *
-  * Returns OCI connecter in case the user would like to work with it (i.e. for OCI functions not supported by this wrapper class).
-  *
-  * @retval object.
-  */
+  /** \brief Get OCI connector
+   *
+   * Returns OCI connecter in case the user would like to work with it (i.e. for OCI functions not supported by this wrapper class).
+   *
+   * @return object.
+   */
   function get_connector() {
     return $this->connect;
   }
 
 
- /** \brief Open new OCI connection
-  * @param $connect_count integer
-  * @retval boolean.
-  */
-  function connect($connect_count=-1) {
+  /** \brief Open new OCI connection
+   * @param $connect_count integer
+   * @return boolean.
+   * @throws ociException
+   */
+  function connect($connect_count = -1) {
 
     $this->clear_OCI_error();
 
@@ -305,9 +309,9 @@ class oci {
     }
 
     if ($connect_count == -1) $connect_count = $this->num_connect_attempts;
-    
-    $this->connect=@oci_pconnect($this->username, $this->password, $this->database, $this->charset );
-    
+
+    $this->connect = @oci_pconnect($this->username, $this->password, $this->database, $this->charset);
+
     if (!is_resource($this->connect)) {
       if ($connect_count > 1) {
         $this->oci_log(WARNING, 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' reconnect (' . $connect_count . ') with error: ' . $this->get_error_string());
@@ -317,74 +321,76 @@ class oci {
       $this->set_OCI_error(oci_error());
       $this->oci_log(ERROR, 'oci_pconnect:: ' . $this->username . '@' . $this->database . ' failed with error: ' . $this->get_error_string());
       throw new ociException(oci_error());
-    } 
+    }
     else {
       return TRUE;
     }
   }
 
- /** \brief Enable or disable commit
-  * @param $state boolean
-  */
+  /** \brief Enable or disable commit
+   * @param $state boolean
+   */
   function commit_enable($state) {
     $this->commit_enabled = $state;
   }
 
 
- /** \brief Set and parse query
-  * @param $query string - SQL query string
-  * @retval boolean
-  */
+  /** \brief Set and parse query
+   * @param $query string - SQL query string
+   * @return boolean
+   * @throws ociException
+   */
   function set_query($query) {
-    
+
     $this->clear_OCI_error();
     // reset num_fetched_rows iterator and result set
     $this->num_fetched_rows = 0;
     $this->result = array();
-    
+
     // set query
-    
+
     if ($this->enable_pagination) {
-      
+
       $this->query = "SELECT *
                         FROM (SELECT /*+ FIRST_ROWS(10)) */ a.*, ROWNUM rnum
-                                FROM (".$query.") a
-                               WHERE ROWNUM<=".$this->end." )
-                       WHERE rnum>=".$this->begin;
+                                FROM (" . $query . ") a
+                               WHERE ROWNUM<=" . $this->end . " )
+                       WHERE rnum>=" . $this->begin;
 
-    } else {
+    }
+    else {
       $this->query = $query;
     }
-    
-   $this->statement = @ociparse($this->connect, $this->query);
-   if (! $this->statement) {
-     if (is_resource($this->connect)) {
-       $this->set_OCI_error(oci_error($this->connect));
-     }
-     else {
-       $this->set_OCI_error('No OCI connection');
-     }
-     $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
-     throw new ociException($this->error);
+
+    $this->statement = @ociparse($this->connect, $this->query);
+    if (!$this->statement) {
+      if (is_resource($this->connect)) {
+        $this->set_OCI_error(oci_error($this->connect));
+      }
+      else {
+        $this->set_OCI_error('No OCI connection');
+      }
+      $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
     }
-    
+
     if (!empty($this->bind_list)) {
       foreach ($this->bind_list as $k => $v) {
-         $this->oci_log(OCI, 'ocibind:: ' . $v['name'] . ' bind to ' . $this->bind_list[$k]['value']);
-        if (! @oci_bind_by_name($this->statement, $v['name'], $this->bind_list[$k]['value'], $v['maxlength'], $v['type'])) {
+        $this->oci_log(OCI, 'ocibind:: ' . $v['name'] . ' bind to ' . $this->bind_list[$k]['value']);
+        if (!@oci_bind_by_name($this->statement, $v['name'], $this->bind_list[$k]['value'], $v['maxlength'], $v['type'])) {
           $this->set_OCI_error(oci_error($this->statement));
-          $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . ' type: '. $v['type'] . ' with error: ' . $this->get_error_string());
+          $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . ' type: ' . $v['type'] . ' with error: ' . $this->get_error_string());
           throw new ociException($this->error);
         }
       }
       $this->bind_list = array();
     }
-    
-    if ($this->commit_enabled) 
-      $success  = @ociexecute($this->statement, OCI_COMMIT_ON_SUCCESS);
+
+    if ($this->commit_enabled)
+      $success = @ociexecute($this->statement, OCI_COMMIT_ON_SUCCESS);
     else
-      $success  = @ociexecute($this->statement, OCI_DEFAULT);
-    if (! $success) {
+      $success = @ociexecute($this->statement, OCI_DEFAULT);
+    if (!$success) {
       $this->set_OCI_error(oci_error($this->statement));
       $this->oci_log(ERROR, 'ociexecute:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
@@ -395,92 +401,95 @@ class oci {
   }
 
 
- /** \brief Insert data including a BLOB into a row in a database
-  * @param $sql string - insert string in sql 
-  * @param $name string - is the name of the column name of the BLOB 
-  * @param $data string - a ref. to the data
-  * @retval integer
-  *
-  * Ex. "insert into xmldata (id, createdate, xmldata) values ($id, sysdate, EMPTY_BLOB() )" 
-  */
+  /** \brief Insert data including a BLOB into a row in a database
+   * @param $sql string - insert string in sql
+   * @param $name string - is the name of the column name of the BLOB
+   * @param $data string - a ref. to the data
+   * @return integer
+   * @throws ociException
+   *
+   * Ex. "insert into xmldata (id, createdate, xmldata) values ($id, sysdate, EMPTY_BLOB() )"
+   */
 
-    function insert_BLOB($sql, $name, &$data) {
-   
-      $this->query = $sql . " returning $name into :data_loc \n";
-      $this->statement = @ociparse($this->connect, $this->query);
-      $this->set_OCI_error(oci_error($this->connect));
-      if (!is_resource($this->statement)) {
-        $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
-        throw new ociException($this->error);
-      }
+  function insert_BLOB($sql, $name, &$data) {
 
-      if (!empty($this->bind_list)) {
-        foreach ($this->bind_list as $k => $v) {
-          $success = @oci_bind_by_name($this->statement, $v['name'], $v['value'], $v['maxlength'], $v['type']);
-          $this->set_OCI_error(oci_error($this->statement));
-          if (!$success) {
-            $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . 'type: '. $v['type'] . ' with error: ' . $this->get_error_string());
-            throw new ociException($this->error);
-          }
-        }
-        $this->bind_list = array();
-      }
-      
-      // Creates an "empty" OCI-Lob object to bind to the locator
-      if (! $dataLOB = @oci_new_descriptor($this->connect, OCI_D_LOB)) {
-        $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log(ERROR, 'oci_new_descriptor:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
-        throw new ociException($this->error);
-      }
-
-      // Bind the returned Oracle LOB locator to the PHP LOB object
-      if (! @oci_bind_by_name($this->statement, ":data_loc", $dataLOB, strlen($data), OCI_B_BLOB)) {
-        $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log(ERROR, 'oci_bind_by_name:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
-        throw new ociException($this->error);
-      }
-
-      if (! @ociexecute($this->statement, OCI_DEFAULT)) {
-        $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log(ERROR, 'ociexecute:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
-        throw new ociException($this->error);
-      }
-      
-      // Now import a file to the LOB
-      if (!$dataLOB->save($data)) {
-        $this->set_OCI_error(oci_error($this->statement));
-        $this->oci_log(ERROR, 'save:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
-        throw new ociException($this->error);
-      }
-
-
-      // Free resources
-      ociFreestatement($this->statement);
-      $dataLOB->free();
-
-      return TRUE;
+    $this->query = $sql . " returning $name into :data_loc \n";
+    $this->statement = @ociparse($this->connect, $this->query);
+    $this->set_OCI_error(oci_error($this->connect));
+    if (!is_resource($this->statement)) {
+      $this->oci_log(ERROR, 'ociparse:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
     }
-      
 
- /** \brief Commits outstanding statements
-  * @retval boolean
-  */
+    if (!empty($this->bind_list)) {
+      foreach ($this->bind_list as $k => $v) {
+        $success = @oci_bind_by_name($this->statement, $v['name'], $v['value'], $v['maxlength'], $v['type']);
+        $this->set_OCI_error(oci_error($this->statement));
+        if (!$success) {
+          $this->oci_log(ERROR, 'oci_bind_by_name:: failed on ' . $this->query . ' binding ' . $v['name'] . ' to ' . $v['value'] . 'type: ' . $v['type'] . ' with error: ' . $this->get_error_string());
+          throw new ociException($this->error);
+        }
+      }
+      $this->bind_list = array();
+    }
+
+    // Creates an "empty" OCI-Lob object to bind to the locator
+    if (!$dataLOB = @oci_new_descriptor($this->connect, OCI_D_LOB)) {
+      $this->set_OCI_error(oci_error($this->statement));
+      $this->oci_log(ERROR, 'oci_new_descriptor:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
+    }
+
+    // Bind the returned Oracle LOB locator to the PHP LOB object
+    if (!@oci_bind_by_name($this->statement, ":data_loc", $dataLOB, strlen($data), OCI_B_BLOB)) {
+      $this->set_OCI_error(oci_error($this->statement));
+      $this->oci_log(ERROR, 'oci_bind_by_name:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
+    }
+
+    if (!@ociexecute($this->statement, OCI_DEFAULT)) {
+      $this->set_OCI_error(oci_error($this->statement));
+      $this->oci_log(ERROR, 'ociexecute:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
+    }
+
+    // Now import a file to the LOB
+    if (!$dataLOB->save($data)) {
+      $this->set_OCI_error(oci_error($this->statement));
+      $this->oci_log(ERROR, 'save:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
+      throw new ociException($this->error);
+    }
+
+
+    // Free resources
+    ociFreestatement($this->statement);
+    $dataLOB->free();
+
+    return TRUE;
+  }
+
+
+  /** \brief Commits outstanding statements
+   * @return boolean
+   * @throws ociException
+   */
   function commit() {
-    if (! oci_commit($this->connect)) {
+    if (!oci_commit($this->connect)) {
       $this->set_OCI_error(oci_error($this->statement));
       $this->oci_log(ERROR, 'commit:: failed on  ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
-      
+
 
   }
 
 
- /** \brief Rollback outstanding statements
-  * @retval boolean
-  */
+  /** \brief Rollback outstanding statements
+   * @return boolean
+   * @throws ociException
+   */
   function rollback() {
-    if (! oci_rollback($this->connect)) {
+    if (!oci_rollback($this->connect)) {
       $this->set_OCI_error(oci_error($this->statement));
       $this->oci_log(ERROR, 'rollback:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
@@ -489,9 +498,10 @@ class oci {
   }
 
 
- /** \brief Creates an empty OCI lob
-  * @retval OCI lob
-  */
+  /** \brief Creates an empty OCI lob
+   * @return OCI lob
+   * @throws ociException
+   */
   function create_lob() {
     if ($lob = oci_new_descriptor($this->connect, OCI_D_LOB))
       return $lob;
@@ -500,64 +510,64 @@ class oci {
       $this->oci_log(ERROR, 'create_lob:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
-
-    return FALSE; 
   }
 
 
- /** \brief Creates an empty OCI lob
-  * @param $name string
-  * @param $value mixed
-  * @param $maxlength integer
-  * @param $type string
-  */
-  function bind($name, $value, $maxlength=-1, $type=SQLT_CHR) {
-    $bind_array['name'] = ($name[0] == ':'? $name : ':'.$name);
+  /** \brief Creates an empty OCI lob
+   * @param $name string
+   * @param $value mixed
+   * @param $maxlength integer
+   * @param $type integer|string
+   */
+  function bind($name, $value, $maxlength = -1, $type = SQLT_CHR) {
+    $bind_array['name'] = ($name[0] == ':' ? $name : ':' . $name);
     $bind_array['value'] = &$value;
     $bind_array['maxlength'] = $maxlength;
     $bind_array['type'] = $type;
     $this->bind_list[] = $bind_array;
   }
 
- /** \brief Get query
-  * @retval string
-  */
+  /** \brief Get query
+   * @return string
+   */
   function get_query() {
     return $this->query;
   }
 
- /** \brief Fetches current blob and return it. There must be only one element (the BLOB) to be fetched.
-  * @param $sql string - SQL string
-  * @retval string | bool
-  */
+  /** \brief Fetches current blob and return it. There must be only one element (the BLOB) to be fetched.
+   * @param $sql string - SQL string
+   * @return string | bool
+   * @throws ociException
+   */
   function fetch_BLOB($sql = '') {
     if ($sql) {
       $this->set_query($sql);
       if ($this->error) return FALSE;
     }
 
-    if (! $res =oci_fetch_row($this->statement)) {
+    if (!$res = oci_fetch_row($this->statement)) {
       $this->set_OCI_error(oci_error($this->statement));
       $this->oci_log(ERROR, 'fetch_BLOB:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
       throw new ociException($this->error);
     }
-    
+
     $this->num_fetched_rows++;
     $this->result = $res[0]->load();
 
     return $this->result;
   }
 
- /** \brief Fetches current data into an associative array (use while loop around this function  to get all)
-  * @param $sql string - SQL string
-  * @retval array | bool
-  */
+  /** \brief Fetches current data into an associative array (use while loop around this function  to get all)
+   * @param $sql string - SQL string
+   * @return array | bool
+   * @throws ociException
+   */
   function fetch_into_assoc($sql = '') {
     if ($sql) {
       $this->set_query($sql);
       if ($this->error) return FALSE;
     }
-    if (! $this->result=oci_fetch_array($this->statement, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    if (!$this->result = oci_fetch_array($this->statement, OCI_ASSOC + OCI_RETURN_NULLS)) {
       $this->set_OCI_error(oci_error($this->statement));
       if ($this->error) {
         $this->oci_log(ERROR, 'oci_fetch_array:: failed on ' . $this->query . ' with error: ' . $this->get_error_string());
@@ -569,17 +579,18 @@ class oci {
   }
 
 
- /** \brief Fetches all data into an associative array
-  * @param $sql string - SQL string
-  * @retval array
-  */
+  /** \brief Fetches all data into an associative array
+   * @param $sql string - SQL string
+   * @return array | boolean
+   * @throws ociException
+   */
   function fetch_all_into_assoc($sql = '') {
     if ($sql) {
       $this->set_query($sql);
       if ($this->error) return FALSE;
     }
 
-    while ($tmp_result = oci_fetch_array($this->statement, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    while ($tmp_result = oci_fetch_array($this->statement, OCI_ASSOC + OCI_RETURN_NULLS)) {
       $this->num_fetched_rows++;
       $this->result[] = $tmp_result;
     }
@@ -592,16 +603,16 @@ class oci {
   }
 
 
- /** \brief Returns last number of rows fetched
-  * @retval integer
-  */
+  /** \brief Returns last number of rows fetched
+   * @return integer
+   */
   function get_num_fetched_rows() {
     return $this->num_fetched_rows;
   }
 
 
- /** \brief Closes OCI connection
-  */
+  /** \brief Closes OCI connection
+   */
   function disconnect() {
     ocilogoff($this->connect);
   }
@@ -610,29 +621,32 @@ class oci {
   // PRIVATE METHODS //
   /////////////////////
 
- /** \brief Set's OCI error
-  * @param $OCIerror string - Expects output from oci_error() function (array)
-  */
+  /** \brief Set's OCI error
+   * @param $OCIerror string - Expects output from oci_error() function (array)
+   */
   function set_OCI_error($OCIerror) {
     if ($OCIerror && empty($this->error))
       $this->error = $OCIerror;
   }
 
- /** \brief Clear OCI error
-  */
+  /** \brief Clear OCI error
+   */
   function clear_OCI_error() {
     $this->error = array();
   }
 
- /** \brief Set's connection to persistent
-  */
+  /** \brief Set's connection to persistent
+   */
   function set_persistent() {
-    $this->persistent_connect=true;
+    $this->persistent_connect = true;
   }
 
+  /**
+   * @param $log_level integer
+   * @param $msg string
+   */
   private function oci_log($log_level, $msg) {
     if (method_exists('verbose', 'log'))
       verbose::log($log_level, $msg);
   }
 }
-?>

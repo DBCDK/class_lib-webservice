@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /**
@@ -66,18 +66,20 @@
  *     Object::set_aray_value($test, 'arr', 19);
  *
  * @author Finn Stausgaard - DBC
-**/
-
+ **/
 class Object {
 
-  private function __construct() {}
-  private function __destruct() {}
-  private function __clone() {}
+  /**
+   * Object constructor.
+   */
+  private function __construct() {
+  }
 
   /** \brief Sets _value on object
-   * @param obj (object) - the object to set
-   * @param name (string)
-   * @param value (mixed)
+   * @param $obj (object) - the object to set
+   * @param $name (string)
+   * @param $value (mixed)
+   * @param $set_empty boolean
    **/
   static public function set_value(&$obj, $name, $value, $set_empty = TRUE) {
     if ($set_empty || !empty($value)) self::set_element($obj, $name, '_value', $value);

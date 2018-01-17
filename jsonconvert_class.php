@@ -17,19 +17,17 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /**
  * \brief Quick try to let request be in json
  * Converts json to the 'corresponding" soap-request.
- * 
+ *
  * Converting is controlled by the [rest] section from the config-object (the ini-file)
  *
  * @author Finn Stausgaard - DBC
  */
-
-
 class Jsonconvert {
 
   //private $charset = 'ISO-8859-1';
@@ -40,11 +38,11 @@ class Jsonconvert {
 
   /** \brief constructor
    *
-   * @param $namespace string 
+   * @param $namespace string
    */
-  public function __construct($namespace='') {
-    $this->soap_header='<?xml version="1.0" encoding="%s"?' . '><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
-    $this->soap_footer='</SOAP-ENV:Body></SOAP-ENV:Envelope>';
+  public function __construct($namespace = '') {
+    $this->soap_header = '<?xml version="1.0" encoding="%s"?' . '><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"%s><SOAP-ENV:Body>';
+    $this->soap_footer = '</SOAP-ENV:Body></SOAP-ENV:Envelope>';
     if ($namespace)
       $this->default_namespace = ' xmlns="' . $namespace . '"';
   }
@@ -52,7 +50,7 @@ class Jsonconvert {
   /** \brief Transform JSON parameters to SOAP-request
    *
    * @param $config (object) the config object from the ini-file
-   * @retval string Soap wrapped xml
+   * @return string Soap wrapped xml
    */
   public function json2soap($config) {
     $soap_actions = $config->get_value('soapAction', 'setup');
@@ -66,15 +64,15 @@ class Jsonconvert {
       unset($json->action);
       $xml = self::tag_me($action, self::to_xml($json));
       return sprintf($this->soap_header, $this->charset, $this->default_namespace) .
-                   $xml . 
-                   $this->soap_footer;
+      $xml .
+      $this->soap_footer;
     }
   }
 
   /** \brief Build xml with data from query
    *
-   * @param $obj (object) list of parameters 
-   * @retval string xml
+   * @param $obj (object) list of parameters
+   * @return string xml
    */
   private function to_xml($obj) {
     foreach ($obj as $tag => $val) {
@@ -95,8 +93,8 @@ class Jsonconvert {
 
   /** \brief Helper function to get a parameter from _GET or _POST
    *
-   * @param $par string 
-   * @retval string the associated value of $par
+   * @param $par string
+   * @return string the associated value of $par
    */
   private function get_post($par) {
     return ($_GET[$par] ? $_GET[$par] : $_POST[$par]);
@@ -104,13 +102,11 @@ class Jsonconvert {
 
   /** \brief Helper function to produce balanced xml
    *
-   * @param $tag string 
-   * @param $val string 
-   * @retval string balanced xml string
+   * @param $tag string
+   * @param $val string
+   * @return string balanced xml string
    */
   private function tag_me($tag, $val) {
-    return '<' . $tag . ">" . $val . '</' . $tag. ">";
+    return '<' . $tag . ">" . $val . '</' . $tag . ">";
   }
 }
-
-?>
