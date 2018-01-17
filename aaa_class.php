@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ **/
 
 /**
  * \brief AAA Authentication, Access control and Accounting
@@ -25,33 +25,41 @@
  * only the first two A's are supported, since there is currently no need for accounting
  *
  * need oci_class and memcache_class to be defined
- * 
+ *
  * if aaa_fors_right is defined, then data is fetched from the webservice defined by the parameter
  *
  * @author Finn Stausgaard - DBC
-**/
+ **/
 
 require_once('OLS_class_lib/oci_class.php');
 require_once('OLS_class_lib/memcache_class.php');
 require_once('OLS_class_lib/ip_class.php');
 
+/**
+ * Class aaa
+ */
 class aaa {
 
-  private $aaa_cache;				// cache object
-  private $cache_seconds;			// number of seconds to cache
+  private $aaa_cache;        // cache object
+  private $cache_seconds;      // number of seconds to cache
   private $cache_key_prefix;
-  private $error_cache_seconds;	// number of seconds to cache answer after an error
-  private $ip_rights;			    // array with repeated elements: ip_list, ressource
-  private $fors_oci;				// oci connection
-  private $fors_credentials;		// oci login credentiales
-  private $rights;				// the rights
-  private $user;			    	// User if any
-  private $group;			    	// Group if any
-  private $password;				// Password if any
-  private $ip;			    	// IP address
+  private $error_cache_seconds;  // number of seconds to cache answer after an error
+  private $ip_rights;          // array with repeated elements: ip_list, ressource
+  private $fors_oci;        // oci connection
+  private $fors_credentials;    // oci login credentiales
+  private $rights;        // the rights
+  private $user;            // User if any
+  private $group;            // Group if any
+  private $password;        // Password if any
+  private $ip;            // IP address
   private $fors_rights_url;     // url to forsRights server
   public $aaa_ip_groups = array();
 
+  /**
+   * aaa constructor.
+   * @param array $aaa_setup
+   * @param string $hash
+   */
   public function __construct($aaa_setup, $hash = '') {
     $this->fors_credentials = $aaa_setup['aaa_credentials'];
     if (isset($aaa_setup['aaa_cache_address']) and $aaa_setup['aaa_cache_address']) {
@@ -66,22 +74,22 @@ class aaa {
   }
 
   /**
-  * \brief sets a list of ressources and the right atributes of each
-  *
-  * @param $user       login name
-  * @param $group      login group
-  * @param $passw      login password
-  * @param $ip         the users ip-address
-  *
-  * @returns TRUE if users has some rights
-  **/
-  public function init_rights($user, $group, $passw, $ip=0) {
+   * \brief sets a list of ressources and the right atributes of each
+   *
+   * @param string $user       login name
+   * @param string $group      login group
+   * @param string $passw      login password
+   * @param integer|string $ip         the users ip-address
+   *
+   * @returns TRUE if users has some rights
+   **/
+  public function init_rights($user, $group, $passw, $ip = 0) {
     $this->user = $user;
     $this->group = $group;
     $this->password = $passw;
     $this->ip = $ip;
     if ($this->aaa_cache) {
-      $cache_key = $this->cache_key_prefix . '_'.md5($this->user . '_' . $this->group . '_' . $this->password . '_' . $this->ip);
+      $cache_key = $this->cache_key_prefix . '_' . md5($this->user . '_' . $this->group . '_' . $this->password . '_' . $this->ip);
       if ($rights = $this->aaa_cache->get($cache_key)) {
         $this->rights = json_decode($rights);
         return !empty($this->rights);
@@ -108,13 +116,13 @@ class aaa {
   }
 
   /**
-  * \brief returns a list of ressources and the rights of each
-  *
-  * @param $ressource
-  *
-  * @returns array of ressources with rights for each or the rights for a given ressource
-  **/
-  public function get_rights($ressource='') {
+   * \brief returns a list of ressources and the rights of each
+   *
+   * @param string $ressource
+   *
+   * @returns array of ressources with rights for each or the rights for a given ressource
+   **/
+  public function get_rights($ressource = '') {
     if ($ressource)
       return $this->rights->$ressource;
     else
@@ -122,35 +130,41 @@ class aaa {
   }
 
   /**
-  * \brief returns TRUE if user has $right to $ressource
-  *
-  * @param $ressource
-  * @param $right
-  *
-  * @returns boolean
-  **/
+   * \brief returns TRUE if user has $right to $ressource
+   *
+   * @param string $ressource
+   * @param integer $right
+   *
+   * @returns boolean
+   **/
   public function has_right($ressource, $right) {
     return ($this->rights->$ressource->$right == TRUE);
   }
 
 
   /**
-  * \brief Register $operation on $ressource
-  *
-  * @param $ressource
-  * @param $operation
-  *
-  * @returns boolean
-  **/
+   * \brief Register $operation on $ressource
+   *
+   * @param string $ressource
+   * @param string $operation
+   *
+   * @returns boolean
+   **/
   public function accounting($ressource, $operation) {
     return TRUE;
   }
 
 
   /**
-  * \brief set the rights array from the forsRight webservice
-  *
-  **/
+   * \brief set the rights array from the forsRight webservice
+   *
+   * @param string $user
+   * @param string $group
+   * @param string $password
+   * @param string $ip
+   * @param string $fors_rights_url
+   * @return mixed
+   */
   private function fetch_rights_from_fors_rights_ws($user, $group, $password, $ip, $fors_rights_url) {
     require_once('OLS_class_lib/curl_class.php');
     $curl = new curl();
@@ -169,9 +183,12 @@ class aaa {
   }
 
   /**
-  * \brief set the rights array from the ini-file
-  *
-  **/
+   * \brief set the rights array from the ini-file
+   *
+   * @param string $ip
+   * @param array $ip_rights
+   * @return mixed
+   */
   private function fetch_rights_from_ip_rights($ip, $ip_rights) {
     if ($ip && is_array($ip_rights)) {
       foreach ($ip_rights as $aaa_group => $aaa_par) {
@@ -194,9 +211,12 @@ class aaa {
 
 
   /**
-  * \brief set the rights array from FORS using the ip of the caller
-  *
-  **/
+   * \brief set the rights array from FORS using the ip of the caller
+   *
+   * @param string $ip
+   * @param string $fors_credentials
+   * @return bool|mixed
+   */
   private function fetch_rights_from_ip_fors($ip, $fors_credentials) {
     if (!empty($fors_credentials) && $ip) {
       if (empty($this->fors_oci)) $this->fors_oci = new Oci($fors_credentials);
@@ -204,12 +224,12 @@ class aaa {
         $this->fors_oci->connect();
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI connect error: ' . $this->fors_oci->get_error_string());
+        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
         return FALSE;
       }
       $long_ip = ip2long($ip);
       try {
-        $this->fors_oci->bind('bind_ipval', $long_ip,-1,SQLT_LNG);
+        $this->fors_oci->bind('bind_ipval', $long_ip, -1, SQLT_LNG);
         $this->fors_oci->set_query('SELECT userid, ipend
                                    FROM domuserid
                                    WHERE ipstart <= :bind_ipval
@@ -221,7 +241,7 @@ class aaa {
         }
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
+        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
         $error = $this->fors_oci->get_error();
       }
 
@@ -239,7 +259,7 @@ class aaa {
           }
         }
         catch (ociException $e) {
-          verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
+          verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
           $error = $this->fors_oci->get_error();
         }
       }
@@ -250,17 +270,22 @@ class aaa {
   }
 
   /**
-  * \brief set the rights array from FORS using the authentication triple of the caller
-  *
-  **/
+   * \brief set the rights array from FORS using the authentication triple of the caller
+   *
+   * @param string $user
+   * @param string $group
+   * @param string $password
+   * @param string $fors_credentials
+   * @return bool|mixed
+   */
   private function fetch_rights_from_auth_fors($user, $group, $password, $fors_credentials) {
-    if ($user &&  $fors_credentials) {
+    if ($user && $fors_credentials) {
       if (empty($this->fors_oci)) $this->fors_oci = new Oci($fors_credentials);
       try {
         $this->fors_oci->connect();
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI connect error: ' . $this->fors_oci->get_error_string());
+        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
         return FALSE;
       }
       try {
@@ -279,13 +304,14 @@ class aaa {
         //$pwd = md5($this->password);			// test
         $state = &$buf['STATE'];
         if ($userid
-            && $state == 'OK'
-            && (($crypttype == 0 && $pwd == $password)
-                || ($crypttype == 2 && $pwd == md5($password))))
+          && $state == 'OK'
+          && (($crypttype == 0 && $pwd == $password)
+            || ($crypttype == 2 && $pwd == md5($password)))
+        )
           $rights = $this->fetch_rights_from_userid($userid, $group);
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
+        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
         $error = $this->fors_oci->get_error();
       }
     }
@@ -294,16 +320,19 @@ class aaa {
 
 
   /**
-  * \brief fecth rights from FORS given a FORS-userid and group
-  *
-  **/
+   * \brief fecth rights from FORS given a FORS-userid and group
+   *
+   * @param string $userid
+   * @param string $group
+   * @return mixed
+   */
   private function fetch_rights_from_userid($userid, $group) {
     if (empty($this->fors_oci)) $this->fors_oci = new Oci($this->fors_credentials);
     try {
       $this->fors_oci->connect();
     }
     catch (ociException $e) {
-      verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI connect error: ' . $this->fors_oci->get_error_string());
+      verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
       return $rights;
     }
     try {
@@ -326,14 +355,13 @@ class aaa {
         }
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
+        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
       }
     }
     catch (ociException $e) {
-      verbose::log(FATAL, 'AAA('.__LINE__.'):: OCI select error: ' . $this->fors_oci->get_error_string());
+      verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
     }
     return $rights;
   }
 
 }
-?>

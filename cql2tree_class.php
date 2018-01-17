@@ -46,7 +46,6 @@
  * @author Adam Dickmeiss - Index Data
  * @author Finn Stausgaard - DBC
  */
-
 class CQL_parser {
   private $qs; // query string
   private $ql; // query string length
@@ -65,27 +64,31 @@ class CQL_parser {
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
   private $unsupported_relations = array('==', '<>', 'encloses', 'within');
-  private $supported_modifiers = array( 
-              '=' => array(                 // =/relevant as a test
-                 'word' => array('symbol' => TRUE),
-                 'string' => array('symbol' => TRUE),
-                 'relevant' => array('symbol' => TRUE)),
-              'all' => array(                 // all/relevant as a test
-                 'relevant' => array('symbol' => TRUE)),
-              'and' => array(                 // and/maybe as test
-                 'dbc.and_semantic' => array('symbol' => '/^=$/', 'unit' => '/^maybe$/', 'error' => 46)),
-              'any' => array(                 // any/relevant as a test
-                 'relevant' => array('symbol' => TRUE)),
-              'prox' => array(                // prox is not supported, but modifiers could be defines as this
-                 'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42), 
-                 'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
+  private $supported_modifiers = array(
+    '=' => array(                 // =/relevant as a test
+      'word' => array('symbol' => TRUE),
+      'string' => array('symbol' => TRUE),
+      'relevant' => array('symbol' => TRUE)),
+    'all' => array(                 // all/relevant as a test
+      'relevant' => array('symbol' => TRUE)),
+    'and' => array(                 // and/maybe as test
+      'dbc.and_semantic' => array('symbol' => '/^=$/', 'unit' => '/^maybe$/', 'error' => 46)),
+    'any' => array(                 // any/relevant as a test
+      'relevant' => array('symbol' => TRUE)),
+    'prox' => array(                // prox is not supported, but modifiers could be defines as this
+      'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42),
+      'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
   private $parse_ok = TRUE; // cql parsing went ok
-  private $diagnostics; 
+  private $diagnostics;
 
-  public function __construct() { }
-  
+  /**
+   * CQL_parser constructor.
+   */
+  public function __construct() {
+  }
+
   /** \brief for supporting national versions of and, or, not - will violate strict cql
-   * @param array $boolean
+   * @param array $booleans
    **/
   public function set_boolean_translate($booleans) {
     if (is_array($booleans)) {
@@ -99,7 +102,7 @@ class CQL_parser {
   }
 
   /** \brief Sets prefixes for the namespaces
-   * @param array $namespaces 
+   * @param array $namespaces
    **/
   public function set_prefix_namespaces($namespaces) {
     if (is_array($namespaces)) {
@@ -117,9 +120,9 @@ class CQL_parser {
   public function define_prefix($prefix, $title, $uri) {
     $this->std_prefixes = self::add_prefix($this->std_prefixes, $prefix, $title, $uri);
   }
-  
-  /** \brief Sets the indexes 
-   * @param string $query
+
+  /** \brief Sets the indexes
+   * @param string $indexes
    **/
   public function set_indexes($indexes) {
     $this->indexes = $indexes;
@@ -132,7 +135,7 @@ class CQL_parser {
 
   /** \brief Parse a query
    * @param string $query
-   * @retval boolean - TRUE if no errors were found, FALSE otherwise
+   * @return boolean - TRUE if no errors were found, FALSE otherwise
    **/
   public function parse($query) {
     $this->diagnostics = array();
@@ -142,31 +145,31 @@ class CQL_parser {
     $this->look = TRUE;
     self::move();
     $this->tree = self::cqlQuery('cql.serverChoice', 'scr', $this->std_prefixes, array());
-    if ($this->look != FALSE) 
+    if ($this->look != FALSE)
       self::add_diagnostic(10, "$this->qi");
-    
+
     return $this->parse_ok;
   }
-  
+
   /** \brief Returns the result of a parse()
-   * 
-   * @retval array - 
+   *
+   * @return array -
    **/
   public function result() {
     return $this->tree;
   }
-  
+
   /** \brief Transform a result to a xml representation
    * @param string $ar
-   * @retval array - 
+   * @return array -
    **/
   public function result2xml($ar) {
     return self::tree2xml_r($ar, 0);
   }
-  
+
   /** \brief retrieve dianostic structure
-   * 
-   * @retval array - 
+   *
+   * @return array -
    **/
   public function get_diagnostics() {
     return $this->diagnostics;
@@ -175,10 +178,10 @@ class CQL_parser {
   /* -------------------------------------------------------------------------------- */
 
   /** \brief get next token by setting class vars qi, look, val and lval
-   * 
+   *
    **/
   private function move() {
-    while ($this->qi < $this->ql && strchr(" \t\r\n", $this->qs[$this->qi])) 
+    while ($this->qi < $this->ql && strchr(" \t\r\n", $this->qs[$this->qi]))
       $this->qi++;
     if ($this->qi == $this->ql) {
       $this->look = FALSE;
@@ -215,14 +218,14 @@ class CQL_parser {
         self::add_diagnostic(27, $this->qi);
       $this->val .= $mark;
       $this->lval = strtolower($this->val);
-      if ($this->qi < $this->ql) 
+      if ($this->qi < $this->ql)
         $this->qi++;
     }
     else {
       $this->look = 's';
       $start_q = $this->qi;
       while ($this->qi < $this->ql && !strchr("()/<>= \t\r\n", $this->qs[$this->qi])) {
-        if ($this->qs[$this->qi] == '\\') 
+        if ($this->qs[$this->qi] == '\\')
           $this->qi++;
         $this->qi++;
       }
@@ -231,11 +234,11 @@ class CQL_parser {
     }
     self::dump_state('move');
   }
-  
+
   /** \brief Collect the modifiers uses on the current boolean or relation
    * @param string $context
    * @param string $target - the boolean or relation being modified
-   * @retval array - of modifiers
+   * @return array - of modifiers
    **/
   private function modifiers($context, $target) {
     $ar = array();
@@ -268,18 +271,18 @@ class CQL_parser {
         $ar[$name] = array('value' => $this->lval, 'relation' => $rel);
         self::move();
       }
-      else 
+      else
         $ar[$name] = TRUE;
     }
     return $ar;
   }
-  
-  /** \brief 
+
+  /** \brief
    * @param string $field
    * @param string $relation
    * @param string $context
    * @param string $modifiers
-   * @retval array
+   * @return array
    **/
   private function cqlQuery($field, $relation, $context, $modifiers) {
     $left = self::searchClause($field, $relation, $context, $modifiers);
@@ -291,7 +294,7 @@ class CQL_parser {
       if (in_array($this->lval, $this->unsupported_booleans)) {
         self::add_diagnostic(37, "$this->qi", $this->lval);
       }
-  // solr_4_4_0: for some unknown reason, the not operator has to be uppercase??
+      // solr_4_4_0: for some unknown reason, the not operator has to be uppercase??
       $op = $this->lval;
       self::move();
       $mod = self::modifiers($context, $op);
@@ -301,13 +304,13 @@ class CQL_parser {
     }
     return $left;
   }
-  
-  /** \brief 
+
+  /** \brief
    * @param string $field
    * @param string $relation
    * @param string $context
    * @param string $modifiers
-   * @retval array
+   * @return array
    **/
   private function searchClause($field, $relation, $context, $modifiers) {
     if ($this->look == '(') {
@@ -324,7 +327,7 @@ class CQL_parser {
     elseif ($this->look == 's' || $this->look == 'q') {
       $first = $this->val; // dont know if field or term yet
       self::move();
-      
+
       if (($this->look == 'q' || ($this->look == 's') && in_array($this->lval, $this->defined_relations))) {
         if (in_array($this->lval, $this->unsupported_relations)) {
           self::add_diagnostic(19, "$this->qi", $this->lval);
@@ -344,7 +347,7 @@ class CQL_parser {
       else {
         // it's a search term
         $pos = strpos($field, '.');
-        if ($pos == FALSE) 
+        if ($pos == FALSE)
           $pre = '';
         else {
           $pre = substr($field, 0, $pos);
@@ -367,14 +370,14 @@ class CQL_parser {
         }
         $uri = $prefix = '';
         for ($i = 0; $i < sizeof($context); $i++) {
-          if ($context[$i]['prefix'] == $pre)  {
+          if ($context[$i]['prefix'] == $pre) {
             $uri = $context[$i]['uri'];
             $prefix = $context[$i]['prefix'];
           }
         }
-        
+
         $pos = strpos($relation, '.');
-        if ($pos == FALSE) 
+        if ($pos == FALSE)
           $pre = 'cql';
         else {
           $pre = substr($relation, 0, $pos);
@@ -382,29 +385,29 @@ class CQL_parser {
         }
         $reluri = '';
         for ($i = 0; $i < sizeof($context); $i++) {
-          if ($context[$i]['prefix'] == $pre) 
+          if ($context[$i]['prefix'] == $pre)
             $reluri = $context[$i]['uri'];
         }
-        return array('type' => 'searchClause', 
-                     'field' => $field, 
-                     'prefix' => $prefix, 
-                     'fielduri' => $uri, 
-                     'relation' => $relation, 
-                     'relationuri' => $reluri, 
-                     'slop' => $slop,
-                     'modifiers' => $modifiers, 
-                     'term' => $first);
+        return array('type' => 'searchClause',
+          'field' => $field,
+          'prefix' => $prefix,
+          'fielduri' => $uri,
+          'relation' => $relation,
+          'relationuri' => $reluri,
+          'slop' => $slop,
+          'modifiers' => $modifiers,
+          'term' => $first);
       }
     }
     elseif ($this->look == '>') {
       self::move();
-      if ($this->look != 's' && $this->look != 'q') 
+      if ($this->look != 's' && $this->look != 'q')
         return array();
       $first = $this->lval;
       self::move();
       if ($this->look == '=') {
         self::move();
-        if ($this->look != 's' && $this->look != 'q') 
+        if ($this->look != 's' && $this->look != 'q')
           return array();
         $context = self::add_prefix($context, $first, '', $this->lval);
         self::move();
@@ -418,29 +421,30 @@ class CQL_parser {
     else {
       self::add_diagnostic(10, "$this->qi");
     }
+    return null;
   }
-  
-  /** \brief 
+
+  /** \brief
    * @param string $ar
    * @param string $prefix
    * @param string $title
    * @param string $uri
-   * @retval array
+   * @return array
    **/
   private function add_prefix($ar, $prefix, $title, $uri) {
-    if (!is_array($ar)) 
+    if (!is_array($ar))
       $ar = array();
-    for ($i = 0; $i < sizeof($ar); $i++) 
-      if ($ar[$i]['prefix'] == $prefix) 
+    for ($i = 0; $i < sizeof($ar); $i++)
+      if ($ar[$i]['prefix'] == $prefix)
         break;
     $ar[$i] = array('prefix' => $prefix, 'title' => $title, 'uri' => $uri);
     return $ar;
   }
-  
+
   /** \brief Build a xml representation of a modifier
    * @param string $ar
    * @param string $level
-   * @retval string
+   * @return string
    **/
   private function tree2xml_modifiers($ar, $level) {
     if (sizeof($ar) == 0) {
@@ -448,16 +452,16 @@ class CQL_parser {
     }
     $s = str_repeat(' ', $level);
     $s .= "<modifiers>\n";
-    
+
     $k = array_keys($ar);
-    
+
     foreach ($k as $no => $key) {
       $s .= str_repeat(' ', $level + 1);
       $s .= "<modifier>\n";
-      
+
       $s .= str_repeat(' ', $level + 2);
       $s .= '<name>' . htmlspecialchars($key) . "</name\n";
-      
+
       if (isset($ar[$key]['relation'])) {
         $s .= str_repeat(' ', $level + 2);
         $s .= '<relation>' . htmlspecialchars($ar[$key]['relation']) . "</relation>\n";
@@ -473,19 +477,19 @@ class CQL_parser {
     $s .= "</modifiers>\n";
     return $s;
   }
-  
+
   /** \brief Indents
    * @param string $level
-   * @retval string
+   * @return string
    **/
   private function tree2xml_indent($level) {
     return str_repeat(' ', $level * 2);
   }
-  
+
   /** \brief Build a xml representation of a tree
    * @param string $ar
    * @param string $level
-   * @retval string
+   * @return string
    **/
   private function tree2xml_r($ar, $level) {
     $s = '';
@@ -495,7 +499,7 @@ class CQL_parser {
     if ($ar['type'] == 'searchClause') {
       $s .= self::tree2xml_indent($level);
       $s .= "<searchClause>\n";
-      
+
 
       if (strlen($ar['fielduri'])) {
         $s .= self::tree2xml_indent($level + 1);
@@ -511,7 +515,7 @@ class CQL_parser {
       }
       $s .= self::tree2xml_indent($level + 1);
       $s .= '<index>' . htmlspecialchars($ar['field']) . "</index>\n";
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "<relation>\n";
       if (strlen($ar['relationuri'])) {
@@ -521,49 +525,49 @@ class CQL_parser {
       $s .= self::tree2xml_indent($level + 2);
       $s .= "<value>" . htmlspecialchars($ar['relation']) . "</value>\n";
       $s .= self::tree2xml_modifiers($ar['modifiers'], $level + 3);
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "</relation>\n";
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= '<term>' . htmlspecialchars($ar['term']) . "</term>\n";
-      
+
       $s .= self::tree2xml_indent($level);
       $s .= "</searchClause>\n";
     }
     elseif ($ar['type'] == 'boolean') {
       $s .= self::tree2xml_indent($level);
       $s .= "<triple>\n";
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "<boolean>\n";
-      
+
       $s .= self::tree2xml_indent($level + 2);
       $s .= "<value>" . htmlspecialchars($ar['op']) . "</value>\n";
-      
+
       $s .= self::tree2xml_modifiers($ar['modifiers'], $level + 2);
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "</boolean>\n";
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "<leftOperand>\n";
       $s .= self::tree2xml_r($ar['left'], $level + 2);
       $s .= self::tree2xml_indent($level + 1);
       $s .= "</leftOperand>\n";
-      
+
       $s .= self::tree2xml_indent($level + 1);
       $s .= "<rightOperand>\n";
       $s .= self::tree2xml_r($ar['right'], $level + 2);
       $s .= self::tree2xml_indent($level + 1);
       $s .= "</rightOperand>\n";
-      
+
       $s .= self::tree2xml_indent($level);
       $s .= "</triple>\n";
     }
     return $s;
   }
-  
+
   /** \brief Build a diagnostic
    * @param integer $id
    * @param integer $pos
@@ -578,27 +582,27 @@ class CQL_parser {
 
   /** \brief Expand an error code to its corresponding errror text
    * @param integer $id
-   * @retval string
+   * @return string
    **/
   private function diag_message($id) {
-/* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
-    static $message = 
+    /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
+    static $message =
       array(10 => 'Query syntax error',
-            13 => 'Invalid or unsupported use of parentheses',
-            16 => 'Unsupported index',
-            19 => 'Unsupported relation',
-            20 => 'Unsupported relation modifier',
-            27 => 'Empty term unsupported',
-            37 => 'Unsupported boolean operator',
-            40 => 'Unsupported proximity relation',
-            41 => 'Unsupported proximity distance',
-            42 => 'Unsupported proximity unit',
-            46 => 'Unsupported boolean modifier');
+        13 => 'Invalid or unsupported use of parentheses',
+        16 => 'Unsupported index',
+        19 => 'Unsupported relation',
+        20 => 'Unsupported relation modifier',
+        27 => 'Empty term unsupported',
+        37 => 'Unsupported boolean operator',
+        40 => 'Unsupported proximity relation',
+        41 => 'Unsupported proximity distance',
+        42 => 'Unsupported proximity unit',
+        46 => 'Unsupported boolean modifier');
 
     return $message[$id];
   }
 
-  /** \brief 
+  /** \brief
    * @param string $where
    **/
   private function dump_state($where) {
