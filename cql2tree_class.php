@@ -64,20 +64,21 @@ class CQL_parser {
   private $defined_relations = array('adj', 'all', 'any', 'encloses', 'within');
   private $implicit_relations = array('=', '==', '<>', '<', '>', '<=', '>=');
   private $unsupported_relations = array('==', '<>', 'encloses', 'within');
-  private $supported_modifiers = array(
-    '=' => array(                 // =/relevant as a test
-      'word' => array('symbol' => TRUE),
-      'string' => array('symbol' => TRUE),
-      'relevant' => array('symbol' => TRUE)),
-    'all' => array(                 // all/relevant as a test
-      'relevant' => array('symbol' => TRUE)),
-    'and' => array(                 // and/maybe as test
-      'dbc.and_semantic' => array('symbol' => '/^=$/', 'unit' => '/^maybe$/', 'error' => 46)),
-    'any' => array(                 // any/relevant as a test
-      'relevant' => array('symbol' => TRUE)),
-    'prox' => array(                // prox is not supported, but modifiers could be defines as this
-      'unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42),
-      'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41)));
+  // =/relevant as a test
+  // all/relevant as a test
+  // and/maybe as test
+  // any/relevant as a test
+  // prox is not supported, but modifiers could be defines as this
+  private $supported_modifiers =
+    array('=' => array('word' => array('symbol' => TRUE),
+                       'string' => array('symbol' => TRUE),
+                       'relevant' => array('symbol' => TRUE)),
+          'all' => array('relevant' => array('symbol' => TRUE)),
+          'and' => array('dbc.and_semantic' => array('symbol' => '/^=$/', 'unit' => '/^maybe$/', 'error' => 46)),
+          'any' => array('relevant' => array('symbol' => TRUE)),
+          'prox' => array('unit' => array('symbol' => '/^=$/', 'unit' => '/word/', 'error' => 42),
+                          'distance' => array('symbol' => '/^=$/', 'unit' => '/^\d*$/', 'error' => 41))
+    );
   private $parse_ok = TRUE; // cql parsing went ok
   private $diagnostics;
 
@@ -389,14 +390,14 @@ class CQL_parser {
             $reluri = $context[$i]['uri'];
         }
         return array('type' => 'searchClause',
-          'field' => $field,
-          'prefix' => $prefix,
-          'fielduri' => $uri,
-          'relation' => $relation,
-          'relationuri' => $reluri,
-          'slop' => $slop,
-          'modifiers' => $modifiers,
-          'term' => $first);
+                     'field' => $field,
+                     'prefix' => $prefix,
+                     'fielduri' => $uri,
+                     'relation' => $relation,
+                     'relationuri' => $reluri,
+                     'slop' => $slop,
+                     'modifiers' => $modifiers,
+                     'term' => $first);
       }
     }
     elseif ($this->look == '>') {
@@ -588,16 +589,16 @@ class CQL_parser {
     /* Total list at: http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html */
     static $message =
       array(10 => 'Query syntax error',
-        13 => 'Invalid or unsupported use of parentheses',
-        16 => 'Unsupported index',
-        19 => 'Unsupported relation',
-        20 => 'Unsupported relation modifier',
-        27 => 'Empty term unsupported',
-        37 => 'Unsupported boolean operator',
-        40 => 'Unsupported proximity relation',
-        41 => 'Unsupported proximity distance',
-        42 => 'Unsupported proximity unit',
-        46 => 'Unsupported boolean modifier');
+            13 => 'Invalid or unsupported use of parentheses',
+            16 => 'Unsupported index',
+            19 => 'Unsupported relation',
+            20 => 'Unsupported relation modifier',
+            27 => 'Empty term unsupported',
+            37 => 'Unsupported boolean operator',
+            40 => 'Unsupported proximity relation',
+            41 => 'Unsupported proximity distance',
+            42 => 'Unsupported proximity unit',
+            46 => 'Unsupported boolean modifier');
 
     return $message[$id];
   }

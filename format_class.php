@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 require_once 'OLS_class_lib/memcache_class.php';
@@ -27,8 +27,8 @@ require_once 'OLS_class_lib/memcache_class.php';
  *   records are split according to record_blocking and send to one or more formating servers
  *
  * Usage: \n
-*    $formater = new formatRecords($config_array, $namespace, $objconverter, $xmlconverter [, $timer]);
-     $formatted_records = $formater->format($records, $param);
+ *    $formater = new formatRecords($config_array, $namespace, $objconverter, $xmlconverter [, $timer]);
+ * $formatted_records = $formater->format($records, $param);
  *
  * Example:
  *   $formatRecords = new formatRecords($this->config->get_section('setup'), $this->xmlns['of'], $this->objconvert, $this->xmlconvert, $this->watch);
@@ -36,7 +36,6 @@ require_once 'OLS_class_lib/memcache_class.php';
  *
  * @author Finn Stausgaard - DBC
  */
-
 class FormatRecords {
   protected $cache;                     ///< for caching formatted records
   protected $curl;                      ///< the curl connection
@@ -50,24 +49,24 @@ class FormatRecords {
   protected $timeout = 5;               ///< -
 
   /** \brief
-  *  @param $setup object
-  *  @param $namespace string
-  *  @param $objconvert class 
-  *  @param $xmlconvert class 
-  *  @param $watch class optional
-  */
+   * @param $setup object
+   * @param $namespace string
+   * @param $objconvert class
+   * @param $xmlconvert class
+   * @param $watch class optional
+   */
   public function __construct($setup, $namespace, &$objconvert, &$xmlconvert, &$watch = NULL) {
     $this->curl = new curl();
     foreach ($setup['js_server'] as $url) {
       $this->js_server_url[] = $url;
     }
-    if (!($this->timeout = (integer) $setup['curl_timeout'])) {
+    if (!($this->timeout = (integer)$setup['curl_timeout'])) {
       $this->timeout = 5;
     }
-  // Since the api for record_blocking is not defined, it will be set to 1
-  //  if (!($this->record_blocking = (integer) $setup['record_blocking'])) {
-      $this->record_blocking = 1;
-  //  }
+    // Since the api for record_blocking is not defined, it will be set to 1
+    //  if (!($this->record_blocking = (integer) $setup['record_blocking'])) {
+    $this->record_blocking = 1;
+    //  }
     $this->cache = new cache($setup['cache_host'], $setup['cache_port'], $setup['cache_expire']);
 
     $this->curl = new curl();
@@ -78,10 +77,10 @@ class FormatRecords {
   }
 
   /** \brief
-  *  @param $records array Records to format
-  *  @param $param object User given parameters
-  *  @retval array - of formatted records
-  */
+   * @param $records array Records to format
+   * @param $param object User given parameters
+   * @return array - of formatted records
+   */
   public function format($records, $param) {
     static $dom;
     if (empty($dom)) {
@@ -141,9 +140,9 @@ class FormatRecords {
           }
           else {
             verbose::log(ERROR, 'http code: ' . $curl_status[$i]['http_code'] .
-                                ' error: "' . $curl_status[$i]['error'] .
-                                '" for: ' . $curl_status[$i]['url'] .
-                                ' TId: ' . $param->trackingId->_value);
+                              ' error: "' . $curl_status[$i]['error'] .
+                              '" for: ' . $curl_status[$i]['url'] .
+                              ' TId: ' . $param->trackingId->_value);
             $error = 'HTTP error ' . $curl_status[$i]['http_code'] . ' . formatting record';
           }
           if ($error) {
@@ -167,32 +166,32 @@ class FormatRecords {
   }
 
   /** \brief setters
-  * $param $count integer
-  */
+   * @param $count integer
+   */
   public function set_record_blocking($count) {
-    $this->record_blocking = (integer) $count;
+    $this->record_blocking = (integer)$count;
   }
 
   /** \brief setters
-  * $param $seconds integer
-  */
+   * @param $seconds integer
+   */
   public function set_timeout($seconds) {
-    $this->timeout = (integer) $seconds;
+    $this->timeout = (integer)$seconds;
   }
 
   /** \brief getters
-  *  @retval array of status
-  *  
-  */
+   * @return array of status
+   *
+   */
   public function get_status() {
     return $this->rec_status;
   }
 
   /** \brief generate hash key from the record and the user params
-  *  @param $record object the records to format
-  *  @param $param object the usergiven parameters
-  *  @retval string cache key for the object
-  */
+   * @param $record object the records to format
+   * @param $param object the usergiven parameters
+   * @return string cache key for the object
+   */
   private function make_cache_key(&$record, &$param) {
     if (is_array($record)) {
       foreach ($record as &$man) {
@@ -202,10 +201,11 @@ class FormatRecords {
     else {
       $key = $record->_value->identifier->_value . '_';
     }
-    return 'OF_' . md5($key .  $param->agency->_value . '_' .
-                               $param->holdBackEndDate->_value . '_' .
-                               $param->language->_value . '_' .
-                               $param->outputFormat->_value);
+    return 'OF_' . md5($key .
+                       $param->agency->_value . '_' .
+                       $param->holdBackEndDate->_value . '_' .
+                       $param->language->_value . '_' .
+                       $param->outputFormat->_value);
   }
 
 }
