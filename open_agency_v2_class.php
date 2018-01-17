@@ -81,7 +81,7 @@ class OpenAgency {
     }
 
     if ($libraries === FALSE) {
-      $libraries = [];
+      $libraries = array();
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $rule . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -126,7 +126,7 @@ class OpenAgency {
     }
 
     if ($library_rules === FALSE) {
-      $library_rules = [];
+      $library_rules = array();
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -167,7 +167,7 @@ class OpenAgency {
     }
 
     if (empty($agency_list)) {
-      $agency_list = [];
+      $agency_list = array();
       self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
@@ -231,7 +231,7 @@ class OpenAgency {
         if (@ $dom->loadXML($res_xml)) {
           foreach ($dom->getElementsByTagName('profile') as $profile) {
             $p_name = '';
-            $p_val = [];
+            $p_val = array();
             foreach ($profile->childNodes as $p) {
               if ($p->localName == 'profileName') {
                 $p_name = $p->nodeValue;
@@ -260,7 +260,7 @@ class OpenAgency {
           }
         }
         else {
-          $this->profiles = [];
+          $this->profiles = array();
         }
         if ($this->agency_cache) {
           if (!$this->agency_cache->set($cache_key, $this->profiles))
@@ -313,7 +313,7 @@ class OpenAgency {
     }
 
     if (!$this->library_type_tab) {
-      $this->library_type_tab = [];
+      $this->library_type_tab = array();
       $curl = new curl();
       $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
       $url = sprintf(self::oa_uri($this->config['libraryType']), $this->tracking_id);
@@ -333,7 +333,8 @@ class OpenAgency {
           }
           foreach ($struct as $agency) {
             $this->library_type_tab[$agency->branchId->{'$'}] =
-              [AGENCY_TYPE => $agency->agencyType->{'$'}, BRANCH_TYPE => $agency->branchType->{'$'}];
+              array(AGENCY_TYPE => $agency->agencyType->{'$'},
+                    BRANCH_TYPE => $agency->branchType->{'$'});
           }
         }
         else {

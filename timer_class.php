@@ -60,8 +60,8 @@ class stopwatch {
     $this->delim = $delim;
     $this->postfix = $postfix;
     $this->format = $format;
-    $this->timers = [];
-    $this->sums = [];
+    $this->timers = array();
+    $this->sums = array();
     $this->start('Total');
   }
 
@@ -173,7 +173,7 @@ class stopwatch {
     if (is_null($postfix)) $postfix = "\n";
     if (!preg_match("/\n\$/", $postfix)) $postfix .= "\n";        // Make sure postfix ends in a newline
 
-    $ret = [];
+    $ret = array();
     //natcasesort($keys = array_keys($this->sums));
     $keys = array_keys($this->sums);
     foreach ($keys as $k) {
