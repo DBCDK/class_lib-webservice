@@ -76,10 +76,10 @@ class aaa {
   /**
    * \brief sets a list of ressources and the right atributes of each
    *
-   * @param string $user       login name
-   * @param string $group      login group
-   * @param string $passw      login password
-   * @param integer|string $ip         the users ip-address
+   * @param string $user login name
+   * @param string $group login group
+   * @param string $passw login password
+   * @param integer|string $ip the users ip-address
    *
    * @returns TRUE if users has some rights
    **/
