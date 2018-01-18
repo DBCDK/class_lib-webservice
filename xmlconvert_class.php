@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /**
@@ -25,31 +25,37 @@
  *
  * @author Finn Stausgaard - DBC
  */
-
 class xmlconvert {
 
+  /**
+   * xmlconvert constructor.
+   */
   public function __construct() {
   }
 
   /** \brief Create an ols--object out of SOAP xml
    *
-  *
+   * @param $request
+   * @return bool|mixed
    */
   public function soap2obj(&$request) {
-    if (empty($request)) return FALSE;
-
-    $dom = new DomDocument();
-    $dom->preserveWhiteSpace = FALSE; 
-    if (@ $dom->loadXML($request))
-      return $this->xml2obj($dom);
+    if ($request) {
+      $dom = new DomDocument();
+      $dom->preserveWhiteSpace = FALSE;
+      if (@ $dom->loadXML($request))
+        return $this->xml2obj($dom);
+    }
+    return FALSE;
   }
 
-  /** \brief Converts domdocument object to object.
-  *
-  *
-  */
 
-  public function xml2obj($domobj, $force_NS='') {
+  /** \brief Converts domdocument object to object.
+   *
+   * @param $domobj
+   * @param string $force_NS
+   * @return mixed
+   */
+  public function xml2obj($domobj, $force_NS = '') {
     foreach ($domobj->childNodes as $node) {
       $subnode = new stdClass();
       if ($node->nodeName == '#comment') {

@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with Open Library System.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 
 /** \brief Webservice server
@@ -37,6 +37,9 @@ require_once('OLS_class_lib/jsonconvert_class.php');
 require_once('OLS_class_lib/xmlconvert_class.php');
 require_once('OLS_class_lib/objconvert_class.php');
 
+/**
+ * Class webServiceServer
+ */
 abstract class webServiceServer {
 
   protected $config; ///< inifile object
@@ -48,11 +51,11 @@ abstract class webServiceServer {
   protected $xmlconvert; ///< xml to OLS object convert
   protected $xmlns; ///< namespaces and prefixes
   protected $default_namespace; ///< -
-  protected $tag_sequence; /**< tag sequence according to XSD or noame of XSD */
+  protected $tag_sequence; ///< tag sequence according to XSD or noame of XSD
   protected $soap_action; ///< -
   protected $dump_timer; ///< -
   protected $dump_timer_ip; ///< -
-  protected $output_type=''; ///< -
+  protected $output_type = ''; ///< -
   protected $curl_recorder; ///< -
   protected $debug; ///< -
   protected $url_override; ///< array with special url-commands for the actual service
@@ -60,15 +63,15 @@ abstract class webServiceServer {
 
   /** \brief Webservice constructer
    *
-  * @param $inifile string
+   * @param $inifile string
    *
    */
-  public function  __construct($inifile) {
+  public function __construct($inifile) {
     // initialize config and verbose objects
     $this->config = new inifile($inifile);
 
     if ($this->config->error) {
-      die('Error: '.$this->config->error );
+      die('Error: ' . $this->config->error);
     }
 
     // service closed
@@ -89,11 +92,11 @@ abstract class webServiceServer {
     $this->version = $this->config->get_value('version', 'setup');
     verbose::open($this->config->get_value('logfile', 'setup'),
                   $this->config->get_value('verbose', 'setup'),
-                  str_replace('_VERSION_', $this->version , $this->config->get_value('syslog_id', 'setup')));
+                  str_replace('_VERSION_', $this->version, $this->config->get_value('syslog_id', 'setup')));
     $this->watch = new stopwatch('', ' ', '', '%s:%01.3f');
 
     if ($this->config->get_value('xmldir'))
-      $this->xmldir=$this->config->get_value('xmldir');
+      $this->xmldir = $this->config->get_value('xmldir');
     $this->xmlns = $this->config->get_value('xmlns', 'setup');
     $this->default_namespace = $this->xmlns[$this->config->get_value('default_namespace_prefix', 'setup')];
     $this->tag_sequence = $this->config->get_value('tag_sequence', 'setup');
@@ -113,26 +116,28 @@ abstract class webServiceServer {
     $this->aaa = new aaa($this->config->get_section('aaa'));
   }
 
-  public function __destruct() { }
+  public function __destruct() {
+  }
 
   /** \brief Handles request from webservice client
-  *
-  */
+   *
+   * @return mixed
+   */
   public function handle_request() {
     foreach ($this->url_override as $query_par => $function_name) {
       if (strpos($_SERVER['QUERY_STRING'], $query_par) === 0 && method_exists($this, $function_name)) {
-        return $this-> {$function_name}();
+        return $this->{$function_name}();
       }
     }
     if (isset($_POST['xml'])) {
-      $xml=trim(stripslashes($_POST['xml']));
+      $xml = trim(stripslashes($_POST['xml']));
       self::soap_request($xml);
     }
     elseif (!empty($GLOBALS['HTTP_RAW_POST_DATA'])) {
       self::soap_request($GLOBALS['HTTP_RAW_POST_DATA']);
     }
     // pjo 11/9/17 for php 7. @see http://php.net/manual/en/reserved.variables.httprawpostdata.php.
-    elseif($xml=file_get_contents("php://input")){
+    elseif ($xml = file_get_contents("php://input")) {
       self::soap_request($xml);
     }
     elseif (!empty($_SERVER['QUERY_STRING']) && ($_REQUEST['action'] || $_REQUEST['json'])) {
@@ -145,8 +150,9 @@ abstract class webServiceServer {
       self::rest_request();
     }
     elseif (self::in_house()
-            || $this->config->get_value('show_samples', 'setup')
-            || ip_func::ip_in_interval($_SERVER['REMOTE_ADDR'], $this->config->get_value('show_samples_ip_list', 'setup'))) {
+      || $this->config->get_value('show_samples', 'setup')
+      || ip_func::ip_in_interval($_SERVER['REMOTE_ADDR'], $this->config->get_value('show_samples_ip_list', 'setup'))
+    ) {
       self::create_sample_forms();
     }
     else {
@@ -155,9 +161,9 @@ abstract class webServiceServer {
   }
 
   /** \brief Handles and validates soap request
-    *
-  * @param $xml string
-  */
+   *
+   * @param $xml string
+   */
   private function soap_request($xml) {
     // Debug verbose::log(TRACE, 'Request ' . $xml);
 
@@ -165,12 +171,12 @@ abstract class webServiceServer {
     $this->validate = $this->config->get_value('validate');
 
     if ($this->validate['soap_request'] || $this->validate['request'])
-      $error = ! self::validate_soap($xml, $this->validate, 'request');
+      $error = !self::validate_soap($xml, $this->validate, 'request');
 
     if (empty($error)) {
       // parse to object
-      $this->xmlconvert=new xmlconvert();
-      $xmlobj=$this->xmlconvert->soap2obj($xml);
+      $this->xmlconvert = new xmlconvert();
+      $xmlobj = $this->xmlconvert->soap2obj($xml);
       // soap envelope?
       if ($xmlobj->Envelope) {
         $request_xmlobj = &$xmlobj->Envelope->_value->Body->_value;
@@ -192,7 +198,7 @@ abstract class webServiceServer {
         // validate response
         if ($this->validate['soap_response'] || $this->validate['response']) {
           $response_xml = $this->objconvert->obj2soap($response_xmlobj, $soap_namespace);
-          $error = ! self::validate_soap($response_xml, $this->validate, 'response');
+          $error = !self::validate_soap($response_xml, $this->validate, 'response');
         }
 
         if (empty($error)) {
@@ -219,7 +225,7 @@ abstract class webServiceServer {
               break;
             default:
               if (empty($response_xml))
-                $response_xml =  $this->objconvert->obj2soap($response_xmlobj, $soap_namespace);
+                $response_xml = $this->objconvert->obj2soap($response_xmlobj, $soap_namespace);
               if ($soap_namespace == 'http://www.w3.org/2003/05/soap-envelope' && empty($_POST['xml']))
                 header('Content-Type: application/soap+xml');   // soap 1.2
               else
@@ -228,7 +234,7 @@ abstract class webServiceServer {
           }
           // request done and response send, dump timer
           if ($this->dump_timer)
-            verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) .  ':: ' . $this->dump_timer_ip . $this->watch->dump());
+            verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) . ':: ' . $this->dump_timer_ip . $this->watch->dump());
         }
         else
           self::soap_error('Error in response validation.');
@@ -262,8 +268,8 @@ abstract class webServiceServer {
   }
 
   /** \brief Handles rest request, converts it to xml and calls soap_request()
-  *
-  */
+   *
+   */
   private function rest_request() {
     // convert to soap
     if ($_REQUEST['json']) {
@@ -278,8 +284,9 @@ abstract class webServiceServer {
   }
 
   /** \brief Show the service version
-  *
-  */
+   *
+   * @param $operation
+   */
   private function update_registry($operation) {
     $registry = $this->config->get_section('service_registry');
     if ($registry && $registry['registry']) {
@@ -291,15 +298,17 @@ abstract class webServiceServer {
   }
 
   /** \brief Show the service version
-  *
-  */
+   *
+   * @noinspection PhpUnusedPrivateMethodInspection
+   */
   private function version() {
     die($this->version);
   }
 
   /** \brief Show wsdl file for the service replacing __LOCATION__ with ini-file setting or current location
-  *
-  */
+   *
+   * @noinspection PhpUnusedPrivateMethodInspection
+   */
   private function Wsdl() {
     if ($wsdl = $this->config->get_value('wsdl', 'setup')) {
       if (!$location = $this->config->get_value('service_location', 'setup')) {
@@ -308,7 +317,8 @@ abstract class webServiceServer {
       if (strpos($location, '://') < 1) {
         if (!empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) {
           $protocol = 'https://';
-        } else {
+        }
+        else {
           $protocol = 'http://';
         }
       }
@@ -325,25 +335,27 @@ abstract class webServiceServer {
     }
   }
 
-  /** \brief Show selected parts of the ini-file 
-  *
-  */
+  /** \brief Show selected parts of the ini-file
+   *
+   * @noinspection PhpUnusedPrivateMethodInspection
+   */
   private function ShowInfo() {
     if (($showinfo = $this->config->get_value('showinfo', 'showinfo')) && self::in_house()) {
       foreach ($showinfo as $line) {
         echo self::showinfo_line($line) . "\n";
       }
-    die();
+      die();
     }
   }
 
   /** \brief expands __var__ to the corresponding setting
-  *
-  * @param $line string
-  */
+   *
+   * @param $line string
+   * @return mixed|string
+   */
   private function showinfo_line($line) {
     while (($s = strpos($line, '__')) !== FALSE) {
-      $line = substr($line, 0, $s) . substr($line, $s+2);
+      $line = substr($line, 0, $s) . substr($line, $s + 2);
       if (($e = strpos($line, '__')) !== FALSE) {
         $var = substr($line, $s, $e - $s);
         list($key, $section) = explode('.', $var, 2);
@@ -358,10 +370,11 @@ abstract class webServiceServer {
   }
 
   /** \brief Helper function to showinfo_line()
-  *
-  * @param $arr array
-  * @param $prefix string
-  */
+   *
+   * @param $arr array
+   * @param $prefix string
+   * @return mixed
+   */
   private function implode_ini_array($arr, $prefix = '') {
     $ret = "\n";
     foreach ($arr as $key => $val) {
@@ -374,9 +387,9 @@ abstract class webServiceServer {
   }
 
   /** \brief
-  *  Return TRUE if the IP is in in_house_ip_list, or if in_house_ip_list is not set, if the name is in in_house_domain
-  *  NB: gethostbyaddr() can take some time or even time out, is the remote name server is slow or wrongly configured
-  */
+   *  Return TRUE if the IP is in in_house_ip_list, or if in_house_ip_list is not set, if the name is in in_house_domain
+   *  NB: gethostbyaddr() can take some time or even time out, is the remote name server is slow or wrongly configured
+   */
   protected function in_house() {
     static $homie;
     if (!isset($homie)) {
@@ -400,18 +413,19 @@ abstract class webServiceServer {
   }
 
   /** \brief RegressionTest tests the webservice
-  *
-  * @param $arg string
-  */
-  private function RegressionTest($arg='') {
-    if (! is_dir($this->xmldir.'/regression'))
+   *
+   * @param $arg string
+   *
+   * @noinspection PhpUnusedPrivateMethodInspection
+   */
+  private function RegressionTest($arg = '') {
+    if (!is_dir($this->xmldir . '/regression'))
       die('No regression catalouge');
 
-    if ($dh = opendir($this->xmldir.'/regression')) {
-      chdir($this->xmldir.'/regression');
-      $reqs = array();
+    if ($dh = opendir($this->xmldir . '/regression')) {
+      chdir($this->xmldir . '/regression');
       while (($file = readdir($dh)) !== false)
-        if (!is_dir($file) && preg_match('/xml$/',$file,$matches))
+        if (!is_dir($file) && preg_match('/xml$/', $file, $matches))
           $fnames[] = $file;
       if (count($fnames)) {
         asort($fnames);
@@ -428,15 +442,17 @@ abstract class webServiceServer {
         die('No files found for regression test');
     }
     else
-      die('Cannot open regression catalouge: ' . $this->xmldir.'/regression');
+      die('Cannot open regression catalouge: ' . $this->xmldir . '/regression');
   }
 
   /** \brief HowRU tests the webservice and answers "Gr8" if none of the tests fail. The test cases resides in the inifile.
-  *
-  *  Handles zero or more set of tests.
-  *  Each set, can contain one or more tests, where just one of them has to succeed
-  *  If all tests in a given set fails, the corresponding error will be displayed
-  */
+   *
+   *  Handles zero or more set of tests.
+   *  Each set, can contain one or more tests, where just one of them has to succeed
+   *  If all tests in a given set fails, the corresponding error will be displayed
+   *
+   * @noinspection PhpUnusedPrivateMethodInspection
+   */
   private function HowRU() {
     $tests = $this->config->get_value('test', 'howru');
     if ($tests) {
@@ -444,11 +460,11 @@ abstract class webServiceServer {
       $reg_matchs = $this->config->get_value('preg_match', 'howru');
       $reg_errors = $this->config->get_value('error', 'howru');
       if (!$server_name = $this->config->get_value('server_name', 'howru')) {
-         if (!$server_name = $_SERVER['SERVER_NAME']) {
-           $server_name = $_SERVER['HTTP_HOST'];
-         }
+        if (!$server_name = $_SERVER['SERVER_NAME']) {
+          $server_name = $_SERVER['HTTP_HOST'];
+        }
       }
-      $url = $server_name. $_SERVER['PHP_SELF'];
+      $url = $server_name . $_SERVER['PHP_SELF'];
       if ($_SERVER['HTTPS'] == 'on') $url = 'https://' . $url;
       foreach ($tests as $i_test => $test) {
         if (is_array($test)) {
@@ -460,9 +476,9 @@ abstract class webServiceServer {
         }
         $error = $reg_errors[$i_test];
         foreach ($test as $i => $t) {
-          $reply=$curl->get($url.'?action='.$t);
+          $reply = $curl->get($url . '?action=' . $t);
           $preg_match = $reg_match[$i];
-          if (preg_match("/$preg_match/",$reply)) {
+          if (preg_match("/$preg_match/", $reply)) {
             unset($error);
             break;
           }
@@ -476,23 +492,23 @@ abstract class webServiceServer {
   }
 
   /** \brief Validates soap and xml
-  *
-  * @param $soap string
-  * @param $schemas array
-  * @param $validate_schema string
-    *
-  */
-
+   *
+   * @param $soap string
+   * @param $schemas array
+   * @param $validate_schema string
+   * @return bool
+   */
   protected function validate_soap($soap, $schemas, $validate_schema) {
     $validate_soap = new DomDocument;
     $validate_soap->preserveWhiteSpace = FALSE;
     @ $validate_soap->loadXml($soap);
-    if (($sc = $schemas['soap_'.$validate_schema]) && ! @ $validate_soap->schemaValidate($sc))
+    if (($sc = $schemas['soap_' . $validate_schema]) && !@ $validate_soap->schemaValidate($sc))
       return FALSE;
 
     if ($sc = $schemas[$validate_schema]) {
       if ($validate_soap->firstChild->localName == 'Envelope'
-          && $validate_soap->firstChild->hasChildNodes()) {
+        && $validate_soap->firstChild->hasChildNodes()
+      ) {
         foreach ($validate_soap->firstChild->childNodes as $soap_node) {
           if ($soap_node->localName == 'Body') {
             $xml = &$soap_node->firstChild;
@@ -505,7 +521,7 @@ abstract class webServiceServer {
       if (empty($validate_xml))
         $validate_xml = &$validate_soap;
 
-      if (! @ $validate_xml->schemaValidate($sc))
+      if (!@ $validate_xml->schemaValidate($sc))
         return FALSE;
     }
 
@@ -513,18 +529,18 @@ abstract class webServiceServer {
   }
 
   /** \brief send an error header and soap fault
-  *
-  * @param $err string
-  *
-  */
+   *
+   * @param $err string
+   *
+   */
   protected function soap_error($err) {
     $elevel = array(LIBXML_ERR_WARNING => "\n Warning",
                     LIBXML_ERR_ERROR => "\n Error",
                     LIBXML_ERR_FATAL => "\n Fatal");
     if ($errors = libxml_get_errors()) {
       foreach ($errors as $error) {
-        $xml_err .= $elevel[$error->level] . ": " .  trim($error->message) .
-                    ($error->file ? " in file " . $error->file : " on line " . $error->line);
+        $xml_err .= $elevel[$error->level] . ": " . trim($error->message) .
+          ($error->file ? " in file " . $error->file : " on line " . $error->line);
       }
     }
     header('HTTP/1.0 400 Bad Request');
@@ -540,14 +556,13 @@ abstract class webServiceServer {
   }
 
   /** \brief Validates xml
-  *
-  * @param $xml string
-  * @param $schema_filename string
-  * @param $resolve_externals boolean
-    *
-  */
-
-  protected function validate_xml($xml, $schema_filename, $resolve_externals=FALSE) {
+   *
+   * @param $xml string
+   * @param $schema_filename string
+   * @param $resolve_externals boolean
+   * @return bool
+   */
+  protected function validate_xml($xml, $schema_filename, $resolve_externals = FALSE) {
     $validateXml = new DomDocument;
     $validateXml->resolveExternals = $resolve_externals;
     $validateXml->loadXml($xml);
@@ -560,20 +575,19 @@ abstract class webServiceServer {
   }
 
   /** \brief Find operation in object created from xml and and calls this function defined by developer in extended class.
-  * Authentication is by default found in the authentication node, in userIdAut, groupIdAut and passwordAut
-  * These names can be changed by doing so in the aaa-section, like: 
-  * userIdAut = theNameOfUserIdInThisService
-  *
-  * @param $xmlobj object
-  * @retval object - from the service entry point called
-  *
-  */
+   * Authentication is by default found in the authentication node, in userIdAut, groupIdAut and passwordAut
+   * These names can be changed by doing so in the aaa-section, like:
+   * userIdAut = theNameOfUserIdInThisService
+   *
+   * @param $xmlobj object
+   * @return bool - from the service entry point called
+   */
   private function call_xmlobj_function($xmlobj) {
     if ($xmlobj) {
       $soapActions = $this->config->get_value('soapAction', 'setup');
-      $request=key($xmlobj);
+      $request = key($xmlobj);
       if ($this->soap_action = array_search($request, $soapActions)) {
-        $params=$xmlobj->$request->_value;
+        $params = $xmlobj->$request->_value;
         if (method_exists($this, $this->soap_action)) {
           if (is_object($this->aaa)) {
             foreach (array('authentication', 'userIdAut', 'groupIdAut', 'passwordAut') as $par) {
@@ -589,7 +603,7 @@ abstract class webServiceServer {
           }
           verbose::set_tracking_id($this->config->get_value('default_namespace_prefix', 'setup'), $params->trackingId->_value);
           self::update_registry($this->soap_action);
-          return $this-> {$this->soap_action}($params);
+          return $this->{$this->soap_action}($params);
         }
       }
     }
@@ -598,9 +612,9 @@ abstract class webServiceServer {
   }
 
   /** \brief Create sample form for testing webservice. This is called of no request is send via browser.
-  *
-  *
-  */
+   *
+   *
+   */
 
   private function create_sample_forms() {
     if ($sample_header = $this->config->get_value('sample_header', 'setup')) {
@@ -609,17 +623,17 @@ abstract class webServiceServer {
     else {
       $sample_header = 'Content-type: text/html; charset=utf-8';
     }
-    header ($sample_header);
+    header($sample_header);
 
     // Open a known directory, and proceed to read its contents
-    if (is_dir($this->xmldir.'/request')) {
-      if ($dh = opendir($this->xmldir.'/request')) {
-        chdir($this->xmldir.'/request');
+    if (is_dir($this->xmldir . '/request')) {
+      if ($dh = opendir($this->xmldir . '/request')) {
+        chdir($this->xmldir . '/request');
         $fnames = $reqs = array();
         while (($file = readdir($dh)) !== false) {
           if (!is_dir($file)) {
-            if (preg_match('/html$/',$file,$matches)) $info = file_get_contents($file);
-            if (preg_match('/xml$/',$file,$matches)) $fnames[] = $file;
+            if (preg_match('/html$/', $file, $matches)) $info = file_get_contents($file);
+            if (preg_match('/xml$/', $file, $matches)) $fnames[] = $file;
           }
         }
         closedir($dh);
@@ -630,35 +644,38 @@ abstract class webServiceServer {
           natsort($fnames);
           foreach ($fnames as $fname) {
             $contents = str_replace("\r\n", PHP_EOL, file_get_contents($fname));
-            $contents=addcslashes(str_replace("\n",'\n',$contents), '"');
-            $reqs[]=$contents;
-            $names[]=$fname;
+            $contents = addcslashes(str_replace("\n", '\n', $contents), '"');
+            $reqs[] = $contents;
+            $names[] = $fname;
           }
 
           foreach ($reqs as $key => $req)
-            $options .= '<option value="' . $key . '">'.$names[$key].'</option>' . "\n";
+            $options .= '<option value="' . $key . '">' . $names[$key] . '</option>' . "\n";
           if ($_GET['debug'] && self::in_house())
             $debug = '<input type="hidden" name="debug" value="' . $_GET['debug'] . '">';
 
-          $html = str_replace('__REQS__', implode("\",\n\"", $reqs), $html); 
-          $html = str_replace('__XML__', htmlspecialchars($_REQUEST['xml']), $html); 
-          $html = str_replace('__OPTIONS__', $options, $html); 
+          $html = str_replace('__REQS__', implode("\",\n\"", $reqs), $html);
+          $html = str_replace('__XML__', htmlspecialchars($_REQUEST['xml']), $html);
+          $html = str_replace('__OPTIONS__', $options, $html);
         }
         else {
           $error = 'No example xml files found...';
         }
-        $html = str_replace('__ERROR__', $error, $html); 
-        $html = str_replace('__DEBUG__', $debug, $html); 
-        $html = str_replace('__HEADER_WARNING__', $header_warning, $html); 
-        $html = str_replace('__VERSION__', $this->version, $html); 
+        $html = str_replace('__ERROR__', $error, $html);
+        $html = str_replace('__DEBUG__', $debug, $html);
+        $html = str_replace('__HEADER_WARNING__', $header_warning, $html);
+        $html = str_replace('__VERSION__', $this->version, $html);
       }
     }
     echo $html;
   }
 
+  /**
+   * @return string
+   */
   private function sample_form() {
-    return 
-'<html><head>
+    return
+      '<html><head>
 __HEADER_WARNING__
 <script language="javascript">
   var reqs = Array("__REQS__");
@@ -681,5 +698,3 @@ __HEADER_WARNING__
   }
 
 }
-
-?>

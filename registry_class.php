@@ -30,19 +30,25 @@
 
 require_once('OLS_class_lib/curl_class.php');
 
+/**
+ * Class Registry
+ */
 class Registry {
 
   public static $response = FALSE;
 
-  private function __construct() { }
-  private function __destruct() { }
-  private function __clone() { }
+  /**
+   * Registry constructor.
+   */
+  private function __construct() {
+  }
 
   /**
    * \brief Sets loglevel and logfile
    * @param service_name (string)
+   * @param operation (string)
    * @param version (string)
-   * @param setting (array) 
+   * @param settings (array)
    * */
   static public function set($service_name, $operation, $version, $settings) {
     if ($registry = $settings['registry']) {
@@ -59,7 +65,7 @@ class Registry {
   }
 
   /**
-   * \brief Handle reply - will newer get called unless set_wait_for_connections is set to 1 
+   * \brief Handle reply - will newer get called unless set_wait_for_connections is set to 1
    * @param handle (string)
    * @param answer (string)
    * */
@@ -69,7 +75,7 @@ class Registry {
 
   /**
    * \brief to return response set by receiveResponse() above
-   * @retval (string)
+   * @return string
    * */
   static public function get_response() {
     return self::$response;
@@ -92,6 +98,7 @@ class Registry {
   /**
    * \brief Send the http request and do no wait for an answer
    * @param url (string)
+   * @return array
    * */
   static private function curl_options() {
     return array(CURLOPT_RETURNTRANSFER => TRUE,
@@ -102,7 +109,6 @@ class Registry {
                  CURLOPT_CONNECTTIMEOUT_MS => 1000,
                  CURLOPT_WRITEFUNCTION => array(__CLASS__, 'receiveResponse'));
   }
- 
-}
 
+}
 
