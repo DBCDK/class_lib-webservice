@@ -68,7 +68,7 @@ class Cache {
    * @return boolean
    **/
   public function get($key) {
-    if (is_object($this->memcache) && isset($_GET['cache']) && ($_GET['cache'] != 'SkipCache')) {
+    if (is_object($this->memcache) && (empty($_GET['cache']) || ($_GET['cache'] != 'SkipCache'))) {
       return $this->memcache->get($key);
     }
     return FALSE;
