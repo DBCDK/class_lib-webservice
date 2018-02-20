@@ -108,12 +108,12 @@ class objconvert {
     if ($this->timer) $this->timer->start('obj2json');
     foreach ($this->namespaces as $ns => $prefix) {
       if ($prefix)
-        $o_ns->$prefix = $ns;
+        self::set_object_value($o_ns, $prefix, $ns);
       else
-        $o_ns->{'$'} = $ns;
+        self::set_object_value($o_ns, '$', $ns);
     }
     $json_obj = $this->obj2badgerfish_obj($obj);
-    $json_obj->{'@namespaces'} = $o_ns;
+    self::set_object_value($json_obj, '@namespaces', $o_ns);
     if ($this->timer) $this->timer->stop('obj2json');
     return json_encode($json_obj);
   }
@@ -131,7 +131,7 @@ class objconvert {
           }
         }
         else
-          $ret->$key = $this->build_json_obj($o);
+          self::set_object_value($ret, $key, $this->build_json_obj($o));
       }
     }
     return $ret;
@@ -143,16 +143,16 @@ class objconvert {
    */
   private function build_json_obj($obj) {
     if (is_scalar($obj->_value))
-      $ret->{'$'} = html_entity_decode($obj->_value);
+      self::set_object_value($ret, '$', html_entity_decode($obj->_value));
     else
       $ret = $this->obj2badgerfish_obj($obj->_value);
-    if ($obj->_attributes) {
+    if (isset($obj->_attributes)) {
       foreach ($obj->_attributes as $aname => $aval) {
-        $ret->{'@' . $aname} = $this->build_json_obj($aval);
+        self::set_object_value($ret, '@' . $aname, $this->build_json_obj($aval));
       }
     }
-    if ($obj->_namespace)
-      $ret->{'@'} = $this->get_namespace_prefix($obj->_namespace);
+    if (isset($obj->_namespace))
+      self::set_object_value($ret, '@', $this->get_namespace_prefix($obj->_namespace));
     return $ret;
   }
 
@@ -404,6 +404,24 @@ class objconvert {
       $space = ($attr && $attr[0] <> ' ') ? ' ' : '';
       return '<' . $tag . $space . $attr . '>' . $val . '</' . $tag . '>';
     }
+  }
+
+  /** \brief makes sure the object is defined and set value
+   * @param obj (object) - the object to set
+   * @param name (string)
+   * @param $val string -
+   **/
+  private function set_object_value(&$obj, $name, $val) {
+    self::ensure_object_set($obj);
+    self::ensure_object_set($obj->$name);
+    $obj->$name = $val;
+  }
+
+  /** \brief makes sure the object is defined
+   * @param obj (object) - the object to set
+   **/
+   private function ensure_object_set(&$obj) {
+    if (!isset($obj)) $obj = new stdClass();
   }
 
 }
