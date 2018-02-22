@@ -20,7 +20,7 @@ class TestOfObjectConvertClass extends UnitTestCase {
   function test_convert() {
     $head = '<?xml version="1.0" encoding="UTF-8"?>';
 
-    $obj->tagname->_value = 'tag&value';
+    @ $obj->tagname->_value = 'tag&value';
     list($xml, $xmlNS, $xmlSoap, $json, $php) = self::convert($obj);
     $this->assertEqual($xml, '<tagname>tag&amp;value</tagname>');
     $this->assertEqual($xmlNS, $head . '<tagname>tag&amp;value</tagname>');
@@ -36,7 +36,7 @@ class TestOfObjectConvertClass extends UnitTestCase {
     $this->assertEqual($json, '{"tagname":{"$":"tag&value","@":"ns1"},"@namespaces":{"ns1":"http:\/\/some.namespace.com\/"}}');
     $this->assertEqual($php, serialize($obj));
 
-    $obj->tagname->_attributes->attr->_value = "ATTR";
+    @ $obj->tagname->_attributes->attr->_value = "ATTR";
     list($xml, $xmlNS, $xmlSoap, $json, $php) = self::convert($obj);
     $this->assertEqual($xml, '<ns1:tagname attr="ATTR">tag&amp;value</ns1:tagname>');
     $this->assertEqual($xmlNS, $head . '<ns1:tagname attr="ATTR" xmlns:ns1="http://some.namespace.com/">tag&amp;value</ns1:tagname>');

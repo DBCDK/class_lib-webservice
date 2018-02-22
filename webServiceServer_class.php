@@ -678,6 +678,9 @@ abstract class webServiceServer {
       '<html><head>
 __HEADER_WARNING__
 <script language="javascript">
+  function useTab() {
+    document.f.target=(document.f.usetab.checked ? "tab" : "_blank");
+  }
   var reqs = Array("__REQS__");
 </script>
 </head><body>
@@ -688,7 +691,8 @@ __HEADER_WARNING__
       <option>Pick a test-request</option>
       __OPTIONS__
     </select>
-    <input type="submit" name="subm" value="Try me">
+    <input type="submit" name="subm" value="Try me"/>
+    &nbsp; Reuse tab <input id="usetab" type="checkbox" name="usetab/" onClick="useTab()">
     __DEBUG__
   </form>
   __INFO__
