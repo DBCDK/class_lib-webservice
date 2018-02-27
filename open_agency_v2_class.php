@@ -161,42 +161,11 @@ class OpenAgency {
    * @return array - array with agency as index and priority as value
    **/
   public function get_show_priority($agency) {
-    if ($this->agency_cache) {
-      $cache_key = md5(__CLASS__ . __FUNCTION__ . $agency);
-      $agency_list = $this->agency_cache->get($cache_key);
-    }
+    return self::get_priority($agency, 'showOrder');
+  }
 
-    if (empty($agency_list)) {
-      $agency_list = array();
-      self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
-      $curl = new curl();
-      $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
-      $url = sprintf(self::oa_uri($this->config['showOrder']), $agency, $this->tracking_id);
-      $res_xml = $curl->get($url);
-      $curl_err = $curl->get_status();
-      if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
-        $agency_list = FALSE;
-        self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot fetch show order from ' . $url);
-      }
-      else {
-        $dom = new DomDocument();
-        $dom->preserveWhiteSpace = false;
-        if (@ $dom->loadXML($res_xml)) {
-          foreach ($dom->getElementsByTagName('agencyId') as $id) {
-            $agency_list[$id->nodeValue] = count($agency_list) + 1;
-          }
-        }
-        if (!isset($agency_list[$agency])) {
-          $agency_list[$agency] = 0;
-        }
-        if ($this->agency_cache) {
-          if (!$this->agency_cache->set($cache_key, $agency_list))
-            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
-        }
-      }
-    }
-
-    return $agency_list;
+  public function get_request_priority($agency) {
+    return self::get_priority($agency, 'requestOrder');
   }
 
   /**
@@ -350,6 +319,51 @@ class OpenAgency {
     }
   }
 
+  /**
+   * \brief Get a given prority list for the agency
+   *
+   * @param $agency string - agency-id
+   * @param $priority_type string - showOrder or requestOrder
+   * @return array - array with agency as index and priority as value
+   **/
+  private function get_priority($agency, $priority_type) {
+    if ($this->agency_cache) {
+      $cache_key = md5(__CLASS__ . __FUNCTION__ . $agency . $priority_type);
+      $agency_list = $this->agency_cache->get($cache_key);
+    }
+
+    if (empty($agency_list)) {
+      $agency_list = array();
+      self::trace(__CLASS__ . '::' . __FUNCTION__ . '(): Cache miss (' . $agency . ')');
+      $curl = new curl();
+      $curl->set_option(CURLOPT_TIMEOUT, $this->config['timeout']);
+      $url = sprintf(self::oa_uri($this->config[$priority_type]), $agency, $this->tracking_id);
+      $res_xml = $curl->get($url);
+      $curl_err = $curl->get_status();
+      if ($curl_err['http_code'] < 200 || $curl_err['http_code'] > 299) {
+        $agency_list = FALSE;
+        self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot fetch ' . $request_type . ' from ' . $url);
+      }
+      else {
+        $dom = new DomDocument();
+        $dom->preserveWhiteSpace = false;
+        if (@ $dom->loadXML($res_xml)) {
+          foreach ($dom->getElementsByTagName('agencyId') as $id) {
+            $agency_list[$id->nodeValue] = count($agency_list) + 1;
+          }
+        }
+        if (!isset($agency_list[$agency])) {
+          $agency_list[$agency] = 0;
+        }
+        if ($this->agency_cache) {
+          if (!$this->agency_cache->set($cache_key, $agency_list))
+            self::fatal(__CLASS__ . '::' . __FUNCTION__ . '(): Cannot set cache. key: ' . $cache_key);
+        }
+      }
+    }
+
+    return $agency_list;
+  }
 
   /**
    * \brief Make a full url for the openagency call.
