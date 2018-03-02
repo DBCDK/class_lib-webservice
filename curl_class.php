@@ -594,6 +594,8 @@ class Curl {
       curl_close($this->curl_handle[$key]);
     }
     $this->curl_handle = array();
+        $this->curl_content = null;
+        $this->curl_status = null;
 // keep the multihandle in order to reuse sockets
     //curl_multi_close($this->curl_multi_handle);
     //$this->curl_multi_handle = null ;
