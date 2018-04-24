@@ -483,8 +483,10 @@ abstract class webServiceServer {
             break;
           }
         }
-        if ($error)
+        if ($error) {
+          header('HTTP/1.0 503 Service Unavailable');
           die($error);
+        }
       }
       $curl->close();
     }
