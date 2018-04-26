@@ -224,7 +224,7 @@ class aaa {
         $this->fors_oci->connect();
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
+        self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
         return FALSE;
       }
       $long_ip = ip2long($ip);
@@ -241,7 +241,7 @@ class aaa {
         }
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
+        self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
         $error = $this->fors_oci->get_error();
       }
 
@@ -259,7 +259,7 @@ class aaa {
           }
         }
         catch (ociException $e) {
-          verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
+          self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
           $error = $this->fors_oci->get_error();
         }
       }
@@ -285,7 +285,7 @@ class aaa {
         $this->fors_oci->connect();
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
+        self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
         return FALSE;
       }
       try {
@@ -311,7 +311,7 @@ class aaa {
           $rights = $this->fetch_rights_from_userid($userid, $group);
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
+        self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
         $error = $this->fors_oci->get_error();
       }
     }
@@ -332,7 +332,7 @@ class aaa {
       $this->fors_oci->connect();
     }
     catch (ociException $e) {
-      verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
+      self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI connect error: ' . $this->fors_oci->get_error_string());
       return $rights;
     }
     try {
@@ -355,13 +355,26 @@ class aaa {
         }
       }
       catch (ociException $e) {
-        verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
+        self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
       }
     }
     catch (ociException $e) {
-      verbose::log(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
+      self::local_verbose(FATAL, 'AAA(' . __LINE__ . '):: OCI select error: ' . $this->fors_oci->get_error_string());
     }
     return $rights;
+  }
+
+  /** \brief -
+   * @param string $level
+   * @param string $msg
+   */
+  private function local_verbose($level, $msg) {
+    if (method_exists('VerboseJson', 'log')) {
+      VerboseJson::log($level, $msg);
+    }
+    elseif (method_exists('verbose', 'log')) {
+      verbose::log($level, $msg);
+    }
   }
 
 }

@@ -104,10 +104,10 @@ class FormatRecords {
     for ($no = 0; $no < count($records); $no = $no + $this->record_blocking) {
       $cache_key[$curls] = self::make_cache_key($records[$no]->_value->collection->_value->object, $param);
       if ($ret[$no] = $this->cache->get($cache_key[$curls])) {
-        verbose::log(DEBUG, 'format cache hit ' . $cache_key[$curls]);
+        self::local_verbose(DEBUG, 'format cache hit ' . $cache_key[$curls]);
         continue;
       }
-      verbose::log(DEBUG, 'no format cache hit');
+      self::local_verbose(DEBUG, 'no format cache hit');
       $ret_index[$curls] = $no;
       $form_req->formatSingleManifestationRequest->_value->originalData = &$records[$tot_curls];
       $this->curl->set_option(CURLOPT_TIMEOUT, $this->timeout, $curls);
@@ -139,7 +139,7 @@ class FormatRecords {
             }
           }
           else {
-            verbose::log(ERROR, 'http code: ' . $curl_status[$i]['http_code'] .
+            self::local_verbose(ERROR, 'http code: ' . $curl_status[$i]['http_code'] .
                               ' error: "' . $curl_status[$i]['error'] .
                               '" for: ' . $curl_status[$i]['url'] .
                               ' TId: ' . $param->trackingId->_value);
@@ -208,4 +208,16 @@ class FormatRecords {
                        $param->outputFormat->_value);
   }
 
+  /** \brief -
+   * @param string $level
+   * @param string $msg
+   */
+  private function local_verbose($level, $msg) {
+    if (method_exists('VerboseJson', 'log')) {
+      VerboseJson::log($level, $msg);
+    }
+    elseif (method_exists('verbose', 'log')) {
+      verbose::log($level, $msg);
+    }
+  }
 }

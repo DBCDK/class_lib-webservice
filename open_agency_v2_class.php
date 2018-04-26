@@ -59,8 +59,8 @@ class OpenAgency {
     if (!isset($this->config['timeout'])) {
       $this->config['timeout'] = 10;
     }
-    if (class_exists('verbose')) {
-      $this->tracking_id = verbose::$tracking_id;
+    if (class_exists('VerboseJson')) {
+      $this->tracking_id = VerboseJson::$tracking_id;
     }
   }
 
@@ -406,7 +406,10 @@ class OpenAgency {
    * @param string $msg
    */
   private function local_verbose($level, $msg) {
-    if (method_exists('verbose', 'log')) {
+    if (method_exists('VerboseJson', 'log')) {
+      VerboseJson::log($level, $msg);
+    }
+    elseif (method_exists('verbose', 'log')) {
       verbose::log($level, $msg);
     }
   }

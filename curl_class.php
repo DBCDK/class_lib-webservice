@@ -160,22 +160,12 @@ class Curl {
     $this->wait_for_connections = PHP_INT_MAX;
 
     if (!function_exists('curl_init')) {
-      if (method_exists('verbose', 'log')) {
-        verbose::log(FATAL, "PHP was not built with curl, rebuild PHP to use the curl class.");
-      }
-      elseif (function_exists('verbose')) {
-        verbose(FATAL, "PHP was not built with curl, rebuild PHP to use the curl class.");
-      }
+      self::local_verbose(FATAL, "PHP was not built with curl, rebuild PHP to use the curl class.");
       return FALSE;
     }
 
     if (!isset($curl_default_options)) {
-      if (method_exists('verbose', 'log')) {
-        verbose::log(ERROR, '$curl_default_options is not defined. See the class description for usage');
-      }
-      elseif (function_exists('verbose')) {
-        verbose(ERROR, '$curl_default_options is not defined. See the class description for usage');
-      }
+      self::local_verbose(ERROR, '$curl_default_options is not defined. See the class description for usage');
       return FALSE;
     }
     else
@@ -637,6 +627,22 @@ class Curl {
       }
     }
     return strlen($header_line);
+  }
+
+  /** \brief -
+   * @param string $level
+   * @param string $msg
+   */
+  private function local_verbose($level, $msg) {
+    if (method_exists('VerboseJson', 'log')) {
+      VerboseJson::log($level, $msg);
+    }
+    elseif (method_exists('verbose', 'log')) {
+      verbose::log($level, $msg);
+    }
+    elseif (function_exists('verbose')) {
+      verbose($level, $msg);
+    }
   }
 
 }

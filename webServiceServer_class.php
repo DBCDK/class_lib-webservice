@@ -27,7 +27,7 @@
  */
 
 require_once('OLS_class_lib/curl_class.php');
-require_once('OLS_class_lib/verbose_class.php');
+require_once('OLS_class_lib/verbose_json_class.php');
 require_once('OLS_class_lib/inifile_class.php');
 require_once('OLS_class_lib/timer_class.php');
 require_once('OLS_class_lib/aaa_class.php');
@@ -90,9 +90,7 @@ abstract class webServiceServer {
     if (self::in_house())
       $this->debug = $_REQUEST['debug'];
     $this->version = $this->config->get_value('version', 'setup');
-    verbose::open($this->config->get_value('logfile', 'setup'),
-                  $this->config->get_value('verbose', 'setup'),
-                  str_replace('_VERSION_', $this->version, $this->config->get_value('syslog_id', 'setup')));
+    VerboseJson::open($this->config->get_section('setup'));
     $this->watch = new stopwatch('', ' ', '', '%s:%01.3f');
 
     if ($this->config->get_value('xmldir'))
@@ -165,7 +163,7 @@ abstract class webServiceServer {
    * @param $xml string
    */
   private function soap_request($xml) {
-    // Debug verbose::log(TRACE, 'Request ' . $xml);
+    // Debug VerboseJson::log(TRACE, array('request' => $xml));
 
     // validate request
     $this->validate = $this->config->get_value('validate');
@@ -233,8 +231,9 @@ abstract class webServiceServer {
               echo $response_xml;
           }
           // request done and response send, dump timer
-          if ($this->dump_timer)
-            verbose::log(TIMER, sprintf($this->dump_timer, $this->soap_action) . ':: ' . $this->dump_timer_ip . $this->watch->dump());
+          if ($this->dump_timer) {
+            VerboseJson::log(TIMER, array_merge(array('action' => $this->soap_action), $this->watch->get_timers()));
+          }
         }
         else
           self::soap_error('Error in response validation.');
@@ -591,6 +590,8 @@ abstract class webServiceServer {
       if ($this->soap_action = array_search($request, $soapActions)) {
         $params = $xmlobj->$request->_value;
         if (method_exists($this, $this->soap_action)) {
+          VerboseJson::set_action($this->soap_action);
+          VerboseJson::set_tracking_id($this->config->get_value('default_namespace_prefix', 'setup'), $params->trackingId->_value);
           if (is_object($this->aaa)) {
             foreach (array('authentication', 'userIdAut', 'groupIdAut', 'passwordAut') as $par) {
               if (!$$par = $this->config->get_value($par, 'aaa')) {
@@ -603,7 +604,6 @@ abstract class webServiceServer {
                                     $auth->$passwordAut->_value,
                                     $_SERVER['REMOTE_ADDR']);
           }
-          verbose::set_tracking_id($this->config->get_value('default_namespace_prefix', 'setup'), $params->trackingId->_value);
           self::update_registry($this->soap_action);
           return $this->{$this->soap_action}($params);
         }

@@ -646,7 +646,11 @@ class oci {
    * @param $msg string
    */
   private function oci_log($log_level, $msg) {
-    if (method_exists('verbose', 'log'))
-      verbose::log($log_level, $msg);
+    if (method_exists('VerboseJson', 'log')) {
+      VerboseJson::log($level, $msg);
+    }
+    elseif (method_exists('verbose', 'log')) {
+      verbose::log($level, $msg);
+    }
   }
 }
