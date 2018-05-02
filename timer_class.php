@@ -151,6 +151,15 @@ class stopwatch {
     }
   }
 
+  function get_timers() {
+    $ret = $this->sums;
+    foreach ($this->timers as $k => $v) {
+      if (!is_null($v))
+        $ret[$k] = self::splittime($k);
+    }
+    return $ret;
+  }
+
   /**
    * \brief dump all stoptimers
    * @param mixed $delim delimitor
