@@ -142,7 +142,7 @@ class VerboseJson {
   }
 
   static private function stringify($arr) {
-    $ret = [];
+    $ret = array();
     foreach ($arr as $key => $val) {
       $ret[] = $key . ':' . $val;
     }
