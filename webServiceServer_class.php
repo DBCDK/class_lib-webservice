@@ -456,6 +456,12 @@ abstract class webServiceServer {
     $tests = $this->config->get_value('test', 'howru');
     if ($tests) {
       $curl = new curl();
+
+      $proxy = $this->config->get_section('proxy');
+      if ($proxy['domain_and_port']) {
+        $curl->set_proxy($proxy['domain_and_port']);
+      }
+
       $reg_matchs = $this->config->get_value('preg_match', 'howru');
       $reg_errors = $this->config->get_value('error', 'howru');
       if (!$server_name = $this->config->get_value('server_name', 'howru')) {
