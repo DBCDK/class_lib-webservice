@@ -81,7 +81,7 @@ class FormatRecords {
    * @param $param object User given parameters
    * @return array - of formatted records
    */
-  public function format($records, $param) {
+  public function format($records, $param, $cache_me=true) {
     static $dom;
     if (empty($dom)) {
       $dom = new DomDocument();
@@ -106,7 +106,7 @@ class FormatRecords {
     $next_js_server = rand(0, count($this->js_server_url) - 1);
     for ($no = 0; $no < count($records); $no = $no + $this->record_blocking) {
       $cache_key[$curls] = self::make_cache_key($records[$no]->_value->collection->_value->object, $param);
-      if ($ret[$no] = $this->cache->get($cache_key[$curls])) {
+      if ($ret[$no] = $this->cache->get($cache_key[$curls]) && $cache_me) {
         self::local_verbose(DEBUG, 'format cache hit ' . $cache_key[$curls]);
         continue;
       }
