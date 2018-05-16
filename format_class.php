@@ -96,6 +96,9 @@ class FormatRecords {
     $form_req->formatSingleManifestationRequest->_value->language = $param->language;
     $form_req->formatSingleManifestationRequest->_value->outputFormat = $param->outputFormat;
     $form_req->formatSingleManifestationRequest->_value->trackingId = $param->trackingId;
+    if(isset($param->customDisplay)) {
+      $form_req->formatSingleManifestationRequest->_value->customDisplay = $param->customDisplay;
+    }
     $ret = array();
     $ret_index = array();  // to make future caching easier
     $curls = 0;
