@@ -81,7 +81,7 @@ class FormatRecords {
    * @param $param object User given parameters
    * @return array - of formatted records
    */
-  public function format($records, $param, $cache_me=true) {
+  public function format($records, $param, $cache_me = true) {
     static $dom;
     if (empty($dom)) {
       $dom = new DomDocument();
@@ -96,7 +96,7 @@ class FormatRecords {
     $form_req->formatSingleManifestationRequest->_value->language = $param->language;
     $form_req->formatSingleManifestationRequest->_value->outputFormat = $param->outputFormat;
     $form_req->formatSingleManifestationRequest->_value->trackingId = $param->trackingId;
-    if(isset($param->customDisplay)) {
+    if (isset($param->customDisplay)) {
       $form_req->formatSingleManifestationRequest->_value->customDisplay = $param->customDisplay;
     }
     $ret = array();
@@ -129,8 +129,12 @@ class FormatRecords {
         if (is_object($this->watch)) {
           $this->watch->stop('js_server');
         }
-        if ($curl_status['url']) $curl_status = array($curl_status);
-        if (!is_array($js_result)) $js_result = array($js_result);
+        if ($curl_status['url']) {
+          $curl_status = array($curl_status);
+        }
+        if (!is_array($js_result)) {
+          $js_result = array($js_result);
+        }
         for ($i = 0; $i < $curls; $i++) {
           $this->rec_status[] = $curl_status[$i];
           if ($curl_status[$i]['http_code'] == 200) {
@@ -138,15 +142,32 @@ class FormatRecords {
               $js_obj = $this->xmlconvert->xml2obj($dom);
             }
             else {
+              self::local_verbose(ERROR, 'http code: ' . $curl_status[$i]['http_code'] .
+                ' error: "' . $curl_status[$i]['error'] .
+                '" for: ' . $curl_status[$i]['url'] .
+                ' TId: ' . $param->trackingId->_value);
+
+              $debug = array(
+                'XML' => $rec,
+                'http_code' => $curl_status[$i]['http_code'],
+              );
+              self::local_verbose(DEBUG, $debug);
+
               $error = 'Error formatting record - no valid response';
             }
           }
           else {
             self::local_verbose(ERROR, 'http code: ' . $curl_status[$i]['http_code'] .
-                              ' error: "' . $curl_status[$i]['error'] .
-                              '" for: ' . $curl_status[$i]['url'] .
-                              ' TId: ' . $param->trackingId->_value);
+              ' error: "' . $curl_status[$i]['error'] .
+              '" for: ' . $curl_status[$i]['url'] .
+              ' TId: ' . $param->trackingId->_value);
             $error = 'HTTP error ' . $curl_status[$i]['http_code'] . ' . formatting record';
+
+            $debug = array(
+              'XML' => $rec,
+              'http_code' => $curl_status[$i]['http_code'],
+            );
+            self::local_verbose(DEBUG, $debug);
           }
           if ($error) {
             $js_obj = new stdClass();
@@ -205,10 +226,10 @@ class FormatRecords {
       $key = $record->_value->identifier->_value . '_';
     }
     return 'OF_' . md5($key .
-                       $param->agency->_value . '_' .
-                       $param->holdBackEndDate->_value . '_' .
-                       $param->language->_value . '_' .
-                       $param->outputFormat->_value);
+        $param->agency->_value . '_' .
+        $param->holdBackEndDate->_value . '_' .
+        $param->language->_value . '_' .
+        $param->outputFormat->_value);
   }
 
   /** \brief -
