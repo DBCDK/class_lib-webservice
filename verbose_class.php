@@ -93,7 +93,8 @@ class verbose {
   static public function open($verbose_file_name, $verbose_mask, $syslog_id = '', $date_format = '') {
     self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
     if (!self::$date_format = $date_format)
-      self::$date_format = 'H:i:s-d/m/y';
+      // ISO 8601 date (added in PHP 5)
+      self::$date_format = 'c';
     if (strtolower(substr($verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
       $facility = substr($verbose_file_name, strlen(SYSLOG_PREFIX));     //  syslog://[facility]
       self::$syslog_facility = defined($facility) ? constant($facility) : LOG_LOCAL0;

@@ -92,7 +92,8 @@ class VerboseJson {
   static public function open($settings) {
     self::$tracking_id = date('Y-m-d\TH:i:s:') . substr((string)microtime(), 2, 6) . ':' . getmypid();
     if (!self::$date_format = $settings['date_format'])
-      self::$date_format = 'H:i:s-d/m/y';
+      // ISO 8601 date (added in PHP 5)
+      self::$date_format = 'c';
     self::$verbose_file_name = $settings['logfile'];
     if (strtolower(substr(self::$verbose_file_name, 0, strlen(SYSLOG_PREFIX))) == SYSLOG_PREFIX) {
       $facility = substr(self::$verbose_file_name, strlen(SYSLOG_PREFIX));     //  syslog://[facility]
