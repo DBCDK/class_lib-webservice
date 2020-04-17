@@ -175,7 +175,7 @@ class aaa {
         $name = $ressource->_value->name->_value;
         foreach ($ressource->_value->right as $right) {
           $r = $right->_value;
-          Object::set_element($rights, $name, $r, TRUE);
+          SetObject::set_element($rights, $name, $r, TRUE);
         }
       }
     }
@@ -199,7 +199,7 @@ class aaa {
               $right_val = explode(',', $right_list);
               foreach ($right_val as $r) {
                 $r = trim($r);
-                Object::set_element($rights, $ressource, $r, TRUE);
+                SetObject::set_element($rights, $ressource, $r, TRUE);
               }
             }
           }
@@ -343,15 +343,15 @@ class aaa {
                                  AND t.attr1id = map1.objecttypeattr2');
       $buf = $this->fors_oci->fetch_all_into_assoc();
       foreach ($buf as $val) {
-        Object::set_element($rights, $val['OBJECTTYPENAME2'], $val['FUNCTIONTYPEID'], TRUE);
+        SetObject::set_element($rights, $val['OBJECTTYPENAME2'], $val['FUNCTIONTYPEID'], TRUE);
       }
       try {
         $this->fors_oci->bind('bind_bibnr', $group);
         $this->fors_oci->set_query('SELECT bib_nr FROM vip WHERE kmd_nr = :bind_bibnr');
         $buf = $this->fors_oci->fetch_all_into_assoc();
-        Object::set_element($rights->vipInfo, 'agencyId', $group, TRUE);
+        SetObject::set_element($rights->vipInfo, 'agencyId', $group, TRUE);
         foreach ($buf as $val) {
-          Object::set_element($rights->vipInfo, 'subAgencyId', $val['BIB_NR'], TRUE);
+          SetObject::set_element($rights->vipInfo, 'subAgencyId', $val['BIB_NR'], TRUE);
         }
       }
       catch (ociException $e) {

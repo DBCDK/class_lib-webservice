@@ -24,10 +24,10 @@
  * \brief singleton class to handle object creation
  *
  * Usage: \n
- * Object::set_value(object, tag-to-set, value); \n
- * Object::set_namespace(object, tag-to-set, value); \n
- * Object::set_array_value(object, array-to-set, value); \n
- * Object::set_element(object, tag-to-set, element, value); \n
+ * SetObject::set_value(object, tag-to-set, value); \n
+ * SetObject::set_namespace(object, tag-to-set, value); \n
+ * SetObject::set_array_value(object, array-to-set, value); \n
+ * SetObject::set_element(object, tag-to-set, element, value); \n
  *
  * Example:
  *   instead of:
@@ -35,27 +35,27 @@
  *     $test->tag = new stdClass()
  *     $test->tag->_value = 19;
  *   use:
- *     Object::set_value($test, 'tag', 19);
+ *     SetObject::set_value($test, 'tag', 19);
  *
  *   instead of:
  *     $test = new stdClass();
  *     $test->tag = new stdClass()
  *     $test->tag->_namespace = 'string';
  *   use:
- *     Object::set_namespace($test, 'tag', 'string');
+ *     SetObject::set_namespace($test, 'tag', 'string');
  *
  *   instead of:
  *     $test = new stdClass();
  *     $test->tag = new stdClass()
  *     $test->tag->$sub_tag = 19;
  *   use:
- *     Object::set_element($test, 'tag', 'sub_tag', 19);
+ *     SetObject::set_element($test, 'tag', 'sub_tag', 19);
  *
  *   instead of:
  *     $test = new stdClass();
  *     $test->arr[] = 19;
  *   use:
- *     Object::set_aray($test, 'arr', 19);
+ *     SetObject::set_aray($test, 'arr', 19);
  *
  *   instead of:
  *     $test = new stdClass();
@@ -63,11 +63,11 @@
  *     $help->_value = 19;
  *     $test->arr[] = $help;
  *   use:
- *     Object::set_aray_value($test, 'arr', 19);
+ *     SetObject::set_aray_value($test, 'arr', 19);
  *
  * @author Finn Stausgaard - DBC
  **/
-class Object {
+class SetObject {
 
   /**
    * Object constructor.
